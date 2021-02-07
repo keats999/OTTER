@@ -27,6 +27,9 @@
 #include <FollowPathBehaviour.h>
 #include <SimpleMoveBehaviour.h>
 
+#include "Utilities/MapManager.h"
+#include"Utilities/Collision2D.h"
+
 #define NUM_TREES 300
 #define NUM_ROCKS 40
 #define PLANE_X 19.0f
@@ -151,6 +154,12 @@ int main() {
 		Texture2D::sptr boxSpec = Texture2D::LoadFromFile("images/box-reflections.bmp");
 		Texture2D::sptr simpleFlora = Texture2D::LoadFromFile("images/SimpleFlora.png");
 
+		Texture2D::sptr blue = Texture2D::LoadFromFile("images/blue.png");
+		Texture2D::sptr green = Texture2D::LoadFromFile("images/green.png");
+		Texture2D::sptr orange = Texture2D::LoadFromFile("images/orange.png");
+		Texture2D::sptr red = Texture2D::LoadFromFile("images/red.png");
+		Texture2D::sptr yellow = Texture2D::LoadFromFile("images/yellow.png");
+
 		// Load the cube map
 		//TextureCubeMap::sptr environmentMap = TextureCubeMap::LoadFromImages("images/cubemaps/skybox/sample.jpg");
 		TextureCubeMap::sptr environmentMap = TextureCubeMap::LoadFromImages("images/cubemaps/skybox/ToonSky.jpg"); 
@@ -210,6 +219,137 @@ int main() {
 		simpleFloraMat->Set("s_Specular", noSpec);
 		simpleFloraMat->Set("u_Shininess", 8.0f);
 		simpleFloraMat->Set("u_TextureMix", 0.0f);
+
+		VertexArrayObject::sptr coin = ObjLoader::LoadFromFile("models/coin.obj");
+		std::vector<GameObject> coins;
+		int coincount = 0;
+
+		VertexArrayObject::sptr tubestr = ObjLoader::LoadFromFile("models/tubestr.obj");
+		VertexArrayObject::sptr tubelbw = ObjLoader::LoadFromFile("models/tubelbw.obj");
+		VertexArrayObject::sptr tubetee = ObjLoader::LoadFromFile("models/tubetee.obj");
+		VertexArrayObject::sptr tubeqd = ObjLoader::LoadFromFile("models/tubeqd.obj");
+		VertexArrayObject::sptr tubend = ObjLoader::LoadFromFile("models/tubend.obj");
+		std::vector<GameObject> tubes;
+
+		VertexArrayObject::sptr wallobj = ObjLoader::LoadFromFile("models/wall.obj");
+		std::vector<GameObject> walls;
+
+		glm::vec2 spawn = glm::vec2(0, 0);
+
+		//Call map managing tool and pass level data
+		MapManager::sptr Manager = MapManager::Create();
+		Manager->LoadFromFile("level.lvl");
+
+		//Get map data from the manager
+		auto& map = Manager->GetMap();
+		int x = Manager->GetRows();
+		int y = Manager->GetColumns();
+		int unitsize = Manager->GetUnitS();
+
+		//Nested loop to cycle through the 2D array for the map
+		for (int i = 0; i < x; i++) {
+			for (int j = 0; j < y; j++) {
+				//Use i and j to get coordinates
+				int coord1 = j * unitsize;
+				int coord2 = i * unitsize;
+				//Check to see the map array has a 1 to spawn a tube
+				if (map[i][j] == 1) {
+					bool canspawn = true; //Variable to check for valid coin spawn location
+					bool pspawn = false; //Variable to check for valid player spawn location (Safe rooms)
+					
+					//Create tube material
+					ShaderMaterial::sptr tMat = ShaderMaterial::Create();
+					tMat->Shader = shader;
+					tMat->Set("s_Specular", noSpec);
+					tMat->Set("u_Shininess", 8.0f);
+					tMat->Set("u_TextureMix", 0.0f);
+
+					//Randomly pick a color and set the material diffuse
+					int c = rand() % 5;
+					switch (c) {
+					case 1:
+						tMat->Set("s_Diffuse", green);
+						break;
+					case 2:
+						tMat->Set("s_Diffuse", orange);
+						break;
+					case 3:
+						tMat->Set("s_Diffuse", red);
+						break;
+					case 4:
+						tMat->Set("s_Diffuse", yellow);
+						break;
+					default:
+						tMat->Set("s_Diffuse", blue);
+						break;
+					}
+
+					//Create tube object
+					GameObject tubee = scene->CreateEntity("Tube");
+					tubes.push_back(tubee);
+
+					//Pass the location in the array to the manager to get appropriate piece
+					glm::vec2 tubeData = Manager->GetTube(glm::vec2(i, j));
+					switch (int(tubeData.x)) {
+					case 1:
+						tubee.emplace<RendererComponent>().SetMesh(tubestr).SetMaterial(tMat);
+						break;
+					case 2:
+						tubee.emplace<RendererComponent>().SetMesh(tubelbw).SetMaterial(tMat);
+						break;
+					case 3:
+						tubee.emplace<RendererComponent>().SetMesh(tubetee).SetMaterial(tMat);
+						break;
+					case 4:
+						tubee.emplace<RendererComponent>().SetMesh(tubeqd).SetMaterial(tMat);
+						break;
+					default:
+						tubee.emplace<RendererComponent>().SetMesh(tubend).SetMaterial(tMat);
+						pspawn = true;
+						canspawn = false;
+						break;
+					}
+
+					//If valid spot to spawn player, set spawn coordinates to tubing piece
+					if (pspawn) {
+						spawn = glm::vec2(coord1, coord2);
+					}
+					
+					//Set tubing orientation based on coordinates and rotation data given by the manager
+					auto& tubeT = tubee.get<Transform>();
+					tubeT.SetLocalPosition(coord1, 0, coord2);
+					tubeT.SetLocalRotation(glm::vec3(0.0f, tubeData.y, 0.0f));
+
+					int r = rand() % 5;
+					if (r == 3 && canspawn) {
+						auto& coine = MainScene->CreateEntity();
+						coins.push_back(coine);
+						coine.AddComponent<CoinComponent>();
+						auto& coinvao = coine.AddComponent<VertexArrayObject::sptr>(coin);
+						auto& coinCol = coine.AddComponent<Collision2D>(MainScene->World());
+						coinCol.CreateStaticSensor(glm::vec2(coord1, coord2), glm::vec2(unitsize / 2, unitsize / 2));
+						coinCol.getBody()->SetUserData(&coine);
+						auto& coinT = coine.GetComponent<Transform::sptr>();
+						coinT->SetLocalPosition(coord1, 0, coord2);
+						coinT->SetLocalRotation(90, 0, 90);
+						auto& cmat = coine.AddComponent<Material>();
+						cmat.Albedo = yellow;
+						cmat.Shininess = 1.0f;
+						coincount++;
+					}
+				}
+				else if (map[i][j] == 0) {
+					auto& walle = MainScene->CreateEntity();
+					walls.push_back(walle);
+					auto& wallvao = walle.AddComponent<VertexArrayObject::sptr>(wallobj);
+					auto& wallCol = walle.AddComponent<Collision2D>(MainScene->World());
+					//wallCol.getBody()->SetUserData(&walle);
+					wallCol.CreateStaticBox(glm::vec2(coord1, coord2), glm::vec2(unitsize / 2, unitsize / 2));
+					auto& wallT = walle.GetComponent<Transform::sptr>();
+					wallT->SetLocalPosition(coord1, 0, coord2);
+				}
+			}
+		}
 
 		GameObject obj1 = scene->CreateEntity("Ground"); 
 		{
