@@ -62,7 +62,7 @@ int main() {
 		// Load our shaders
 		Shader::sptr shader = Shader::Create();
 		shader->LoadShaderPartFromFile("shaders/vertex_shader.glsl", GL_VERTEX_SHADER);
-		shader->LoadShaderPartFromFile("shaders/frag_blinn_phong_textured.glsl", GL_FRAGMENT_SHADER);
+		shader->LoadShaderPartFromFile("shaders/frag_blinn_phong_textured2.glsl", GL_FRAGMENT_SHADER);
 		shader->Link();
 
 		glm::vec3 lightPos = glm::vec3(0.0f, 0.0f, 5.0f);
@@ -88,7 +88,79 @@ int main() {
 
 		// We'll add some ImGui controls to control our shader
 		BackendHandler::imGuiCallbacks.push_back([&]() {
-			if (ImGui::CollapsingHeader("Scene Level Lighting Settings"))
+			if (ImGui::Button("Base Lighting")) {
+
+				shader->SetUniform("u_AmbientCol", glm::vec3(0.0f));
+				shader->SetUniform("u_AmbientStrength", 0.0f);
+				shader->SetUniform("u_AmbientLightStrength", 1.0f);
+
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 0.0f));
+
+				shader->SetUniform("u_SpecularLightStrength", 0.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+
+			}
+			if (ImGui::Button("Ambient")) {
+				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
+				shader->SetUniform("u_AmbientStrength", 0.3f);
+				shader->SetUniform("u_AmbientLightStrength", 0.5f);
+
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 0.0f));
+
+				shader->SetUniform("u_SpecularLightStrength", 0.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+
+			}
+			if (ImGui::Button("Specular")) {
+				shader->SetUniform("u_SpecularLightStrength", 1.0f);
+
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 0.0f));
+				shader->SetUniform("u_AmbientCol", glm::vec3(0.0f));
+				shader->SetUniform("u_AmbientStrength", 0.0f);
+				shader->SetUniform("u_AmbientLightStrength", 0.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+
+			}
+			if (ImGui::Button("Diffuse")) {
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
+
+				shader->SetUniform("u_SpecularLightStrength", 0.0f);
+				shader->SetUniform("u_AmbientCol", glm::vec3(0.0f));
+				shader->SetUniform("u_AmbientStrength", 0.0f);
+				shader->SetUniform("u_AmbientLightStrength", 0.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+
+			}
+
+			if (ImGui::Button("Ambient+Specular+Diffuse")) {
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
+
+				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
+				shader->SetUniform("u_AmbientStrength", 0.3f);
+				shader->SetUniform("u_AmbientLightStrength", 0.5f);
+
+				shader->SetUniform("u_SpecularLightStrength", 1.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+
+			}
+
+			if (ImGui::Button("Special")) {
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
+
+				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
+				shader->SetUniform("u_AmbientStrength", 0.3f);
+				shader->SetUniform("u_AmbientLightStrength", 0.5f);
+
+				shader->SetUniform("u_SpecularLightStrength", 1.0f);
+
+				shader->SetUniform("u_Cel", (int)true);
+			}
+			/*if (ImGui::CollapsingHeader("Scene Level Lighting Settings"))
 			{
 				if (ImGui::ColorPicker3("Ambient Color", glm::value_ptr(ambientCol))) {
 					shader->SetUniform("u_AmbientCol", ambientCol);
@@ -117,7 +189,7 @@ int main() {
 				if (ImGui::DragFloat("Light Quadratic Falloff", &lightQuadraticFalloff, 0.01f, 0.0f, 1.0f)) {
 					shader->SetUniform("u_LightAttenuationQuadratic", lightQuadraticFalloff);
 				}
-			}
+			}*/
 
 			auto name = controllables[selectedVao].get<GameObjectTag>().Name;
 			ImGui::Text(name.c_str());
