@@ -1,5 +1,6 @@
 #include "Collision2D.h"
 
+
 Collision2D::~Collision2D()
 {
 	//world->DestroyBody(body);
@@ -8,14 +9,18 @@ Collision2D::~Collision2D()
 
 void Collision2D::CreateDynamicBox(const glm::vec2& position, const glm::vec2& dimensions)
 {
+	//Dynamic box construction (for moving solid bodies)
+	//Create body definition
 	b2BodyDef bodyDef;
 	bodyDef.type = b2_dynamicBody;
 	bodyDef.position.Set(position.x, position.y);
 	body = world->CreateBody(&bodyDef);
 
+	//Create collision shape
 	b2PolygonShape boxShape;
 	boxShape.SetAsBox(dimensions.x / 2.0f, dimensions.y / 2.0);
 
+	//Create fixture definition
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &boxShape;
 	fixtureDef.density = 1.0f;
@@ -25,14 +30,18 @@ void Collision2D::CreateDynamicBox(const glm::vec2& position, const glm::vec2& d
 }
 void Collision2D::CreateStaticBox(const glm::vec2& position, const glm::vec2& dimensions)
 {
+	//Static box construction (for unmoving solid bodies)
+	//Create body definition
 	b2BodyDef bodyDef;
 	bodyDef.type = b2_staticBody;
 	bodyDef.position.Set(position.x, position.y);
 	body = world->CreateBody(&bodyDef);
 
+	//Create collision shape
 	b2PolygonShape boxShape;
 	boxShape.SetAsBox(dimensions.x / 2.0f, dimensions.y / 2.0);
 
+	//Create fixture definition
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &boxShape;
 	fixtureDef.density = 1.0f;
@@ -42,14 +51,18 @@ void Collision2D::CreateStaticBox(const glm::vec2& position, const glm::vec2& di
 }
 void Collision2D::CreateStaticSensor(const glm::vec2& position, const glm::vec2& dimensions)
 {
+	//Static sensor box construction (for non-solid collision areas)
+	//Create body definition
 	b2BodyDef bodyDef;
 	bodyDef.type = b2_staticBody;
 	bodyDef.position.Set(position.x, position.y);
 	body = world->CreateBody(&bodyDef);
 
+	//Create collision shape
 	b2PolygonShape boxShape;
 	boxShape.SetAsBox(dimensions.x / 2.0f, dimensions.y / 2.0);
 
+	//Create fixture definition
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &boxShape;
 	fixtureDef.density = 1.0f;
@@ -67,10 +80,7 @@ b2Vec2 Collision2D::GetForwardVelocity() {
 	b2Vec2 currentForwardNormal = body->GetWorldVector(b2Vec2(0, 1));
 	return b2Dot(currentForwardNormal, body->GetLinearVelocity()) * currentForwardNormal;
 }
-void Collision2D::SetType(_type t)
-{
-	type = t;
-}
+
 void Collision2D::updateFriction() {
 	//lateral linear velocity
 	b2Vec2 impulse = body->GetMass() * -GetLateralVelocity();
@@ -126,4 +136,5 @@ void Collision2D::Shoot() {
 }
 void Collision2D::RemoveBody() {
 	world->DestroyBody(body);
+	body = nullptr;
 }

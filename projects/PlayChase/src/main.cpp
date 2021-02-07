@@ -26,9 +26,11 @@
 #include <CameraControlBehaviour.h>
 #include <FollowPathBehaviour.h>
 #include <SimpleMoveBehaviour.h>
+#include "Behaviours/PlayerBehaviour.h"
 
 #include "Utilities/MapManager.h"
-#include"Utilities/Collision2D.h"
+#include "Utilities/Collision2D.h"
+#include "Utilities/PhysicsWorld.h"
 
 #define NUM_TREES 300
 #define NUM_ROCKS 40
@@ -140,7 +142,7 @@ int main() {
 
 		// GL states
 		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
+		glDisable(GL_CULL_FACE);
 		glDepthFunc(GL_LEQUAL); // New 
 
 		#pragma region TEXTURE LOADING
@@ -186,6 +188,7 @@ int main() {
 		// Create a scene, and set it to be the active scene in the application
 		GameScene::sptr scene = GameScene::Create("test");
 		Application::Instance().ActiveScene = scene;
+		PhysicsWorld::sptr pworld = PhysicsWorld::Create(scene);
 
 		// We can create a group ahead of time to make iterating on the group faster
 		entt::basic_group<entt::entity, entt::exclude_t<>, entt::get_t<Transform>, RendererComponent> renderGroup =
@@ -222,6 +225,12 @@ int main() {
 
 		VertexArrayObject::sptr coin = ObjLoader::LoadFromFile("models/coin.obj");
 		std::vector<GameObject> coins;
+		ShaderMaterial::sptr coinMat = ShaderMaterial::Create();
+		coinMat->Shader = shader;
+		coinMat->Set("s_Diffuse", yellow);
+		coinMat->Set("s_Specular", noSpec);
+		coinMat->Set("u_Shininess", 8.0f);
+		coinMat->Set("u_TextureMix", 0.0f);
 		int coincount = 0;
 
 		VertexArrayObject::sptr tubestr = ObjLoader::LoadFromFile("models/tubestr.obj");
@@ -322,39 +331,42 @@ int main() {
 
 					int r = rand() % 5;
 					if (r == 3 && canspawn) {
-						auto& coine = MainScene->CreateEntity();
+						GameObject coine = scene->CreateEntity("Coin");
 						coins.push_back(coine);
-						coine.AddComponent<CoinComponent>();
-						auto& coinvao = coine.AddComponent<VertexArrayObject::sptr>(coin);
-						auto& coinCol = coine.AddComponent<Collision2D>(MainScene->World());
+						coine.emplace<RendererComponent>().SetMesh(coin).SetMaterial(coinMat);
+						auto& coinCol = coine.emplace<Collision2D>(pworld->World());
 						coinCol.CreateStaticSensor(glm::vec2(coord1, coord2), glm::vec2(unitsize / 2, unitsize / 2));
 						coinCol.getBody()->SetUserData(&coine);
-						auto& coinT = coine.GetComponent<Transform::sptr>();
-						coinT->SetLocalPosition(coord1, 0, coord2);
-						coinT->SetLocalRotation(90, 0, 90);
-						auto& cmat = coine.AddComponent<Material>();
-						cmat.Albedo = yellow;
-						cmat.Shininess = 1.0f;
+						auto& coinT = coine.get<Transform>();
+						coinT.SetLocalPosition(coord1, 0, coord2);
+						coinT.SetLocalRotation(90, 0, 90);
 						coincount++;
 					}
 				}
 				else if (map[i][j] == 0) {
-					auto& walle = MainScene->CreateEntity();
+					GameObject walle = scene->CreateEntity("wall");
 					walls.push_back(walle);
-					auto& wallvao = walle.AddComponent<VertexArrayObject::sptr>(wallobj);
-					auto& wallCol = walle.AddComponent<Collision2D>(MainScene->World());
+					auto& wallCol = walle.emplace<Collision2D>(pworld->World());
 					//wallCol.getBody()->SetUserData(&walle);
 					wallCol.CreateStaticBox(glm::vec2(coord1, coord2), glm::vec2(unitsize / 2, unitsize / 2));
-					auto& wallT = walle.GetComponent<Transform::sptr>();
-					wallT->SetLocalPosition(coord1, 0, coord2);
+					auto& wallT = walle.get<Transform>();
+					wallT.SetLocalPosition(coord1, 0, coord2);
 				}
 			}
 		}
 
-		GameObject obj1 = scene->CreateEntity("Ground"); 
+
+
+		GameObject player = scene->CreateEntity("monkey_quads");
 		{
-			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
-			obj1.emplace<RendererComponent>().SetMesh(vao).SetMaterial(grassMat);
+			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/monkey_quads.obj");
+			player.emplace<RendererComponent>().SetMesh(vao).SetMaterial(stoneMat);
+			auto& playerCol = player.emplace<Collision2D>(pworld->World());
+			playerCol.CreateDynamicBox(spawn, glm::vec2(2, 2));
+			playerCol.getBody()->SetUserData(&player);
+			//playerCol.getBody()->SetAngularDamping(1.0);
+			playerCol.getBody()->SetLinearDamping(1.0);
+			BehaviourBinding::Bind<PlayerBehaviour>(player);
 		}
 
 		GameObject obj2 = scene->CreateEntity("monkey_quads");
@@ -366,42 +378,6 @@ int main() {
 			BehaviourBinding::BindDisabled<SimpleMoveBehaviour>(obj2);
 		}
 
-		std::vector<GameObject> randomTrees;
-		{
-			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/simplePine.obj");
-			for (int i = 0; i < NUM_TREES/2; i++)
-			{
-				randomTrees.push_back(scene->CreateEntity("simplePine" + (std::to_string(i + 1))));
-				randomTrees[i].emplace<RendererComponent>().SetMesh(vao).SetMaterial(simpleFloraMat);
-				//Randomly places
-				randomTrees[i].get<Transform>().SetLocalPosition(glm::vec3(Util::GetRandomNumberBetween(glm::vec2(-PLANE_X, -PLANE_Y), glm::vec2(PLANE_X, PLANE_Y), glm::vec2(-DNS_X, -DNS_Y), glm::vec2(DNS_X, DNS_Y)), 0.0f));
-			}
-		}
-
-		std::vector<GameObject> randomTrees2;
-		{
-			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/simpleTree.obj");
-			for (int i = 0; i < NUM_TREES/2; i++)
-			{
-				randomTrees2.push_back(scene->CreateEntity("simpleTree" + (std::to_string(i + 1))));
-				randomTrees2[i].emplace<RendererComponent>().SetMesh(vao).SetMaterial(simpleFloraMat);
-				//Randomly places
-				randomTrees2[i].get<Transform>().SetLocalPosition(glm::vec3(Util::GetRandomNumberBetween(glm::vec2(-PLANE_X, -PLANE_Y), glm::vec2(PLANE_X, PLANE_Y), glm::vec2(-DNS_X, -DNS_Y), glm::vec2(DNS_X, DNS_Y)), 0.0f));
-			}
-		}
-
-		std::vector<GameObject> randomRocks;
-		{
-			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/simpleRock.obj");
-			for (int i = 0; i < NUM_ROCKS; i++)
-			{
-				randomRocks.push_back(scene->CreateEntity("simpleRock" + (std::to_string(i + 1))));
-				randomRocks[i].emplace<RendererComponent>().SetMesh(vao).SetMaterial(simpleFloraMat);
-				//Randomly places
-				randomRocks[i].get<Transform>().SetLocalPosition(glm::vec3(Util::GetRandomNumberBetween(glm::vec2(-PLANE_X, -PLANE_Y), glm::vec2(PLANE_X, PLANE_Y), glm::vec2(-DNS_X, -DNS_Y), glm::vec2(DNS_X, DNS_Y)), 0.0f));
-			}
-		}
-
 		// Create an object to be our camera
 		GameObject cameraObject = scene->CreateEntity("Camera");
 		{
@@ -410,7 +386,7 @@ int main() {
 			// We'll make our camera a component of the camera object
 			Camera& camera = cameraObject.emplace<Camera>();// Camera::Create();
 			camera.SetPosition(glm::vec3(0, 3, 3));
-			camera.SetUp(glm::vec3(0, 0, 1));
+			camera.SetUp(glm::vec3(0, 1, 0));
 			camera.LookAt(glm::vec3(0));
 			camera.SetFovDegrees(90.0f); // Set an initial FOV
 			camera.SetOrthoHeight(3.0f);
@@ -528,7 +504,7 @@ int main() {
 					}
 				}
 			});
-
+			pworld->Update(time.DeltaTime);
 			// Clear the screen
 			testBuffer->Clear();
 

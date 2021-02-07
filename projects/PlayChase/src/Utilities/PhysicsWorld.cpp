@@ -14,12 +14,14 @@ void PhysicsWorld::Update(float dt)
 	//Create a view with all entities with both transform components and collision 2D components
 	auto view = _scene->Registry().view<Transform, Collision2D>();
 	for (auto entity : view) {
+		//Gather all data from the physics body
 		auto& collider = view.get<Collision2D>(entity);
 		auto pos = collider.getBody()->GetPosition();
 		auto angle = collider.getBody()->GetAngle();
-		auto type = collider.GetType();
 		//auto contacts = collider.getBody()->GetContactList();
 		//for (contacts; contacts; contacts = contacts->next) {}
+
+		//Update transform to match the physics body
 		auto& transform = view.get<Transform>(entity);
 		glm::vec3 tpos = transform.GetLocalPosition();
 		transform.SetLocalPosition(pos.x, tpos.y, pos.y);

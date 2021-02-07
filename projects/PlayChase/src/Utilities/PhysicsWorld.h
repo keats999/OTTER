@@ -12,8 +12,8 @@ public:
 	PhysicsWorld& operator=(const PhysicsWorld& other) = delete;
 	PhysicsWorld& operator=(PhysicsWorld&& other) = delete;
 	typedef std::shared_ptr<PhysicsWorld> sptr;
-	static inline sptr Create() {
-		return std::make_shared<PhysicsWorld>();
+	static inline sptr Create(GameScene::sptr scene) {
+		return std::make_shared<PhysicsWorld>(scene);
 	}
 public:
 	PhysicsWorld(GameScene::sptr scene);
