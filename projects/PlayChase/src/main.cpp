@@ -188,6 +188,69 @@ int main() {
 
 				shader->SetUniform("u_Cel", (int)true);
 			}
+			if (ImGui::Button("Diffuse Ramp")) {
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
+
+				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
+				shader->SetUniform("u_AmbientStrength", 0.3f);
+				shader->SetUniform("u_AmbientLightStrength", 0.5f);
+
+				shader->SetUniform("u_SpecularLightStrength", 1.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+			}
+			if (ImGui::Button("Specular Ramp")) {
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 0.0f));
+
+				shader->SetUniform("u_AmbientCol", glm::vec3(0.0f));
+				shader->SetUniform("u_AmbientStrength", 0.0f);
+				shader->SetUniform("u_AmbientLightStrength", 0.0f);
+
+				shader->SetUniform("u_SpecularLightStrength", 1.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+
+
+			}
+			if (ImGui::Button("Color Grading Warm")) {
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
+
+				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
+				shader->SetUniform("u_AmbientStrength", 0.3f);
+				shader->SetUniform("u_AmbientLightStrength", 0.5f);
+
+				shader->SetUniform("u_SpecularLightStrength", 1.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+
+
+			}
+			if (ImGui::Button("Color Grading Cool")) {
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
+
+				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
+				shader->SetUniform("u_AmbientStrength", 0.3f);
+				shader->SetUniform("u_AmbientLightStrength", 0.5f);
+
+				shader->SetUniform("u_SpecularLightStrength", 1.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+
+
+			}
+			if (ImGui::Button("Color Grading Custom")) {
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
+
+				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
+				shader->SetUniform("u_AmbientStrength", 0.3f);
+				shader->SetUniform("u_AmbientLightStrength", 0.5f);
+
+				shader->SetUniform("u_SpecularLightStrength", 1.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+
+
+			}
 			/*if (ImGui::CollapsingHeader("Scene Level Lighting Settings"))
 			{
 				if (ImGui::ColorPicker3("Ambient Color", glm::value_ptr(ambientCol))) {
