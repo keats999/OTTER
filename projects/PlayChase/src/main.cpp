@@ -83,6 +83,7 @@ int main() {
 		float     ambientPow = 0.1f;
 		float     lightLinearFalloff = 0.09f;
 		float     lightQuadraticFalloff = 0.032f;
+		int		  mode = 0;
 
 		struct Mat
 		{
@@ -107,6 +108,7 @@ int main() {
 		shader->SetUniform("u_LightAttenuationConstant", 1.0f);
 		shader->SetUniform("u_LightAttenuationLinear", lightLinearFalloff);
 		shader->SetUniform("u_LightAttenuationQuadratic", lightQuadraticFalloff);
+		shader->SetUniform("u_Mode", mode);
 		
 		shader->SetUniform("s_RampTexture", 0);
 		rampMat.Albedo->Bind(1);
@@ -123,105 +125,59 @@ int main() {
 		// We'll add some ImGui controls to control our shader
 		BackendHandler::imGuiCallbacks.push_back([&]() {
 
-			if (ImGui::Button("Base Lighting")) {
-
-				shader->SetUniform("u_AmbientCol", glm::vec3(0.0f));
-				shader->SetUniform("u_AmbientStrength", 0.0f);
-				shader->SetUniform("u_AmbientLightStrength", 1.0f);
-
-				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 0.0f));
-
-				shader->SetUniform("u_SpecularLightStrength", 0.0f);
-
-				shader->SetUniform("u_Cel", (int)false);
+			if (ImGui::Button("No Lighting")) {
+				mode = 1;
+				shader->SetUniform("u_Mode", mode);
 			}
-			if (ImGui::Button("Ambient")) {
-				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
-				shader->SetUniform("u_AmbientStrength", 0.3f);
-				shader->SetUniform("u_AmbientLightStrength", 0.5f);
-
-				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 0.0f));
-
-				shader->SetUniform("u_SpecularLightStrength", 0.0f);
-
-				shader->SetUniform("u_Cel", (int)false);
+			
+			if (ImGui::Button("Ambient Only")) {
+				mode = 2;
+				shader->SetUniform("u_Mode", mode);
 			}
-			if (ImGui::Button("Specular")) {
-				shader->SetUniform("u_SpecularLightStrength", 1.0f);
-
-				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 0.0f));
-				shader->SetUniform("u_AmbientCol", glm::vec3(0.0f));
-				shader->SetUniform("u_AmbientStrength", 0.0f);
-				shader->SetUniform("u_AmbientLightStrength", 0.0f);
-
-				shader->SetUniform("u_Cel", (int)false);
+			
+			if (ImGui::Button("Specular Only")) {
+				mode = 3;
+				shader->SetUniform("u_Mode", mode);
 			}
-			if (ImGui::Button("Diffuse")) {
-				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
-
-				shader->SetUniform("u_SpecularLightStrength", 0.0f);
-				shader->SetUniform("u_AmbientCol", glm::vec3(0.0f));
-				shader->SetUniform("u_AmbientStrength", 0.0f);
-				shader->SetUniform("u_AmbientLightStrength", 0.0f);
-
-				shader->SetUniform("u_Cel", (int)false);
+			
+			if (ImGui::Button("Ambient + Specular")) {
+				mode = 0;
+				shader->SetUniform("u_Mode", mode);
 			}
 
-			if (ImGui::Button("Ambient+Specular+Diffuse")) {
-				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
-
-				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
-				shader->SetUniform("u_AmbientStrength", 0.3f);
-				shader->SetUniform("u_AmbientLightStrength", 0.5f);
-
-				shader->SetUniform("u_SpecularLightStrength", 1.0f);
-
-				shader->SetUniform("u_Cel", (int)false);
+			if (ImGui::Button("Ambient + Specular + Custom")) {
+				mode = 4;
+				shader->SetUniform("u_Mode", mode);
 			}
-
-			if (ImGui::Button("Special")) {
-				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
-
-				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
-				shader->SetUniform("u_AmbientStrength", 0.3f);
-				shader->SetUniform("u_AmbientLightStrength", 0.5f);
-
-				shader->SetUniform("u_SpecularLightStrength", 1.0f);
-
-				shader->SetUniform("u_Cel", (int)true);
-			}
+			
 			if (ImGui::Button("Diffuse Ramp")) {
-				if (ramp == 1) {
-					ramp = 0;
-				}
-				else {
+				mode = 5;
+				shader->SetUniform("u_Mode", mode);
 					shader->SetUniform("s_RampTexture", 1);
 					rampMat.Albedo->Bind(1);
-					ramp = 1;
-				}
 			}
+			
 			if (ImGui::Button("Specular Ramp")) {
-				if (ramp == 2) {
-					ramp = 0;
-				}
-				else {
+				mode = 6;
+				shader->SetUniform("u_Mode", mode);
 					shader->SetUniform("s_RampTexture", 1);
 					rampMat.Albedo->Bind(1);
-					ramp = 2;
-				}
 			}
+			
 			if (ImGui::Button("Color Grading Warm")) {
 				if (activeEffect == 1)
 					activeEffect = 0;
 				else
 					activeEffect = 1;
 			}
+			
 			if (ImGui::Button("Color Grading Cool")) {
 				if (activeEffect == 2)
 					activeEffect = 0;
 				else
 					activeEffect = 2;
 			}
+			
 			if (ImGui::Button("Color Grading Custom")) {
 				if (activeEffect == 3)
 					activeEffect = 0;
@@ -548,6 +504,7 @@ int main() {
 		{
 			ColorCorrection* noColorCorrectEffect = &noColorCorrectionObj.emplace<ColorCorrection>();
 			noColorCorrectEffect->filename = "cubes/no_color_correction.cube";
+			noColorCorrectEffect->filename = "cubes/neutral.cube";
 			noColorCorrectEffect->Init(width, height);
 		}
 		effects.push_back(noColorCorrectionObj);
