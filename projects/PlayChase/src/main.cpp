@@ -98,7 +98,7 @@ int main() {
 
 		PostEffect* testBuffer;
 
-		int activeEffect = 2;
+		int activeEffect = 0;
 		std::vector<GameObject> effects;
 
 	
@@ -119,8 +119,6 @@ int main() {
 				shader->SetUniform("u_SpecularLightStrength", 0.0f);
 
 				shader->SetUniform("u_Cel", (int)false);
-
-				activeEffect = 0;
 			}
 			if (ImGui::Button("Ambient")) {
 				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
@@ -132,8 +130,6 @@ int main() {
 				shader->SetUniform("u_SpecularLightStrength", 0.0f);
 
 				shader->SetUniform("u_Cel", (int)false);
-
-				activeEffect = 0;
 			}
 			if (ImGui::Button("Specular")) {
 				shader->SetUniform("u_SpecularLightStrength", 1.0f);
@@ -144,8 +140,6 @@ int main() {
 				shader->SetUniform("u_AmbientLightStrength", 0.0f);
 
 				shader->SetUniform("u_Cel", (int)false);
-
-				activeEffect = 0;
 			}
 			if (ImGui::Button("Diffuse")) {
 				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
@@ -156,8 +150,6 @@ int main() {
 				shader->SetUniform("u_AmbientLightStrength", 0.0f);
 
 				shader->SetUniform("u_Cel", (int)false);
-
-				activeEffect = 0;
 			}
 
 			if (ImGui::Button("Ambient+Specular+Diffuse")) {
@@ -170,8 +162,6 @@ int main() {
 				shader->SetUniform("u_SpecularLightStrength", 1.0f);
 
 				shader->SetUniform("u_Cel", (int)false);
-
-				activeEffect = 0;
 			}
 
 			if (ImGui::Button("Special")) {
@@ -184,8 +174,6 @@ int main() {
 				shader->SetUniform("u_SpecularLightStrength", 1.0f);
 
 				shader->SetUniform("u_Cel", (int)true);
-
-				activeEffect = 0;
 			}
 			if (ImGui::Button("Diffuse Ramp")) {
 				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
@@ -197,8 +185,6 @@ int main() {
 				shader->SetUniform("u_SpecularLightStrength", 1.0f);
 
 				shader->SetUniform("u_Cel", (int)false);
-
-				activeEffect = 0;
 			}
 			if (ImGui::Button("Specular Ramp")) {
 				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 0.0f));
@@ -210,47 +196,24 @@ int main() {
 				shader->SetUniform("u_SpecularLightStrength", 1.0f);
 
 				shader->SetUniform("u_Cel", (int)false);
-
-				activeEffect = 0;
 			}
 			if (ImGui::Button("Color Grading Warm")) {
-				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
-
-				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
-				shader->SetUniform("u_AmbientStrength", 0.3f);
-				shader->SetUniform("u_AmbientLightStrength", 0.5f);
-
-				shader->SetUniform("u_SpecularLightStrength", 1.0f);
-
-				shader->SetUniform("u_Cel", (int)false);
-
-				activeEffect = 1;
+				if (activeEffect == 1)
+					activeEffect = 0;
+				else
+					activeEffect = 1;
 			}
 			if (ImGui::Button("Color Grading Cool")) {
-				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
-
-				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
-				shader->SetUniform("u_AmbientStrength", 0.3f);
-				shader->SetUniform("u_AmbientLightStrength", 0.5f);
-
-				shader->SetUniform("u_SpecularLightStrength", 1.0f);
-
-				shader->SetUniform("u_Cel", (int)false);
-
-				activeEffect = 2;
+				if (activeEffect == 2)
+					activeEffect = 0;
+				else
+					activeEffect = 2;
 			}
 			if (ImGui::Button("Color Grading Custom")) {
-				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
-
-				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
-				shader->SetUniform("u_AmbientStrength", 0.3f);
-				shader->SetUniform("u_AmbientLightStrength", 0.5f);
-
-				shader->SetUniform("u_SpecularLightStrength", 1.0f);
-
-				shader->SetUniform("u_Cel", (int)false);
-
-				activeEffect = 0;
+				if (activeEffect == 3)
+					activeEffect = 0;
+				else
+					activeEffect = 3;
 			}
 			/*if (ImGui::CollapsingHeader("Scene Level Lighting Settings"))
 			{
@@ -569,7 +532,7 @@ int main() {
 		GameObject noColorCorrectionObj = scene->CreateEntity("Color Correct");
 		{
 			ColorCorrection* noColorCorrectEffect = &noColorCorrectionObj.emplace<ColorCorrection>();
-			noColorCorrectEffect->filename = "cubes/test.cube";
+			noColorCorrectEffect->filename = "cubes/no_color_correction.cube";
 			noColorCorrectEffect->Init(width, height);
 		}
 		effects.push_back(noColorCorrectionObj);
@@ -589,6 +552,14 @@ int main() {
 			coolColorCorrectEffect->Init(width, height);
 		}
 		effects.push_back(coolColorCorrectionObj);
+
+		GameObject customColorCorrectionObj = scene->CreateEntity("Color Correct Inverted");
+		{
+			ColorCorrection* customColorCorrectEffect = &customColorCorrectionObj.emplace<ColorCorrection>();
+			customColorCorrectEffect->filename = "cubes/inverted_color_correction.cube";
+			customColorCorrectEffect->Init(width, height);
+		}
+		effects.push_back(customColorCorrectionObj);
 
 		#pragma endregion 
 		//////////////////////////////////////////////////////////////////////////////////////////
