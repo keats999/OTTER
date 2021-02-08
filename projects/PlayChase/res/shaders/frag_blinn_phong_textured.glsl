@@ -118,7 +118,8 @@ void main() {
 	}
 	else if(u_Mode == 5)
 	{
-		vec4 rampColor = RampCalc(diffuse);
+		float dif = max(dot(N, lightDir), 0.0);
+		vec4 rampColor = RampCalc(dif);
 		result = (
         (u_AmbientCol * u_AmbientStrength) + // global ambient light
         (ambient + (diffuse*rampColor.rgb) + specular) * attenuation // light factors from our single light
@@ -126,7 +127,8 @@ void main() {
 	}
 	else if(u_Mode == 6)
 	{
-		vec4 rampColor = RampCalc(specular);
+		float spec = pow(max(dot(N, h), 0.0), u_Shininess);
+		vec4 rampColor = RampCalc(spec);
 		result = (
         (u_AmbientCol * u_AmbientStrength) + // global ambient light
         (ambient + diffuse + (specular*rampColor.rgb)) * attenuation // light factors from our single light

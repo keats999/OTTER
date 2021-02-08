@@ -72,7 +72,7 @@ int main() {
 		colorCorrectionShader->Link();
 		Shader::sptr shader = Shader::Create();
 		shader->LoadShaderPartFromFile("shaders/vertex_shader.glsl", GL_VERTEX_SHADER);
-		shader->LoadShaderPartFromFile("shaders/frag_blinn_phong_textured2.glsl", GL_FRAGMENT_SHADER);
+		shader->LoadShaderPartFromFile("shaders/frag_blinn_phong_textured.glsl", GL_FRAGMENT_SHADER);
 		shader->Link();
 
 		glm::vec3 lightPos = glm::vec3(0.0f, 0.0f, 5.0f);
@@ -89,7 +89,7 @@ int main() {
 		Texture2D::sptr texRamp = Texture2D::Create();
 		texRamp->LoadData(rampImage);
 
-
+		
 		// These are our application / scene level uniforms that don't necessarily update
 		// every frame
 		shader->SetUniform("u_LightPos", lightPos);
@@ -103,7 +103,7 @@ int main() {
 		shader->SetUniform("u_LightAttenuationQuadratic", lightQuadraticFalloff);
 		shader->SetUniform("u_Mode", mode);
 		
-		shader->SetUniform("s_RampTexture", 0);
+		shader->SetUniform("s_RampTexture", 1);
 
 		PostEffect* testBuffer;
 
@@ -562,6 +562,28 @@ int main() {
 			keyToggles.emplace_back(GLFW_KEY_T, [&]() { cameraObject.get<Camera>().ToggleOrtho(); });
 
 			keyToggles.emplace_back(GLFW_KEY_ESCAPE, [&]() { BehaviourBinding::Get<FirstPersonBehaviour>(cameraObject)->ToggleMouse(); });
+
+			keyToggles.emplace_back(GLFW_KEY_1, [&]() { 
+				mode = 1;
+				});
+			keyToggles.emplace_back(GLFW_KEY_2, [&]() {
+				mode = 2;
+				});
+			keyToggles.emplace_back(GLFW_KEY_3, [&]() {
+				mode = 3;
+				});
+			keyToggles.emplace_back(GLFW_KEY_4, [&]() {
+				mode = 0;
+				});
+			keyToggles.emplace_back(GLFW_KEY_5, [&]() {
+				mode = 4;
+				});
+			keyToggles.emplace_back(GLFW_KEY_6, [&]() {
+				mode = 5;
+				});
+			keyToggles.emplace_back(GLFW_KEY_7, [&]() {
+				mode = 6;
+				});
 			/*controllables.push_back(obj2);
 
 			keyToggles.emplace_back(GLFW_KEY_KP_ADD, [&]() {
