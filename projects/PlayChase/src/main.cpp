@@ -84,6 +84,18 @@ int main() {
 		float     lightLinearFalloff = 0.09f;
 		float     lightQuadraticFalloff = 0.032f;
 
+		struct Mat
+		{
+			Texture2D::sptr Albedo;
+			float Shininess;
+		};
+
+		Mat rampMat;
+		Texture2DData::sptr rampImage = Texture2DData::LoadFromFile("images/Ramp.png");
+		Texture2D::sptr texRamp = Texture2D::Create();
+		texRamp->LoadData(rampImage);
+
+
 		// These are our application / scene level uniforms that don't necessarily update
 		// every frame
 		shader->SetUniform("u_LightPos", lightPos);
@@ -95,12 +107,15 @@ int main() {
 		shader->SetUniform("u_LightAttenuationConstant", 1.0f);
 		shader->SetUniform("u_LightAttenuationLinear", lightLinearFalloff);
 		shader->SetUniform("u_LightAttenuationQuadratic", lightQuadraticFalloff);
+		
+		shader->SetUniform("s_RampTexture", 0);
+		rampMat.Albedo->Bind(1);
 
 		PostEffect* testBuffer;
 
 		int activeEffect = 0;
 		std::vector<GameObject> effects;
-
+		bool ramp=0;
 	
 		int width, height;
 		glfwGetWindowSize(BackendHandler::window, &width, &height);
@@ -176,26 +191,24 @@ int main() {
 				shader->SetUniform("u_Cel", (int)true);
 			}
 			if (ImGui::Button("Diffuse Ramp")) {
-				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
-
-				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
-				shader->SetUniform("u_AmbientStrength", 0.3f);
-				shader->SetUniform("u_AmbientLightStrength", 0.5f);
-
-				shader->SetUniform("u_SpecularLightStrength", 1.0f);
-
-				shader->SetUniform("u_Cel", (int)false);
+				if (ramp == 1) {
+					ramp = 0;
+				}
+				else {
+					shader->SetUniform("s_RampTexture", 1);
+					rampMat.Albedo->Bind(1);
+					ramp = 1;
+				}
 			}
 			if (ImGui::Button("Specular Ramp")) {
-				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 0.0f));
-
-				shader->SetUniform("u_AmbientCol", glm::vec3(0.0f));
-				shader->SetUniform("u_AmbientStrength", 0.0f);
-				shader->SetUniform("u_AmbientLightStrength", 0.0f);
-
-				shader->SetUniform("u_SpecularLightStrength", 1.0f);
-
-				shader->SetUniform("u_Cel", (int)false);
+				if (ramp == 2) {
+					ramp = 0;
+				}
+				else {
+					shader->SetUniform("s_RampTexture", 1);
+					rampMat.Albedo->Bind(1);
+					ramp = 2;
+				}
 			}
 			if (ImGui::Button("Color Grading Warm")) {
 				if (activeEffect == 1)
@@ -360,6 +373,8 @@ int main() {
 		coinMat->Set("u_Shininess", 8.0f);
 		coinMat->Set("u_TextureMix", 0.0f);
 		int coincount = 0;
+
+
 
 		VertexArrayObject::sptr tubestr = ObjLoader::LoadFromFile("models/tubestr.obj");
 		VertexArrayObject::sptr tubelbw = ObjLoader::LoadFromFile("models/tubelbw.obj");
