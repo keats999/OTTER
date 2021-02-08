@@ -15,6 +15,7 @@ class FirstPersonBehaviour : public IBehaviour
 public:
 	void Update(entt::handle entity) override;
 	void SetParent(entt::handle parent) { _parent = parent.entity(); }
+	void ToggleMouse() { _trapped = !_trapped; }
 
 protected:
 	entt::entity _parent{ entt::null };

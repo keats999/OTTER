@@ -99,11 +99,9 @@ int main() {
 		PostEffect* testBuffer;
 
 		int activeEffect = 2;
-		std::vector<PostEffect*> effects;
+		std::vector<GameObject> effects;
 
-		ColorCorrection* noColorCorrectEffect;
-		ColorCorrection* warmColorCorrectEffect;
-		ColorCorrection* coolColorCorrectEffect;
+	
 		int width, height;
 		glfwGetWindowSize(BackendHandler::window, &width, &height);
 
@@ -570,27 +568,27 @@ int main() {
 
 		GameObject noColorCorrectionObj = scene->CreateEntity("Color Correct");
 		{
-			noColorCorrectEffect = &noColorCorrectionObj.emplace<ColorCorrection>();
+			ColorCorrection* noColorCorrectEffect = &noColorCorrectionObj.emplace<ColorCorrection>();
 			noColorCorrectEffect->filename = "cubes/test.cube";
 			noColorCorrectEffect->Init(width, height);
 		}
-		effects.push_back(noColorCorrectEffect);
+		effects.push_back(noColorCorrectionObj);
 
 		GameObject warmColorCorrectionObj = scene->CreateEntity("Color Correct Warm");
 		{
-			warmColorCorrectEffect = &warmColorCorrectionObj.emplace<ColorCorrection>();
+			ColorCorrection* warmColorCorrectEffect = &warmColorCorrectionObj.emplace<ColorCorrection>();
 			warmColorCorrectEffect->filename = "cubes/warm_color_correction.cube";
 			warmColorCorrectEffect->Init(width, height);
 		}
-		effects.push_back(warmColorCorrectEffect);
+		effects.push_back(warmColorCorrectionObj);
 
 		GameObject coolColorCorrectionObj = scene->CreateEntity("Color Correct Cold");
 		{
-			coolColorCorrectEffect = &coolColorCorrectionObj.emplace<ColorCorrection>();
+			ColorCorrection* coolColorCorrectEffect = &coolColorCorrectionObj.emplace<ColorCorrection>();
 			coolColorCorrectEffect->filename = "cubes/cool_color_correction.cube";
 			coolColorCorrectEffect->Init(width, height);
 		}
-		effects.push_back(coolColorCorrectEffect);
+		effects.push_back(coolColorCorrectionObj);
 
 		#pragma endregion 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -630,6 +628,7 @@ int main() {
 			// use std::bind
 			keyToggles.emplace_back(GLFW_KEY_T, [&]() { cameraObject.get<Camera>().ToggleOrtho(); });
 
+			keyToggles.emplace_back(GLFW_KEY_ESCAPE, [&]() { BehaviourBinding::Get<FirstPersonBehaviour>(cameraObject)->ToggleMouse(); });
 			/*controllables.push_back(obj2);
 
 			keyToggles.emplace_back(GLFW_KEY_KP_ADD, [&]() {
@@ -697,7 +696,7 @@ int main() {
 			testBuffer->Clear();
 			for (int i = 0; i < effects.size(); i++)
 			{
-				effects[i]->Clear();
+				effects[i].get<ColorCorrection>().Clear();
 			}
 
 			glClearColor(0.08f, 0.17f, 0.31f, 1.0f);
@@ -760,8 +759,9 @@ int main() {
 			testBuffer->UnbindBuffer();
 
 			//testBuffer->DrawToBackbuffer();
-			effects[activeEffect]->ApplyEffect(testBuffer);
-			effects[activeEffect]->DrawToScreen();
+			ColorCorrection currentEffect = effects[activeEffect].get<ColorCorrection>();
+			currentEffect.ApplyEffect(testBuffer);
+			currentEffect.DrawToScreen();
 			// Draw our ImGui content
 			BackendHandler::RenderImGui();
 
