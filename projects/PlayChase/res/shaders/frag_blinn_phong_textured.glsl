@@ -36,6 +36,19 @@ const float scaleFactor = 1.0/bands;
 
 out vec4 frag_color;
 
+uniform sampler2D s_RampTexture;
+//Ramp lighting explained by 
+//https://webglfundamentals.org/webgl/lessons/webgl-ramp-textures.html
+vec4 RampCalc(float modify)
+{
+    float u = modify * 0.5 + 0.5;
+    vec2 uv = vec2(u, 0.5);
+
+    vec4 rampColor = texture(s_RampTexture, uv);
+
+    return rampColor;
+}
+
 // https://learnopengl.com/Advanced-Lighting/Advanced-Lighting
 void main() {
 	// Lecture 5
@@ -81,21 +94,14 @@ void main() {
 		(u_AmbientCol * u_AmbientStrength) + // global ambient light
 		(ambient) * attenuation // light factors from our single light
 		) * inColor * textureColor.rgb; // Object color
-	]
+	}
 	else if(u_Mode == 3)
 	{
 		result = (
 		(diffuse + specular) * attenuation // light factors from our single light
 		) * inColor * textureColor.rgb; // Object color
-	]
+	}
 	else if(u_Mode == 4)
-	{
-		result = (
-		(u_AmbientCol * u_AmbientStrength) + // global ambient light
-		(ambient + diffuse + specular) * attenuation // light factors from our single light
-		) * inColor * textureColor.rgb; // Object color
-	]
-	else
 	{
 		//Cel Shading
 		vec3 diffuseOut = (dif * u_LightCol) / (dist*dist);
@@ -109,7 +115,30 @@ void main() {
 		(u_AmbientCol * u_AmbientStrength) + // global ambient light
 		(ambient + (diffuseOut*edge) + specular) * attenuation // light factors from our single light
 		) * inColor * textureColor.rgb; // Object color
-	]
+	}
+	else if(u_Mode == 5)
+	{
+		vec4 rampColor = RampCalc(diffuse);
+		result = (
+        (u_AmbientCol * u_AmbientStrength) + // global ambient light
+        (ambient + (diffuse*rampColor.rgb) + specular) * attenuation // light factors from our single light
+        ) * inColor * textureColor.rgb *rampColor.rgb;
+	}
+	else if(u_Mode == 6)
+	{
+		vec4 rampColor = RampCalc(specular);
+		result = (
+        (u_AmbientCol * u_AmbientStrength) + // global ambient light
+        (ambient + diffuse + (specular*rampColor.rgb)) * attenuation // light factors from our single light
+        ) * inColor * textureColor.rgb *rampColor.rgb;
+	}
+	else
+	{
+		result = (
+		(u_AmbientCol * u_AmbientStrength) + // global ambient light
+		(ambient + diffuse + specular) * attenuation // light factors from our single light
+		) * inColor * textureColor.rgb; // Object color	
+	}
 
 	frag_color = vec4(result, textureColor.a);
 }

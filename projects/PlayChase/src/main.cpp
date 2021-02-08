@@ -136,12 +136,12 @@ int main() {
 			}
 			
 			if (ImGui::Button("Diffuse Ramp")) {
-				mode = 0;
+				mode = 5;
 				shader->SetUniform("u_Mode", mode);
 			}
 			
 			if (ImGui::Button("Specular Ramp")) {
-				mode = 0;
+				mode = 6;
 				shader->SetUniform("u_Mode", mode);
 			}
 			
