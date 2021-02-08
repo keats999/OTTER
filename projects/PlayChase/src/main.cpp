@@ -27,6 +27,7 @@
 #include <FollowPathBehaviour.h>
 #include <SimpleMoveBehaviour.h>
 #include "Behaviours/PlayerBehaviour.h"
+#include "Behaviours/FirstPersonBehaviour.h"
 
 #include "Utilities/MapManager.h"
 #include "Utilities/Collision2D.h"
@@ -62,7 +63,7 @@ int main() {
 		// Load our shaders
 		Shader::sptr shader = Shader::Create();
 		shader->LoadShaderPartFromFile("shaders/vertex_shader.glsl", GL_VERTEX_SHADER);
-		shader->LoadShaderPartFromFile("shaders/frag_blinn_phong_textured2.glsl", GL_FRAGMENT_SHADER);
+		shader->LoadShaderPartFromFile("shaders/frag_blinn_phong_textured.glsl", GL_FRAGMENT_SHADER);
 		shader->Link();
 
 		glm::vec3 lightPos = glm::vec3(0.0f, 0.0f, 5.0f);
@@ -88,79 +89,7 @@ int main() {
 
 		// We'll add some ImGui controls to control our shader
 		BackendHandler::imGuiCallbacks.push_back([&]() {
-			if (ImGui::Button("Base Lighting")) {
-
-				shader->SetUniform("u_AmbientCol", glm::vec3(0.0f));
-				shader->SetUniform("u_AmbientStrength", 0.0f);
-				shader->SetUniform("u_AmbientLightStrength", 1.0f);
-
-				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 0.0f));
-
-				shader->SetUniform("u_SpecularLightStrength", 0.0f);
-
-				shader->SetUniform("u_Cel", (int)false);
-
-			}
-			if (ImGui::Button("Ambient")) {
-				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
-				shader->SetUniform("u_AmbientStrength", 0.3f);
-				shader->SetUniform("u_AmbientLightStrength", 0.5f);
-
-				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 0.0f));
-
-				shader->SetUniform("u_SpecularLightStrength", 0.0f);
-
-				shader->SetUniform("u_Cel", (int)false);
-
-			}
-			if (ImGui::Button("Specular")) {
-				shader->SetUniform("u_SpecularLightStrength", 1.0f);
-
-				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 0.0f));
-				shader->SetUniform("u_AmbientCol", glm::vec3(0.0f));
-				shader->SetUniform("u_AmbientStrength", 0.0f);
-				shader->SetUniform("u_AmbientLightStrength", 0.0f);
-
-				shader->SetUniform("u_Cel", (int)false);
-
-			}
-			if (ImGui::Button("Diffuse")) {
-				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
-
-				shader->SetUniform("u_SpecularLightStrength", 0.0f);
-				shader->SetUniform("u_AmbientCol", glm::vec3(0.0f));
-				shader->SetUniform("u_AmbientStrength", 0.0f);
-				shader->SetUniform("u_AmbientLightStrength", 0.0f);
-
-				shader->SetUniform("u_Cel", (int)false);
-
-			}
-
-			if (ImGui::Button("Ambient+Specular+Diffuse")) {
-				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
-
-				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
-				shader->SetUniform("u_AmbientStrength", 0.3f);
-				shader->SetUniform("u_AmbientLightStrength", 0.5f);
-
-				shader->SetUniform("u_SpecularLightStrength", 1.0f);
-
-				shader->SetUniform("u_Cel", (int)false);
-
-			}
-
-			if (ImGui::Button("Special")) {
-				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
-
-				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
-				shader->SetUniform("u_AmbientStrength", 0.3f);
-				shader->SetUniform("u_AmbientLightStrength", 0.5f);
-
-				shader->SetUniform("u_SpecularLightStrength", 1.0f);
-
-				shader->SetUniform("u_Cel", (int)true);
-			}
-			/*if (ImGui::CollapsingHeader("Scene Level Lighting Settings"))
+			if (ImGui::CollapsingHeader("Scene Level Lighting Settings"))
 			{
 				if (ImGui::ColorPicker3("Ambient Color", glm::value_ptr(ambientCol))) {
 					shader->SetUniform("u_AmbientCol", ambientCol);
@@ -189,15 +118,15 @@ int main() {
 				if (ImGui::DragFloat("Light Quadratic Falloff", &lightQuadraticFalloff, 0.01f, 0.0f, 1.0f)) {
 					shader->SetUniform("u_LightAttenuationQuadratic", lightQuadraticFalloff);
 				}
-			}*/
+			}
 
-			auto name = controllables[selectedVao].get<GameObjectTag>().Name;
+			/*auto name = controllables[selectedVao].get<GameObjectTag>().Name;
 			ImGui::Text(name.c_str());
 			auto behaviour = BehaviourBinding::Get<SimpleMoveBehaviour>(controllables[selectedVao]);
 			ImGui::Checkbox("Relative Rotation", &behaviour->Relative);
 
 			ImGui::Text("Q/E -> Yaw\nLeft/Right -> Roll\nUp/Down -> Pitch\nY -> Toggle Mode");
-		
+			*/
 			minFps = FLT_MAX;
 			maxFps = 0;
 			avgFps = 0;
@@ -255,6 +184,7 @@ int main() {
 		// We need to tell our scene system what extra component types we want to support
 		GameScene::RegisterComponentType<RendererComponent>();
 		GameScene::RegisterComponentType<BehaviourBinding>();
+		GameScene::RegisterComponentType<Collision2D>();
 		GameScene::RegisterComponentType<Camera>();
 
 		// Create a scene, and set it to be the active scene in the application
@@ -429,9 +359,9 @@ int main() {
 
 
 
-		GameObject player = scene->CreateEntity("monkey_quads");
+		GameObject player = scene->CreateEntity("player");
 		{
-			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/monkey_quads.obj");
+			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
 			player.emplace<RendererComponent>().SetMesh(vao).SetMaterial(stoneMat);
 			auto& playerCol = player.emplace<Collision2D>(pworld->World());
 			playerCol.CreateDynamicBox(spawn, glm::vec2(2, 2));
@@ -459,10 +389,12 @@ int main() {
 			Camera& camera = cameraObject.emplace<Camera>();// Camera::Create();
 			camera.SetPosition(glm::vec3(0, 3, 3));
 			camera.SetUp(glm::vec3(0, 1, 0));
-			camera.LookAt(glm::vec3(0));
+			camera.LookAt(glm::vec3(0, 2, 0));
 			camera.SetFovDegrees(90.0f); // Set an initial FOV
 			camera.SetOrthoHeight(3.0f);
-			BehaviourBinding::Bind<CameraControlBehaviour>(cameraObject);
+			//BehaviourBinding::Bind<CameraControlBehaviour>(cameraObject);
+			BehaviourBinding::Bind<FirstPersonBehaviour>(cameraObject);
+			BehaviourBinding::Get<FirstPersonBehaviour>(cameraObject)->SetParent(player);
 		}
 
 		Framebuffer* testBuffer;
@@ -514,7 +446,7 @@ int main() {
 			// use std::bind
 			keyToggles.emplace_back(GLFW_KEY_T, [&]() { cameraObject.get<Camera>().ToggleOrtho(); });
 
-			controllables.push_back(obj2);
+			/*controllables.push_back(obj2);
 
 			keyToggles.emplace_back(GLFW_KEY_KP_ADD, [&]() {
 				BehaviourBinding::Get<SimpleMoveBehaviour>(controllables[selectedVao])->Enabled = false;
@@ -534,7 +466,7 @@ int main() {
 			keyToggles.emplace_back(GLFW_KEY_Y, [&]() {
 				auto behaviour = BehaviourBinding::Get<SimpleMoveBehaviour>(controllables[selectedVao]);
 				behaviour->Relative = !behaviour->Relative;
-				});
+				});*/
 		}
 
 		// Initialize our timing instance and grab a reference for our use

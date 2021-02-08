@@ -14,13 +14,13 @@ void PlayerBehaviour::Update(entt::handle entity)
 		controlState = 2;
 	}
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		controlState = 3;
-	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
 		controlState = 4;
 	}
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+		controlState = 3;
+	}
 
-	Collision2D collider = entity.get<Collision2D>();
+	Collision2D& collider = entity.get<Collision2D>();
 
 	float desiredSpeed = 0;
 	float desiredTorque = 0;
