@@ -27,6 +27,13 @@ uniform float u_TextureMix;
 
 uniform vec3  u_CamPos;
 
+uniform int u_Mode;
+
+//cel shading
+uniform float lightIntensity = 10.0;
+const int bands = 5;
+const float scaleFactor = 1.0/bands;
+
 out vec4 frag_color;
 
 // https://learnopengl.com/Advanced-Lighting/Advanced-Lighting
@@ -62,10 +69,47 @@ void main() {
 	vec4 textureColor2 = texture(s_Diffuse2, inUV);
 	vec4 textureColor = mix(textureColor1, textureColor2, u_TextureMix);
 
-	vec3 result = (
+	vec3 result = inColor * textureColor.rgb;
+
+	if(u_Mode == 1)
+	{
+		result = inColor * textureColor.rgb; // Object color
+	}
+	else if(u_Mode == 2)
+	{
+		result = (
+		(u_AmbientCol * u_AmbientStrength) + // global ambient light
+		(ambient) * attenuation // light factors from our single light
+		) * inColor * textureColor.rgb; // Object color
+	]
+	else if(u_Mode == 3)
+	{
+		result = (
+		(diffuse + specular) * attenuation // light factors from our single light
+		) * inColor * textureColor.rgb; // Object color
+	]
+	else if(u_Mode == 4)
+	{
+		result = (
 		(u_AmbientCol * u_AmbientStrength) + // global ambient light
 		(ambient + diffuse + specular) * attenuation // light factors from our single light
 		) * inColor * textureColor.rgb; // Object color
+	]
+	else
+	{
+		//Cel Shading
+		vec3 diffuseOut = (dif * u_LightCol) / (dist*dist);
+		diffuseOut = diffuseOut*lightIntensity;
+		diffuseOut=floor(diffuseOut*bands)*scaleFactor;
+
+		//Outline
+		float edge=(dot(viewDir,N) <0.2)? 0.0 : 1.0;
+		
+		result = (
+		(u_AmbientCol * u_AmbientStrength) + // global ambient light
+		(ambient + (diffuseOut*edge) + specular) * attenuation // light factors from our single light
+		) * inColor * textureColor.rgb; // Object color
+	]
 
 	frag_color = vec4(result, textureColor.a);
 }
