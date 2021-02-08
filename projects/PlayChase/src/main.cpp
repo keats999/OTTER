@@ -72,7 +72,7 @@ int main() {
 		colorCorrectionShader->Link();
 		Shader::sptr shader = Shader::Create();
 		shader->LoadShaderPartFromFile("shaders/vertex_shader.glsl", GL_VERTEX_SHADER);
-		shader->LoadShaderPartFromFile("shaders/frag_blinn_phong_textured.glsl", GL_FRAGMENT_SHADER);
+		shader->LoadShaderPartFromFile("shaders/frag_blinn_phong_textured2.glsl", GL_FRAGMENT_SHADER);
 		shader->Link();
 
 		glm::vec3 lightPos = glm::vec3(0.0f, 0.0f, 5.0f);
@@ -85,13 +85,6 @@ int main() {
 		float     lightQuadraticFalloff = 0.032f;
 		int		  mode = 0;
 
-		struct Mat
-		{
-			Texture2D::sptr Albedo;
-			float Shininess;
-		};
-
-		Mat rampMat;
 		Texture2DData::sptr rampImage = Texture2DData::LoadFromFile("images/Ramp.png");
 		Texture2D::sptr texRamp = Texture2D::Create();
 		texRamp->LoadData(rampImage);
@@ -111,7 +104,6 @@ int main() {
 		shader->SetUniform("u_Mode", mode);
 		
 		shader->SetUniform("s_RampTexture", 0);
-		rampMat.Albedo->Bind(1);
 
 		PostEffect* testBuffer;
 
@@ -154,14 +146,12 @@ int main() {
 				mode = 5;
 				shader->SetUniform("u_Mode", mode);
 					shader->SetUniform("s_RampTexture", 1);
-					rampMat.Albedo->Bind(1);
 			}
 			
 			if (ImGui::Button("Specular Ramp")) {
 				mode = 6;
 				shader->SetUniform("u_Mode", mode);
 					shader->SetUniform("s_RampTexture", 1);
-					rampMat.Albedo->Bind(1);
 			}
 			
 			if (ImGui::Button("Color Grading Warm")) {
