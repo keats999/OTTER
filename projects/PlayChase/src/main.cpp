@@ -98,10 +98,12 @@ int main() {
 
 		PostEffect* testBuffer;
 
-		int activeEffect = 0;
+		int activeEffect = 2;
 		std::vector<PostEffect*> effects;
 
-		ColorCorrection* colorCorrectEffect;
+		ColorCorrection* noColorCorrectEffect;
+		ColorCorrection* warmColorCorrectEffect;
+		ColorCorrection* coolColorCorrectEffect;
 		int width, height;
 		glfwGetWindowSize(BackendHandler::window, &width, &height);
 
@@ -120,11 +122,7 @@ int main() {
 
 				shader->SetUniform("u_Cel", (int)false);
 
-				colorCorrectEffect->filename = "cubes/test.cube";
-				colorCorrectEffect->Init(width, height);
-				effects[activeEffect]->ApplyEffect(testBuffer);
-				effects[activeEffect]->DrawToScreen();
-
+				activeEffect = 0;
 			}
 			if (ImGui::Button("Ambient")) {
 				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
@@ -137,6 +135,7 @@ int main() {
 
 				shader->SetUniform("u_Cel", (int)false);
 
+				activeEffect = 0;
 			}
 			if (ImGui::Button("Specular")) {
 				shader->SetUniform("u_SpecularLightStrength", 1.0f);
@@ -148,6 +147,7 @@ int main() {
 
 				shader->SetUniform("u_Cel", (int)false);
 
+				activeEffect = 0;
 			}
 			if (ImGui::Button("Diffuse")) {
 				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
@@ -159,6 +159,7 @@ int main() {
 
 				shader->SetUniform("u_Cel", (int)false);
 
+				activeEffect = 0;
 			}
 
 			if (ImGui::Button("Ambient+Specular+Diffuse")) {
@@ -172,6 +173,7 @@ int main() {
 
 				shader->SetUniform("u_Cel", (int)false);
 
+				activeEffect = 0;
 			}
 
 			if (ImGui::Button("Special")) {
@@ -184,6 +186,8 @@ int main() {
 				shader->SetUniform("u_SpecularLightStrength", 1.0f);
 
 				shader->SetUniform("u_Cel", (int)true);
+
+				activeEffect = 0;
 			}
 			if (ImGui::Button("Diffuse Ramp")) {
 				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
@@ -195,6 +199,8 @@ int main() {
 				shader->SetUniform("u_SpecularLightStrength", 1.0f);
 
 				shader->SetUniform("u_Cel", (int)false);
+
+				activeEffect = 0;
 			}
 			if (ImGui::Button("Specular Ramp")) {
 				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 0.0f));
@@ -207,7 +213,7 @@ int main() {
 
 				shader->SetUniform("u_Cel", (int)false);
 
-
+				activeEffect = 0;
 			}
 			if (ImGui::Button("Color Grading Warm")) {
 				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
@@ -220,10 +226,7 @@ int main() {
 
 				shader->SetUniform("u_Cel", (int)false);
 
-				colorCorrectEffect->filename= "cubes/test.cube";
-				colorCorrectEffect->Init(width, height);
-				effects[activeEffect]->ApplyEffect(testBuffer);
-				effects[activeEffect]->DrawToScreen();
+				activeEffect = 1;
 			}
 			if (ImGui::Button("Color Grading Cool")) {
 				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
@@ -236,11 +239,7 @@ int main() {
 
 				shader->SetUniform("u_Cel", (int)false);
 
-				colorCorrectEffect->filename = "cubes/BrightenedCorrection.cube";
-				colorCorrectEffect->Init(width, height);
-				effects[activeEffect]->ApplyEffect(testBuffer);
-				effects[activeEffect]->DrawToScreen();
-
+				activeEffect = 2;
 			}
 			if (ImGui::Button("Color Grading Custom")) {
 				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
@@ -253,7 +252,7 @@ int main() {
 
 				shader->SetUniform("u_Cel", (int)false);
 
-
+				activeEffect = 0;
 			}
 			/*if (ImGui::CollapsingHeader("Scene Level Lighting Settings"))
 			{
@@ -569,14 +568,30 @@ int main() {
 			testBuffer->Init(width, height);
 		}
 
-		GameObject colorCorrectionObj = scene->CreateEntity("Color Correct");
+		GameObject noColorCorrectionObj = scene->CreateEntity("Color Correct");
 		{
-			colorCorrectEffect = &colorCorrectionObj.emplace<ColorCorrection>();
-			colorCorrectEffect->filename = "cubes/BrightenedCorrection.cube";
-			colorCorrectEffect->Init(width, height);
+			noColorCorrectEffect = &noColorCorrectionObj.emplace<ColorCorrection>();
+			noColorCorrectEffect->filename = "cubes/test.cube";
+			noColorCorrectEffect->Init(width, height);
 		}
+		effects.push_back(noColorCorrectEffect);
 
-		effects.push_back(colorCorrectEffect);
+		GameObject warmColorCorrectionObj = scene->CreateEntity("Color Correct Warm");
+		{
+			warmColorCorrectEffect = &warmColorCorrectionObj.emplace<ColorCorrection>();
+			warmColorCorrectEffect->filename = "cubes/warm_color_correction.cube";
+			warmColorCorrectEffect->Init(width, height);
+		}
+		effects.push_back(warmColorCorrectEffect);
+
+		GameObject coolColorCorrectionObj = scene->CreateEntity("Color Correct Cold");
+		{
+			coolColorCorrectEffect = &coolColorCorrectionObj.emplace<ColorCorrection>();
+			coolColorCorrectEffect->filename = "cubes/cool_color_correction.cube";
+			coolColorCorrectEffect->Init(width, height);
+		}
+		effects.push_back(coolColorCorrectEffect);
+
 		#pragma endregion 
 		//////////////////////////////////////////////////////////////////////////////////////////
 
