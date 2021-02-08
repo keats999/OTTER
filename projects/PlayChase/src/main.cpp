@@ -59,8 +59,17 @@ int main() {
 	// Push another scope so most memory should be freed *before* we exit the app
 	{
 		#pragma region Shader and ImGui
-
 		// Load our shaders
+
+		Shader::sptr passthroughShader = Shader::Create();
+		passthroughShader->LoadShaderPartFromFile("shaders/passthrough_vert.glsl", GL_VERTEX_SHADER);
+		passthroughShader->LoadShaderPartFromFile("shaders/passthrough_frag.glsl", GL_FRAGMENT_SHADER);
+		passthroughShader->Link();
+
+		Shader::sptr colorCorrectionShader = Shader::Create();
+		colorCorrectionShader->LoadShaderPartFromFile("shaders/passthrough_vert.glsl", GL_VERTEX_SHADER);
+		colorCorrectionShader->LoadShaderPartFromFile("shaders/Post/color_correction_frag.glsl", GL_FRAGMENT_SHADER);
+		colorCorrectionShader->Link();
 		Shader::sptr shader = Shader::Create();
 		shader->LoadShaderPartFromFile("shaders/vertex_shader.glsl", GL_VERTEX_SHADER);
 		shader->LoadShaderPartFromFile("shaders/frag_blinn_phong_textured.glsl", GL_FRAGMENT_SHADER);
@@ -87,9 +96,166 @@ int main() {
 		shader->SetUniform("u_LightAttenuationLinear", lightLinearFalloff);
 		shader->SetUniform("u_LightAttenuationQuadratic", lightQuadraticFalloff);
 
+		PostEffect* testBuffer;
+
+		int activeEffect = 0;
+		std::vector<PostEffect*> effects;
+
+		ColorCorrection* colorCorrectEffect;
+		int width, height;
+		glfwGetWindowSize(BackendHandler::window, &width, &height);
+
 		// We'll add some ImGui controls to control our shader
 		BackendHandler::imGuiCallbacks.push_back([&]() {
-			if (ImGui::CollapsingHeader("Scene Level Lighting Settings"))
+
+			if (ImGui::Button("Base Lighting")) {
+
+				shader->SetUniform("u_AmbientCol", glm::vec3(0.0f));
+				shader->SetUniform("u_AmbientStrength", 0.0f);
+				shader->SetUniform("u_AmbientLightStrength", 1.0f);
+
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 0.0f));
+
+				shader->SetUniform("u_SpecularLightStrength", 0.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+
+				colorCorrectEffect->filename = "cubes/test.cube";
+				colorCorrectEffect->Init(width, height);
+				effects[activeEffect]->ApplyEffect(testBuffer);
+				effects[activeEffect]->DrawToScreen();
+
+			}
+			if (ImGui::Button("Ambient")) {
+				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
+				shader->SetUniform("u_AmbientStrength", 0.3f);
+				shader->SetUniform("u_AmbientLightStrength", 0.5f);
+
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 0.0f));
+
+				shader->SetUniform("u_SpecularLightStrength", 0.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+
+			}
+			if (ImGui::Button("Specular")) {
+				shader->SetUniform("u_SpecularLightStrength", 1.0f);
+
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 0.0f));
+				shader->SetUniform("u_AmbientCol", glm::vec3(0.0f));
+				shader->SetUniform("u_AmbientStrength", 0.0f);
+				shader->SetUniform("u_AmbientLightStrength", 0.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+
+			}
+			if (ImGui::Button("Diffuse")) {
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
+
+				shader->SetUniform("u_SpecularLightStrength", 0.0f);
+				shader->SetUniform("u_AmbientCol", glm::vec3(0.0f));
+				shader->SetUniform("u_AmbientStrength", 0.0f);
+				shader->SetUniform("u_AmbientLightStrength", 0.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+
+			}
+
+			if (ImGui::Button("Ambient+Specular+Diffuse")) {
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
+
+				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
+				shader->SetUniform("u_AmbientStrength", 0.3f);
+				shader->SetUniform("u_AmbientLightStrength", 0.5f);
+
+				shader->SetUniform("u_SpecularLightStrength", 1.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+
+			}
+
+			if (ImGui::Button("Special")) {
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
+
+				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
+				shader->SetUniform("u_AmbientStrength", 0.3f);
+				shader->SetUniform("u_AmbientLightStrength", 0.5f);
+
+				shader->SetUniform("u_SpecularLightStrength", 1.0f);
+
+				shader->SetUniform("u_Cel", (int)true);
+			}
+			if (ImGui::Button("Diffuse Ramp")) {
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
+
+				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
+				shader->SetUniform("u_AmbientStrength", 0.3f);
+				shader->SetUniform("u_AmbientLightStrength", 0.5f);
+
+				shader->SetUniform("u_SpecularLightStrength", 1.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+			}
+			if (ImGui::Button("Specular Ramp")) {
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 0.0f));
+
+				shader->SetUniform("u_AmbientCol", glm::vec3(0.0f));
+				shader->SetUniform("u_AmbientStrength", 0.0f);
+				shader->SetUniform("u_AmbientLightStrength", 0.0f);
+
+				shader->SetUniform("u_SpecularLightStrength", 1.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+
+
+			}
+			if (ImGui::Button("Color Grading Warm")) {
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
+
+				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
+				shader->SetUniform("u_AmbientStrength", 0.3f);
+				shader->SetUniform("u_AmbientLightStrength", 0.5f);
+
+				shader->SetUniform("u_SpecularLightStrength", 1.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+
+				colorCorrectEffect->filename= "cubes/test.cube";
+				colorCorrectEffect->Init(width, height);
+				effects[activeEffect]->ApplyEffect(testBuffer);
+				effects[activeEffect]->DrawToScreen();
+			}
+			if (ImGui::Button("Color Grading Cool")) {
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
+
+				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
+				shader->SetUniform("u_AmbientStrength", 0.3f);
+				shader->SetUniform("u_AmbientLightStrength", 0.5f);
+
+				shader->SetUniform("u_SpecularLightStrength", 1.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+
+				colorCorrectEffect->filename = "cubes/BrightenedCorrection.cube";
+				colorCorrectEffect->Init(width, height);
+				effects[activeEffect]->ApplyEffect(testBuffer);
+				effects[activeEffect]->DrawToScreen();
+
+			}
+			if (ImGui::Button("Color Grading Custom")) {
+				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
+
+				shader->SetUniform("u_AmbientCol", glm::vec3(1.0f));
+				shader->SetUniform("u_AmbientStrength", 0.3f);
+				shader->SetUniform("u_AmbientLightStrength", 0.5f);
+
+				shader->SetUniform("u_SpecularLightStrength", 1.0f);
+
+				shader->SetUniform("u_Cel", (int)false);
+
+
+			}
+			/*if (ImGui::CollapsingHeader("Scene Level Lighting Settings"))
 			{
 				if (ImGui::ColorPicker3("Ambient Color", glm::value_ptr(ambientCol))) {
 					shader->SetUniform("u_AmbientCol", ambientCol);
@@ -397,17 +563,20 @@ int main() {
 			BehaviourBinding::Get<FirstPersonBehaviour>(cameraObject)->SetParent(player);
 		}
 
-		Framebuffer* testBuffer;
 		GameObject framebufferObject = scene->CreateEntity("Basic Buffer");
 		{
-			int width, height;
-			glfwGetWindowSize(BackendHandler::window, &width, &height);
-
-			testBuffer = &framebufferObject.emplace<Framebuffer>();
-			testBuffer->AddDepthTarget();
-			testBuffer->AddColorTarget(GL_RGBA8);
+			testBuffer = &framebufferObject.emplace<PostEffect>();
 			testBuffer->Init(width, height);
 		}
+
+		GameObject colorCorrectionObj = scene->CreateEntity("Color Correct");
+		{
+			colorCorrectEffect = &colorCorrectionObj.emplace<ColorCorrection>();
+			colorCorrectEffect->filename = "cubes/BrightenedCorrection.cube";
+			colorCorrectEffect->Init(width, height);
+		}
+
+		effects.push_back(colorCorrectEffect);
 		#pragma endregion 
 		//////////////////////////////////////////////////////////////////////////////////////////
 
@@ -511,6 +680,10 @@ int main() {
 			pworld->Update(time.DeltaTime);
 			// Clear the screen
 			testBuffer->Clear();
+			for (int i = 0; i < effects.size(); i++)
+			{
+				effects[i]->Clear();
+			}
 
 			glClearColor(0.08f, 0.17f, 0.31f, 1.0f);
 			glEnable(GL_DEPTH_TEST);
@@ -550,7 +723,7 @@ int main() {
 			Shader::sptr current = nullptr;
 			ShaderMaterial::sptr currentMat = nullptr;
 
-			testBuffer->Bind();
+			testBuffer->BindBuffer(0);
 
 			// Iterate over the render group components and draw them
 			renderGroup.each( [&](entt::entity e, RendererComponent& renderer, Transform& transform) {
@@ -569,10 +742,11 @@ int main() {
 				BackendHandler::RenderVAO(renderer.Material->Shader, renderer.Mesh, viewProjection, transform);
 			});
 
-			testBuffer->Unbind();
+			testBuffer->UnbindBuffer();
 
-			testBuffer->DrawToBackbuffer();
-
+			//testBuffer->DrawToBackbuffer();
+			effects[activeEffect]->ApplyEffect(testBuffer);
+			effects[activeEffect]->DrawToScreen();
 			// Draw our ImGui content
 			BackendHandler::RenderImGui();
 

@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Utilities/Util.h"
-#include "Graphics/Framebuffer.h"
+#include "Graphics/Post/GreyscaleEffect.h"
+#include "Graphics/Post/SepiaEffect.h"
+#include "Graphics/Post/ColorCorrection.h"
 
 #include <iostream>
 #include <Logging.h>

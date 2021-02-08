@@ -38,6 +38,8 @@ bool BackendHandler::InitAll()
 	if (!InitGLAD())
 		return 1;
 
+	Framebuffer::InitFullscreenQuad();
+
 	InitImGui();
 }
 
@@ -52,6 +54,23 @@ void BackendHandler::GlfwWindowResizedCallback(GLFWwindow* window, int width, in
 	{
 		buf.Reshape(width, height);
 	});
+	Application::Instance().ActiveScene->Registry().view<PostEffect>().each([=](PostEffect& buf)
+	{
+		buf.Reshape(width, height);
+	});
+	Application::Instance().ActiveScene->Registry().view<GreyscaleEffect>().each([=](GreyscaleEffect& buf)
+	{
+		buf.Reshape(width, height);
+	});
+	Application::Instance().ActiveScene->Registry().view<SepiaEffect>().each([=](SepiaEffect& buf)
+	{
+		buf.Reshape(width, height);
+	});
+	Application::Instance().ActiveScene->Registry().view<ColorCorrection>().each([=](ColorCorrection& buf)
+	{
+		buf.Reshape(width, height);
+	});
+
 }
 
 bool BackendHandler::InitGLFW()
