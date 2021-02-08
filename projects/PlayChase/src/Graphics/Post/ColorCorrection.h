@@ -12,7 +12,10 @@ public:
 	float GetIntensity() const;
 	void SetIntensity(float intensity);
 
+	LUT3D _testCube;
+	
+	//void reloadCube(unsigned width, unsigned height);
+	std::string filename;
 private:
 	float _intensity = 1.0f;
-	LUT3D _testCube;
 };

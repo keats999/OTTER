@@ -101,21 +101,12 @@ int main() {
 		std::vector<PostEffect*> effects;
 
 		ColorCorrection* colorCorrectEffect;
+		int width, height;
+		glfwGetWindowSize(BackendHandler::window, &width, &height);
 
 		// We'll add some ImGui controls to control our shader
 		BackendHandler::imGuiCallbacks.push_back([&]() {
-			if (ImGui::CollapsingHeader("Effect controls"))
-			{
-				ImGui::SliderInt("Chosen Effect", &activeEffect, 0, effects.size() - 1);
 
-				if (activeEffect == 0)
-				{
-					ImGui::Text("Active Effect: Color Correction");
-
-					ColorCorrection* temp = (ColorCorrection*)effects[activeEffect];
-
-				}
-			}
 			if (ImGui::Button("Base Lighting")) {
 
 				shader->SetUniform("u_AmbientCol", glm::vec3(0.0f));
@@ -127,6 +118,11 @@ int main() {
 				shader->SetUniform("u_SpecularLightStrength", 0.0f);
 
 				shader->SetUniform("u_Cel", (int)false);
+
+				colorCorrectEffect->filename = "cubes/test.cube";
+				colorCorrectEffect->Init(width, height);
+				effects[activeEffect]->ApplyEffect(testBuffer);
+				effects[activeEffect]->DrawToScreen();
 
 			}
 			if (ImGui::Button("Ambient")) {
@@ -223,7 +219,10 @@ int main() {
 
 				shader->SetUniform("u_Cel", (int)false);
 
-
+				colorCorrectEffect->filename= "cubes/test.cube";
+				colorCorrectEffect->Init(width, height);
+				effects[activeEffect]->ApplyEffect(testBuffer);
+				effects[activeEffect]->DrawToScreen();
 			}
 			if (ImGui::Button("Color Grading Cool")) {
 				shader->SetUniform("u_LightPos", glm::vec3(0.0f, 0.0f, 2.0f));
@@ -236,6 +235,10 @@ int main() {
 
 				shader->SetUniform("u_Cel", (int)false);
 
+				colorCorrectEffect->filename = "cubes/BrightenedCorrection.cube";
+				colorCorrectEffect->Init(width, height);
+				effects[activeEffect]->ApplyEffect(testBuffer);
+				effects[activeEffect]->DrawToScreen();
 
 			}
 			if (ImGui::Button("Color Grading Custom")) {
@@ -556,9 +559,6 @@ int main() {
 			BehaviourBinding::Bind<CameraControlBehaviour>(cameraObject);
 		}
 
-		int width, height;
-		glfwGetWindowSize(BackendHandler::window, &width, &height);
-
 		GameObject framebufferObject = scene->CreateEntity("Basic Buffer");
 		{
 			testBuffer = &framebufferObject.emplace<PostEffect>();
@@ -568,6 +568,7 @@ int main() {
 		GameObject colorCorrectionObj = scene->CreateEntity("Color Correct");
 		{
 			colorCorrectEffect = &colorCorrectionObj.emplace<ColorCorrection>();
+			colorCorrectEffect->filename = "cubes/BrightenedCorrection.cube";
 			colorCorrectEffect->Init(width, height);
 		}
 

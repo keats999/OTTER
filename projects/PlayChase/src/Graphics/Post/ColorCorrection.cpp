@@ -14,8 +14,10 @@ void ColorCorrection::Init(unsigned width, unsigned height)
     _shaders[index]->LoadShaderPartFromFile("shaders/Post/color_correction_frag.glsl", GL_FRAGMENT_SHADER);
     _shaders[index]->Link();
 
-    _testCube.loadFromFile("cubes/test.cube");
+    //filename="cubes/BrightenedCorrection.cube";
+    _testCube.loadFromFile(filename);
     PostEffect::Init(width, height);
+    // reloadCube(width, height);
  }
 
 void ColorCorrection::ApplyEffect(PostEffect* buffer)
@@ -44,3 +46,9 @@ void ColorCorrection::SetIntensity(float intensity)
 {
     _intensity = intensity;
 }
+
+//void ColorCorrection::reloadCube(unsigned width, unsigned height)
+//{
+//    _testCube.loadFromFile(filename);
+//    PostEffect::Init(width, height);
+//}
