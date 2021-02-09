@@ -616,10 +616,12 @@ int main() {
 		engine.LoadBank("Master.strings");
 		
 		// Add sound events
-		AudioEvent& music = engine.CreateSound("music", "event:/Music"); // Right-click event in fmod -> copy GUID
+		AudioEvent& music = engine.CreateSound("music", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}"); // Right-click event in fmod -> copy GUID
 		music.Play();
 		
 		//add modifiers to the sounds (can be done dynamically)
+		music.SetParameter("Underwater", 1.0f);
+		engine.SetGlobalParameter("Timewarp", 0.0f);
 		
 		// Get ref to Listener
 		AudioListener& listener = engine.GetListener(); // Can use this listener to change the player's 3D position
