@@ -32,6 +32,7 @@
 #include "Utilities/MapManager.h"
 #include "Utilities/Collision2D.h"
 #include "Utilities/PhysicsWorld.h"
+#include "Utilities/AudioEngine.h"
 
 #define NUM_TREES 300
 #define NUM_ROCKS 40
@@ -607,6 +608,23 @@ int main() {
 				});*/
 		}
 
+		//////////////////////////////////////// Sound Setup //////////////////////////////////////////////
+		// Setup FMOD
+		AudioEngine& engine = AudioEngine::Instance();
+		engine.Init();
+		engine.LoadBank("Master");
+		engine.LoadBank("Master.strings");
+		
+		// Add sound events
+		AudioEvent& music = engine.CreateSound("music", "event:/Music"); // Right-click event in fmod -> copy GUID
+		music.Play();
+		
+		//add modifiers to the sounds (can be done dynamically)
+		
+		// Get ref to Listener
+		AudioListener& listener = engine.GetListener(); // Can use this listener to change the player's 3D position
+		///////////////////////////////////////////////////////////////////////////////////////////////////
+
 		// Initialize our timing instance and grab a reference for our use
 		Timing& time = Timing::Instance();
 		time.LastFrame = glfwGetTime();
@@ -620,6 +638,8 @@ int main() {
 			time.DeltaTime = static_cast<float>(time.CurrentFrame - time.LastFrame);
 
 			time.DeltaTime = time.DeltaTime > 1.0f ? 1.0f : time.DeltaTime;
+
+			engine.Update();
 
 			// Update our FPS tracker data
 			fpsBuffer[frameIx] = 1.0f / time.DeltaTime;
@@ -728,6 +748,7 @@ int main() {
 		// Nullify scene so that we can release references
 		Application::Instance().ActiveScene = nullptr;
 		BackendHandler::ShutdownImGui();
+		engine.Shutdown();
 	}	
 
 	// Clean up the toolkit logger so we don't leak memory
