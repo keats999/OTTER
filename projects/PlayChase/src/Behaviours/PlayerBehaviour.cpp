@@ -7,6 +7,10 @@ void PlayerBehaviour::Update(entt::handle entity)
 	GLFWwindow* window = Application::Instance().Window;
 	int controlState = 0;
 
+	AudioEngine& engine = AudioEngine::Instance();
+	AudioEvent& thumping = engine.GetEvent("thump");
+	bool moving = false;
+
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
 		controlState = 1;
 	}
@@ -15,10 +19,14 @@ void PlayerBehaviour::Update(entt::handle entity)
 	}
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 		controlState = 4;
+		moving = true;
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
 		controlState = 3;
+		moving = true;
 	}
+
+	thumping.SetParameter("Moving", (int)moving);
 
 	Collision2D& collider = entity.get<Collision2D>();
 

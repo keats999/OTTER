@@ -32,7 +32,6 @@
 #include "Utilities/MapManager.h"
 #include "Utilities/Collision2D.h"
 #include "Utilities/PhysicsWorld.h"
-#include "Utilities/AudioEngine.h"
 
 #define NUM_TREES 300
 #define NUM_ROCKS 40
@@ -616,15 +615,15 @@ int main() {
 		engine.LoadBank("Master.strings");
 		
 		// Add sound events
-		AudioEvent& music = engine.CreateSound("music", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}"); // Right-click event in fmod -> copy GUID
-		music.Play();
+		AudioEvent& thumping = engine.CreateSound("thump", "event:/Thump"); // Right-click event in fmod -> copy path
+		thumping.Play();
 		
 		//add modifiers to the sounds (can be done dynamically)
-		music.SetParameter("Underwater", 1.0f);
-		engine.SetGlobalParameter("Timewarp", 0.0f);
+		thumping.SetParameter("Moving", 0);
 		
 		// Get ref to Listener
 		AudioListener& listener = engine.GetListener(); // Can use this listener to change the player's 3D position
+		listener.SetUp(cameraObject.get<Camera>().GetUp());
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 
 		// Initialize our timing instance and grab a reference for our use
@@ -668,6 +667,9 @@ int main() {
 					}
 				}
 			});
+			listener.SetForward(cameraObject.get<Camera>().GetForward());
+			listener.SetPosition(cameraObject.get<Camera>().GetPosition());
+			thumping.SetPosition(cameraObject.get<Camera>().GetPosition());
 			pworld->Update(time.DeltaTime);
 			// Clear the screen
 			testBuffer->Clear();

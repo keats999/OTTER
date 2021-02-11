@@ -2,6 +2,7 @@
 #include <SimpleMoveBehaviour.h>
 #include <Box2D/box2d.h>
 #include "Utilities/Collision2D.h"
+#include "Utilities/AudioEngine.h"
 #include "GLFW/glfw3.h"
 #include "Application.h"
 
