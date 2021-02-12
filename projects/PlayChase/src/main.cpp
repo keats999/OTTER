@@ -458,13 +458,13 @@ int main() {
 			BehaviourBinding::Bind<PlayerBehaviour>(player);
 		}
 
-		GameObject obj2 = scene->CreateEntity("monkey_quads");
+		GameObject enemy = scene->CreateEntity("monkey_quads");
 		{
 			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/monkey_quads.obj");
-			obj2.emplace<RendererComponent>().SetMesh(vao).SetMaterial(stoneMat);
-			obj2.get<Transform>().SetLocalPosition(0.0f, 0.0f, 2.0f);
-			obj2.get<Transform>().SetLocalRotation(0.0f, 0.0f, -90.0f);
-			BehaviourBinding::BindDisabled<SimpleMoveBehaviour>(obj2);
+			enemy.emplace<RendererComponent>().SetMesh(vao).SetMaterial(stoneMat);
+			enemy.get<Transform>().SetLocalPosition(0.0f, 0.0f, 2.0f);
+			enemy.get<Transform>().SetLocalRotation(0.0f, 0.0f, -90.0f);
+			BehaviourBinding::BindDisabled<SimpleMoveBehaviour>(enemy);
 		}
 
 		// Create an object to be our camera
@@ -615,20 +615,28 @@ int main() {
 		engine.LoadBank("Master.strings");
 		
 		// Add sound events
-		AudioEvent& thumping = engine.CreateSound("thump", "event:/Thump"); // Right-click event in fmod -> copy path
-		thumping.Play();
+		AudioEvent& music = engine.CreateSound("Music", "event:/BM");// Right-click event in fmod -> copy path
+		music.Play();
+		AudioEvent& playerThumping = engine.CreateSound("Player Thumping", "event:/Thump");
+		playerThumping.Play();
+		//AudioEvent& enemyThumping = engine.CreateSound("Enemy Thumping", "event:/Thump");  // Dont do anything to this sound yet because we dont have the right model for it
+		AudioEvent& enemyScratching = engine.CreateSound("Enemy Scratching", "event:/Scratching");
+		enemyScratching.Play();
+		AudioEvent& enemyAmbient = engine.CreateSound("Enemy Ambient", "event:/Clown Ambient");
 		
 		//add modifiers to the sounds (can be done dynamically)
-		thumping.SetParameter("Moving", 0);
+		playerThumping.SetParameter("Moving", 0);
+		enemyScratching.SetParameter("Moving", 1);
 		
 		// Get ref to Listener
 		AudioListener& listener = engine.GetListener(); // Can use this listener to change the player's 3D position
-		listener.SetUp(cameraObject.get<Camera>().GetUp());
+		listener.SetUp(glm::vec3(0.0f, 1.0f, 0.0f));
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 
 		// Initialize our timing instance and grab a reference for our use
 		Timing& time = Timing::Instance();
 		time.LastFrame = glfwGetTime();
+		float ambientTimer = 20.0f;
 
 		///// Game loop /////
 		while (!glfwWindowShouldClose(BackendHandler::window)) {
@@ -669,7 +677,17 @@ int main() {
 			});
 			listener.SetForward(cameraObject.get<Camera>().GetForward());
 			listener.SetPosition(cameraObject.get<Camera>().GetPosition());
-			thumping.SetPosition(cameraObject.get<Camera>().GetPosition());
+			music.SetPosition(cameraObject.get<Camera>().GetPosition());
+			playerThumping.SetPosition(cameraObject.get<Camera>().GetPosition());
+			enemyScratching.SetPosition(player.get<Transform>().GetLocalPosition());
+			enemyAmbient.SetPosition(player.get<Transform>().GetLocalPosition());
+			if (ambientTimer <= 0.0f)
+			{
+					ambientTimer = 20.0f;
+					enemyAmbient.Play();
+			}
+			else
+				ambientTimer -= time.DeltaTime;
 			pworld->Update(time.DeltaTime);
 			// Clear the screen
 			testBuffer->Clear();

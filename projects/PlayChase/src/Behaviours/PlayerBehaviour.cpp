@@ -8,7 +8,7 @@ void PlayerBehaviour::Update(entt::handle entity)
 	int controlState = 0;
 
 	AudioEngine& engine = AudioEngine::Instance();
-	AudioEvent& thumping = engine.GetEvent("thump");
+	AudioEvent& thumping = engine.GetEvent("Player Thumping");
 	bool moving = false;
 
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
