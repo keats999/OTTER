@@ -615,7 +615,7 @@ int main() {
 		engine.LoadBank("Master.strings");
 		
 		// Add sound events
-		AudioEvent& music = engine.CreateSound("Music", "event:/BM");// Right-click event in fmod -> copy path
+		AudioEvent& music = engine.CreateSound("Music", "event:/BGM");// Right-click event in fmod -> copy path
 		music.Play();
 		AudioEvent& playerThumping = engine.CreateSound("Player Thumping", "event:/Thump");
 		playerThumping.Play();
