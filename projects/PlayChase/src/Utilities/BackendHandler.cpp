@@ -85,7 +85,7 @@ bool BackendHandler::InitGLFW()
 #endif
 
 	//Create a new GLFW window
-	window = glfwCreateWindow(800, 800, "INFR1350U", nullptr, nullptr);
+	window = glfwCreateWindow(800, 800, "Play Chase", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 
 	// Set our window resized callback
@@ -187,6 +187,12 @@ void BackendHandler::RenderVAO(const Shader::sptr& shader, const VertexArrayObje
 	shader->SetUniformMatrix("u_ModelViewProjection", viewProjection * transform.WorldTransform());
 	shader->SetUniformMatrix("u_Model", transform.WorldTransform());
 	shader->SetUniformMatrix("u_NormalMatrix", transform.WorldNormalMatrix());
+	vao->Render();
+}
+
+void BackendHandler::RenderGUI(const Shader::sptr& shader, const VertexArrayObject::sptr& vao, const Transform& transform)
+{
+	shader->SetUniformMatrix("u_Model", transform.WorldTransform());
 	vao->Render();
 }
 

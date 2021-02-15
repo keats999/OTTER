@@ -5,6 +5,8 @@
 #include "Utilities/AudioEngine.h"
 #include "GLFW/glfw3.h"
 #include "Application.h"
+#include "Shader.h"
+#include "Transform.h"
 
 class PlayerBehaviour : public SimpleMoveBehaviour
 {
@@ -13,8 +15,10 @@ public:
 	~PlayerBehaviour() = default;
 
 	void Update(entt::handle entity) override;
+	void SetShader(Shader::sptr& shader) { _shader = shader; }
 
 private:
+	Shader::sptr& _shader = Shader::Create();
 	float _maxForwardSpeed = 5;
 	float _maxBackwardSpeed = -3;
 	float _maxForce = 10;

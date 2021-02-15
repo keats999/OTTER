@@ -28,6 +28,7 @@
 #include <SimpleMoveBehaviour.h>
 #include "Behaviours/PlayerBehaviour.h"
 #include "Behaviours/FirstPersonBehaviour.h"
+#include "Behaviours/EnemyBehaviour.h"
 
 #include "Utilities/MapManager.h"
 #include "Utilities/Collision2D.h"
@@ -70,12 +71,18 @@ int main() {
 		colorCorrectionShader->LoadShaderPartFromFile("shaders/passthrough_vert.glsl", GL_VERTEX_SHADER);
 		colorCorrectionShader->LoadShaderPartFromFile("shaders/Post/color_correction_frag.glsl", GL_FRAGMENT_SHADER);
 		colorCorrectionShader->Link();
+
+		Shader::sptr uiShader = Shader::Create();
+		uiShader->LoadShaderPartFromFile("shaders/ui_vert.glsl", GL_VERTEX_SHADER);
+		uiShader->LoadShaderPartFromFile("shaders/ui_frag.glsl", GL_FRAGMENT_SHADER);
+		uiShader->Link();
+
 		Shader::sptr shader = Shader::Create();
 		shader->LoadShaderPartFromFile("shaders/vertex_shader.glsl", GL_VERTEX_SHADER);
 		shader->LoadShaderPartFromFile("shaders/frag_blinn_phong_textured.glsl", GL_FRAGMENT_SHADER);
 		shader->Link();
 
-		glm::vec3 lightPos = glm::vec3(0.0f, 0.0f, 5.0f);
+		glm::vec3 lightPos = glm::vec3(0.0f, 4.0f, 0.0f);
 		glm::vec3 lightCol = glm::vec3(0.9f, 0.85f, 0.5f);
 		float     lightAmbientPow = 0.05f;
 		float     lightSpecularPow = 1.0f;
@@ -248,6 +255,8 @@ int main() {
 		Texture2D::sptr red = Texture2D::LoadFromFile("images/red.png");
 		Texture2D::sptr yellow = Texture2D::LoadFromFile("images/yellow.png");
 
+		Texture2D::sptr testUI = Texture2D::LoadFromFile("images/testUI.png");
+
 		// Load the cube map
 		//TextureCubeMap::sptr environmentMap = TextureCubeMap::LoadFromImages("images/cubemaps/skybox/sample.jpg");
 		TextureCubeMap::sptr environmentMap = TextureCubeMap::LoadFromImages("images/cubemaps/skybox/ToonSky.jpg"); 
@@ -310,6 +319,13 @@ int main() {
 		simpleFloraMat->Set("u_Shininess", 8.0f);
 		simpleFloraMat->Set("u_TextureMix", 0.0f);
 
+		ShaderMaterial::sptr testuiMat = ShaderMaterial::Create();
+		simpleFloraMat->Shader = uiShader;
+		simpleFloraMat->Set("s_Diffuse", testUI);
+		simpleFloraMat->Set("s_Specular", noSpec);
+		simpleFloraMat->Set("u_Shininess", 8.0f);
+		simpleFloraMat->Set("u_TextureMix", 0.0f);
+
 		VertexArrayObject::sptr coin = ObjLoader::LoadFromFile("models/coin.obj");
 		std::vector<GameObject> coins;
 		ShaderMaterial::sptr coinMat = ShaderMaterial::Create();
@@ -335,14 +351,14 @@ int main() {
 		glm::vec2 spawn = glm::vec2(0, 0);
 
 		//Call map managing tool and pass level data
-		MapManager::sptr Manager = MapManager::Create();
-		Manager->LoadFromFile("level.lvl");
+		MapManager& Manager = MapManager::Instance();
+		Manager.LoadFromFile("level.lvl");
 
 		//Get map data from the manager
-		auto& map = Manager->GetMap();
-		int x = Manager->GetRows();
-		int y = Manager->GetColumns();
-		int unitsize = Manager->GetUnitS();
+		auto& map = Manager.GetMap();
+		int x = Manager.GetRows();
+		int y = Manager.GetColumns();
+		int unitsize = Manager.GetUnitS();
 
 		//Nested loop to cycle through the 2D array for the map
 		for (int i = 0; i < x; i++) {
@@ -387,7 +403,7 @@ int main() {
 					tubes.push_back(tubee);
 
 					//Pass the location in the array to the manager to get appropriate piece
-					glm::vec2 tubeData = Manager->GetTube(glm::vec2(i, j));
+					glm::vec2 tubeData = Manager.GetTube(glm::vec2(i, j));
 					switch (int(tubeData.x)) {
 					case 1:
 						tubee.emplace<RendererComponent>().SetMesh(tubestr).SetMaterial(tMat);
@@ -433,7 +449,7 @@ int main() {
 					}
 				}
 				else if (map[i][j] == 0) {
-					GameObject walle = scene->CreateEntity("wall");
+					GameObject walle = scene->CreateEntity("Wall");
 					walls.push_back(walle);
 					auto& wallCol = walle.emplace<Collision2D>(pworld->World());
 					//wallCol.getBody()->SetUserData(&walle);
@@ -446,7 +462,7 @@ int main() {
 
 
 
-		GameObject player = scene->CreateEntity("player");
+		GameObject player = scene->CreateEntity("Player");
 		{
 			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
 			player.emplace<RendererComponent>().SetMesh(vao).SetMaterial(stoneMat);
@@ -456,6 +472,19 @@ int main() {
 			//playerCol.getBody()->SetAngularDamping(1.0);
 			playerCol.getBody()->SetLinearDamping(1.0);
 			BehaviourBinding::Bind<PlayerBehaviour>(player);
+			BehaviourBinding::Get<PlayerBehaviour>(player)->SetShader(shader);
+		}
+
+		GameObject enemy = scene->CreateEntity("Enemy");
+		{
+			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/monkey_quads.obj");
+			enemy.emplace<RendererComponent>().SetMesh(vao).SetMaterial(stoneMat);
+			auto& enemyCol = enemy.emplace<Collision2D>(pworld->World());
+			enemyCol.CreateDynamicBox(glm::vec2(0,0), glm::vec2(2, 2));
+			enemyCol.getBody()->SetUserData(&enemy);
+			//enemyCol.getBody()->SetLinearDamping(1.0);
+			BehaviourBinding::Bind<EnemyBehaviour>(enemy);
+			BehaviourBinding::Get<EnemyBehaviour>(enemy)->SetTarget(player);
 		}
 
 		GameObject enemy = scene->CreateEntity("monkey_quads");
@@ -518,7 +547,7 @@ int main() {
 		GameObject customColorCorrectionObj = scene->CreateEntity("Color Correct Inverted");
 		{
 			ColorCorrection* customColorCorrectEffect = &customColorCorrectionObj.emplace<ColorCorrection>();
-			customColorCorrectEffect->filename = "cubes/inverted_color_correction.cube";
+			customColorCorrectEffect->filename = "cubes/custom.cube";
 			customColorCorrectEffect->Init(width, height);
 		}
 		effects.push_back(customColorCorrectionObj);

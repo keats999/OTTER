@@ -5,6 +5,11 @@
 void PlayerBehaviour::Update(entt::handle entity)
 {
 	GLFWwindow* window = Application::Instance().Window;
+	
+	Transform& playerT = entity.get<Transform>();
+
+	_shader->SetUniform("u_LightPos",glm::vec3(playerT.GetLocalPosition().x, 4.0 , playerT.GetLocalPosition().z));
+	
 	int controlState = 0;
 
 	AudioEngine& engine = AudioEngine::Instance();

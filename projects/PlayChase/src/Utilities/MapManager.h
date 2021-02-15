@@ -35,9 +35,12 @@ public:
 		return std::make_shared<MapManager>();
 	}
 public:
+	static MapManager& Instance() {
+		static MapManager instance;
+		return instance;
+	}
 	MapManager() = default;
 	~MapManager() = default;
-	
 	void LoadFromFile(const std::string& filename);
 	
 	std::vector<std::vector<int>>& GetMap() { return mapdata; }
@@ -55,7 +58,7 @@ public:
 	glm::vec3 PosToTrns(glm::vec2 pos);
 	std::vector<glm::vec3> NodeListToVecList(std::vector<Node> nodes);
 	
-private:
+protected:
 	int row = 0, col = 0;
 	int unitsize = 2;
 	bool init = false;
