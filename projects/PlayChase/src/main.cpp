@@ -116,6 +116,13 @@ int main() {
 
 		int activeEffect = 0;
 		std::vector<GameObject> effects;
+		
+		GreyscaleEffect* greyscaleEffect;
+
+		BloomEffect* bloomEffect;
+
+		int activePost = 0;
+		std::vector<PostEffect*> post;
 		bool ramp=0;
 	
 		int width, height;
@@ -127,40 +134,72 @@ int main() {
 			if (ImGui::Button("No Lighting")) {
 				mode = 1;
 				shader->SetUniform("u_Mode", mode);
+				activePost = 0;
+
 			}
 			
 			if (ImGui::Button("Ambient Only")) {
 				mode = 2;
 				shader->SetUniform("u_Mode", mode);
+				activePost = 0;
+
 			}
 			
 			if (ImGui::Button("Specular Only")) {
 				mode = 3;
 				shader->SetUniform("u_Mode", mode);
+				activePost = 0;
+
 			}
 			
 			if (ImGui::Button("Ambient + Specular")) {
 				mode = 0;
 				shader->SetUniform("u_Mode", mode);
+				activePost = 0;
+
 			}
 
 			if (ImGui::Button("Ambient + Specular + Custom")) {
 				mode = 4;
 				shader->SetUniform("u_Mode", mode);
+				activePost = 0;
+
 			}
-			
+			if (ImGui::Button("Ambient + Specular + Bloom")) {
+				mode = 7;
+				shader->SetUniform("u_Mode", mode);
+				activePost = 1;
+			}
 			if (ImGui::Button("Diffuse Ramp")) {
 				mode = 5;
 				shader->SetUniform("u_Mode", mode);
 					shader->SetUniform("s_RampTexture", 1);
+					activePost = 0;
+
 			}
 			
 			if (ImGui::Button("Specular Ramp")) {
 				mode = 6;
 				shader->SetUniform("u_Mode", mode);
 					shader->SetUniform("s_RampTexture", 1);
+					activePost = 0;
+
 			}
-			
+			if (ImGui::CollapsingHeader("Effect controls")) {
+				BloomEffect* temp = (BloomEffect*)post[activePost];
+				float threshold = temp->GetThreshold();
+				int pass = temp->GetPasses();
+
+				if (ImGui::SliderFloat("Brightness Threshold", &threshold, 0.0f, 1.0f))
+				{
+					temp->SetThreshold(threshold);
+				}
+
+				if (ImGui::SliderInt("Blur", &pass, 0, 10))
+				{
+					temp->SetPasses(pass);
+				}
+			}
 			if (ImGui::Button("Color Grading Warm")) {
 				if (activeEffect == 1)
 					activeEffect = 0;
@@ -547,6 +586,20 @@ int main() {
 		}
 		effects.push_back(customColorCorrectionObj);
 
+		GameObject greyscaleEffectObject = scene->CreateEntity("greyscale Effect");
+		{
+			greyscaleEffect = &greyscaleEffectObject.emplace<GreyscaleEffect>();
+			greyscaleEffect->Init(width, height);
+		}
+		post.push_back(greyscaleEffect);
+
+		GameObject bloomEffectObject = scene->CreateEntity("Bloom Effect");
+		{
+			bloomEffect = &bloomEffectObject.emplace<BloomEffect>();
+			bloomEffect->Init(width, height);
+		}
+		post.push_back(bloomEffect);
+
 		#pragma endregion 
 		//////////////////////////////////////////////////////////////////////////////////////////
 
@@ -719,6 +772,10 @@ int main() {
 			{
 				effects[i].get<ColorCorrection>().Clear();
 			}
+			for (int i = 0; i < post.size(); i++)
+			{
+				post[i]->Clear();
+			}
 
 			glClearColor(0.08f, 0.17f, 0.31f, 1.0f);
 			glEnable(GL_DEPTH_TEST);
@@ -783,6 +840,9 @@ int main() {
 			ColorCorrection currentEffect = effects[activeEffect].get<ColorCorrection>();
 			currentEffect.ApplyEffect(testBuffer);
 			currentEffect.DrawToScreen();
+
+			post[activePost]->ApplyEffect(testBuffer);
+			post[activePost]->DrawToScreen();
 			// Draw our ImGui content
 			BackendHandler::RenderImGui();
 
