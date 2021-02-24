@@ -294,6 +294,7 @@ int main() {
 		Texture2D::sptr box = Texture2D::LoadFromFile("images/box.bmp");
 		Texture2D::sptr boxSpec = Texture2D::LoadFromFile("images/box-reflections.bmp");
 		Texture2D::sptr simpleFlora = Texture2D::LoadFromFile("images/SimpleFlora.png");
+		Texture2D::sptr coin = Texture2D::LoadFromFile("images/coin.png");
 
 		Texture2D::sptr blue = Texture2D::LoadFromFile("images/blue.png");
 		Texture2D::sptr green = Texture2D::LoadFromFile("images/green.png");
@@ -372,11 +373,11 @@ int main() {
 		simpleFloraMat->Set("u_Shininess", 8.0f);
 		simpleFloraMat->Set("u_TextureMix", 0.0f);
 
-		VertexArrayObject::sptr coin = ObjLoader::LoadFromFile("models/coin.obj");
+		VertexArrayObject::sptr coinvao = ObjLoader::LoadFromFile("models/coin.obj");
 		std::vector<GameObject> coins;
 		ShaderMaterial::sptr coinMat = ShaderMaterial::Create();
 		coinMat->Shader = shader;
-		coinMat->Set("s_Diffuse", yellow);
+		coinMat->Set("s_Diffuse", coin);
 		coinMat->Set("s_Specular", noSpec);
 		coinMat->Set("u_Shininess", 8.0f);
 		coinMat->Set("u_TextureMix", 0.0f);
@@ -488,7 +489,7 @@ int main() {
 					if (r == 3 && canspawn) {
 						GameObject coine = scene->CreateEntity("Coin");
 						coins.push_back(coine);
-						coine.emplace<RendererComponent>().SetMesh(coin).SetMaterial(coinMat);
+						coine.emplace<RendererComponent>().SetMesh(coinvao).SetMaterial(coinMat);
 						auto& coinCol = coine.emplace<Collision2D>(pworld->World());
 						coinCol.CreateStaticSensor(glm::vec2(coord1, coord2), glm::vec2(unitsize / 2, unitsize / 2));
 						coinCol.getBody()->SetUserData(&coine);
