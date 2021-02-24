@@ -30,6 +30,8 @@
 #include "Behaviours/FirstPersonBehaviour.h"
 #include "Behaviours/EnemyBehaviour.h"
 
+#include "Utilities/Trigger.h"
+
 #include "Utilities/MapManager.h"
 #include "Utilities/Collision2D.h"
 #include "Utilities/PhysicsWorld.h"
@@ -491,8 +493,10 @@ int main() {
 						coins.push_back(coine);
 						coine.emplace<RendererComponent>().SetMesh(coinvao).SetMaterial(coinMat);
 						auto& coinCol = coine.emplace<Collision2D>(pworld->World());
-						coinCol.CreateStaticSensor(glm::vec2(coord1, coord2), glm::vec2(unitsize / 2, unitsize / 2));
-						coinCol.getBody()->SetUserData(&coine);
+						coinCol.CreateStaticBox(glm::vec2(coord1, coord2), glm::vec2(unitsize / 2, unitsize / 2), PICKUP, PLAYER);
+						coinCol.getFixture()->SetSensor(true);
+						coinCol.getFixture()->SetEntity(coine.entity());
+						coine.emplace<Trigger>();
 						auto& coinT = coine.get<Transform>();
 						coinT.SetLocalPosition(coord1, 0, coord2);
 						coinT.SetLocalRotation(90, 0, 90);
@@ -504,7 +508,7 @@ int main() {
 					walls.push_back(walle);
 					auto& wallCol = walle.emplace<Collision2D>(pworld->World());
 					//wallCol.getBody()->SetUserData(&walle);
-					wallCol.CreateStaticBox(glm::vec2(coord1, coord2), glm::vec2(unitsize / 2, unitsize / 2));
+					wallCol.CreateStaticBox(glm::vec2(coord1, coord2), glm::vec2(unitsize / 2, unitsize / 2), ENVIRONMENT, PLAYER);
 				auto& wallT = walle.get<Transform>();
 					wallT.SetLocalPosition(coord1, 0, coord2);
 				}
@@ -518,8 +522,7 @@ int main() {
 			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
 			player.emplace<RendererComponent>().SetMesh(vao).SetMaterial(stoneMat);
 			auto& playerCol = player.emplace<Collision2D>(pworld->World());
-			playerCol.CreateDynamicBox(spawn, glm::vec2(2, 2));
-			playerCol.getBody()->SetUserData(&player);
+			playerCol.CreateDynamicBox(spawn, glm::vec2(2, 2), PLAYER, ENVIRONMENT|INTERACTABLE|OBJECT|ENEMY|PICKUP|TRIGGER);
 			//playerCol.getBody()->SetAngularDamping(1.0);
 			playerCol.getBody()->SetLinearDamping(1.0);
 			BehaviourBinding::Bind<PlayerBehaviour>(player);
@@ -531,10 +534,11 @@ int main() {
 			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/rat.obj");
 			enemy.emplace<RendererComponent>().SetMesh(vao).SetMaterial(grassMat);
 			auto& enemyCol = enemy.emplace<Collision2D>(pworld->World());
-			enemyCol.CreateDynamicBox(enemySpawn, glm::vec2(2, 2));
+			enemyCol.CreateDynamicBox(enemySpawn, glm::vec2(2, 2), ENEMY, PLAYER);
 			enemyCol.getBody()->SetUserData(&enemy);
+			enemyCol.getFixture()->SetSensor(true);
+			enemyCol.getFixture()->SetEntity(enemy.entity());
 			enemy.get<Transform>().SetLocalScale(0.5f, 0.5f, 0.5f);
-			//enemyCol.getBody()->SetLinearDamping(1.0);
 			BehaviourBinding::Bind<EnemyBehaviour>(enemy);
 			BehaviourBinding::Get<EnemyBehaviour>(enemy)->SetTarget(player);
 		}

@@ -1,21 +1,26 @@
 #pragma once
 #include <Box2D/box2d.h>
 #include <GLM/glm.hpp>
+#include <entt.hpp>
 #include <memory>
 
-enum  _type {
-	WALL,
-	PLAYER,
-	BUL,
+enum CollisionLayer
+{
+	ENVIRONMENT = 0x0001,
+	INTERACTABLE = 0x0002,
+	PLAYER = 0x0003,
+	OBJECT = 0x0004,
+	ENEMY = 0x0005,
+	PICKUP = 0x0006,
+	TRIGGER = 0x0007
 };
 class Collision2D {
 public:
 	Collision2D(b2World* wrld) : world(wrld) {}
 	~Collision2D();
 
-	void CreateDynamicBox(const glm::vec2& position, const glm::vec2& dimensions);
-	void CreateStaticBox(const glm::vec2& position, const glm::vec2& dimensions);
-	void CreateStaticSensor(const glm::vec2& position, const glm::vec2& dimensions);
+	void CreateDynamicBox(const glm::vec2& position, const glm::vec2& dimensions, CollisionLayer layer, int collisions);
+	void CreateStaticBox(const glm::vec2& position, const glm::vec2& dimensions, CollisionLayer layer, int collisions);
 
 	b2Vec2 GetLateralVelocity();
 

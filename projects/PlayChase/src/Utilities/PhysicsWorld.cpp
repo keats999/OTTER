@@ -5,6 +5,8 @@ PhysicsWorld::PhysicsWorld(GameScene::sptr scene)
 	_scene = scene;
 	//Create new Box2D world with 0 gravity
 	_world = std::make_unique<b2World>(b2Vec2(0.0f, 0.0f));
+	_listener = new ContactListener(scene);
+	_world->SetContactListener(_listener);
 }
 void PhysicsWorld::Update(float dt)
 {

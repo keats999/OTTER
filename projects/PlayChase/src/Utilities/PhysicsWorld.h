@@ -1,6 +1,7 @@
 #pragma once
 #include <Scene.h>
 #include "Utilities/Collision2D.h"
+#include "Utilities/ContactListener.h"
 #include <Box2D/box2d.h>
 #include <Transform.h>
 
@@ -25,4 +26,5 @@ public:
 private:
 	std::unique_ptr<b2World> _world;
 	std::shared_ptr<GameScene> _scene;
+	ContactListener* _listener;
 };

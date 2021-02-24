@@ -43,7 +43,7 @@ void PlayerBehaviour::Update(entt::handle entity)
 	case 4: desiredSpeed = _maxBackwardSpeed; break;
 	case 1:  desiredTorque = -10.0;  break;
 	case 2: desiredTorque = 10.0; break;
-	default: return;//do nothing
+	default: collider.updateFriction(); return;//do nothing
 	}
 
 	//find current speed in forward direction

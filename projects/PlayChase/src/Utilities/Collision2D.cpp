@@ -7,7 +7,7 @@ Collision2D::~Collision2D()
 }
 
 
-void Collision2D::CreateDynamicBox(const glm::vec2& position, const glm::vec2& dimensions)
+void Collision2D::CreateDynamicBox(const glm::vec2& position, const glm::vec2& dimensions, CollisionLayer layer, int collisions)
 {
 	//Dynamic box construction (for moving solid bodies)
 	//Create body definition
@@ -25,10 +25,12 @@ void Collision2D::CreateDynamicBox(const glm::vec2& position, const glm::vec2& d
 	fixtureDef.shape = &boxShape;
 	fixtureDef.density = 1.0f;
 	fixtureDef.friction = 0.3f;
-	fixtureDef.filter.groupIndex = -1;
+	fixtureDef.filter.categoryBits = layer;
+	fixtureDef.filter.maskBits = collisions;
+	fixtureDef.isSensor = false;
 	fixture = body->CreateFixture(&fixtureDef);
 }
-void Collision2D::CreateStaticBox(const glm::vec2& position, const glm::vec2& dimensions)
+void Collision2D::CreateStaticBox(const glm::vec2& position, const glm::vec2& dimensions, CollisionLayer layer, int collisions)
 {
 	//Static box construction (for unmoving solid bodies)
 	//Create body definition
@@ -46,32 +48,12 @@ void Collision2D::CreateStaticBox(const glm::vec2& position, const glm::vec2& di
 	fixtureDef.shape = &boxShape;
 	fixtureDef.density = 1.0f;
 	fixtureDef.friction = 0.3f;
-	fixtureDef.filter.groupIndex = 0;
+	fixtureDef.filter.categoryBits = layer;
+	fixtureDef.filter.maskBits = collisions;
+	fixtureDef.isSensor = false;
 	fixture = body->CreateFixture(&fixtureDef);
 }
-void Collision2D::CreateStaticSensor(const glm::vec2& position, const glm::vec2& dimensions)
-{
-	//Static sensor box construction (for non-solid collision areas)
-	//Create body definition
-	b2BodyDef bodyDef;
-	bodyDef.type = b2_staticBody;
-	bodyDef.position.Set(position.x, position.y);
-	body = world->CreateBody(&bodyDef);
 
-	//Create collision shape
-	b2PolygonShape boxShape;
-	boxShape.SetAsBox(dimensions.x / 2.0f, dimensions.y / 2.0);
-
-	//Create fixture definition
-	b2FixtureDef fixtureDef;
-	fixtureDef.shape = &boxShape;
-	fixtureDef.density = 1.0f;
-	fixtureDef.friction = 0.3f;
-	fixtureDef.filter.groupIndex = 0;
-	fixtureDef.isSensor = true;
-	fixture = body->CreateFixture(&fixtureDef);
-	
-}
 b2Vec2 Collision2D::GetLateralVelocity() {
 	b2Vec2 currentRightNormal = body->GetWorldVector(b2Vec2(1, 0));
 	return b2Dot(currentRightNormal, body->GetLinearVelocity()) * currentRightNormal;
@@ -135,6 +117,6 @@ void Collision2D::Shoot() {
 
 }
 void Collision2D::RemoveBody() {
-	world->DestroyBody(body);
-	body = nullptr;
+	if(body != nullptr)
+		world->DestroyBody(body);
 }

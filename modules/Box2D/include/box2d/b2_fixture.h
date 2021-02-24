@@ -23,6 +23,8 @@
 #ifndef B2_FIXTURE_H
 #define B2_FIXTURE_H
 
+#include <entt.hpp>
+
 #include "b2_api.h"
 #include "b2_body.h"
 #include "b2_collision.h"
@@ -77,6 +79,8 @@ struct B2_API b2FixtureDef
 
 	/// Use this to store application specific fixture data.
 	b2FixtureUserData userData;
+
+	entt::entity entity{ entt::null };
 
 	/// The friction coefficient, usually in the range [0,1].
 	float friction;
@@ -157,6 +161,10 @@ public:
 	/// Get the user data that was assigned in the fixture definition. Use this to
 	/// store your application specific data.
 	b2FixtureUserData& GetUserData();
+
+	entt::entity GetEntity();
+
+	void SetEntity(entt::entity e);
 
 	/// Test a point for containment in this fixture.
 	/// @param p a point in world coordinates.
@@ -248,6 +256,8 @@ protected:
 	bool m_isSensor;
 
 	b2FixtureUserData m_userData;
+
+	entt::entity m_entity;
 };
 
 inline b2Shape::Type b2Fixture::GetType() const
@@ -279,7 +289,14 @@ inline b2FixtureUserData& b2Fixture::GetUserData()
 {
 	return m_userData;
 }
-
+inline entt::entity b2Fixture::GetEntity()
+{
+	return m_entity;
+}
+inline void b2Fixture::SetEntity(entt::entity e)
+{
+	m_entity = e;
+}
 inline b2Body* b2Fixture::GetBody()
 {
 	return m_body;
