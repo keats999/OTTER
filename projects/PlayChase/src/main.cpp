@@ -349,6 +349,7 @@ int main() {
 		std::vector<GameObject> walls;
 
 		glm::vec2 spawn = glm::vec2(0, 0);
+		glm::vec2 enemySpawn = glm::vec2(0, 0);
 
 		//Call map managing tool and pass level data
 		MapManager& Manager = MapManager::Instance();
@@ -428,6 +429,9 @@ int main() {
 					if (pspawn) {
 						spawn = glm::vec2(coord1, coord2);
 					}
+					else if (!pspawn && enemySpawn == glm::vec2(0, 0)) {
+						enemySpawn = glm::vec2(coord1, coord2);
+					}
 					
 					//Set tubing orientation based on coordinates and rotation data given by the manager
 					auto& tubeT = tubee.get<Transform>();
@@ -454,7 +458,7 @@ int main() {
 					auto& wallCol = walle.emplace<Collision2D>(pworld->World());
 					//wallCol.getBody()->SetUserData(&walle);
 					wallCol.CreateStaticBox(glm::vec2(coord1, coord2), glm::vec2(unitsize / 2, unitsize / 2));
-					auto& wallT = walle.get<Transform>();
+				auto& wallT = walle.get<Transform>();
 					wallT.SetLocalPosition(coord1, 0, coord2);
 				}
 			}
@@ -478,9 +482,9 @@ int main() {
 		GameObject enemy = scene->CreateEntity("Enemy");
 		{
 			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/monkey_quads.obj");
-			enemy.emplace<RendererComponent>().SetMesh(vao).SetMaterial(stoneMat);
+			enemy.emplace<RendererComponent>().SetMesh(vao).SetMaterial(grassMat);
 			auto& enemyCol = enemy.emplace<Collision2D>(pworld->World());
-			enemyCol.CreateDynamicBox(glm::vec2(0,0), glm::vec2(2, 2));
+			enemyCol.CreateDynamicBox(enemySpawn, glm::vec2(2, 2));
 			enemyCol.getBody()->SetUserData(&enemy);
 			//enemyCol.getBody()->SetLinearDamping(1.0);
 			BehaviourBinding::Bind<EnemyBehaviour>(enemy);
@@ -699,8 +703,8 @@ int main() {
 			listener.SetPosition(cameraObject.get<Camera>().GetPosition());
 			music.SetPosition(cameraObject.get<Camera>().GetPosition());
 			playerThumping.SetPosition(cameraObject.get<Camera>().GetPosition());
-			enemyScratching.SetPosition(player.get<Transform>().GetLocalPosition());
-			enemyAmbient.SetPosition(player.get<Transform>().GetLocalPosition());
+			enemyScratching.SetPosition(enemy.get<Transform>().GetLocalPosition());
+			enemyAmbient.SetPosition(enemy.get<Transform>().GetLocalPosition());
 			if (ambientTimer <= 0.0f)
 			{
 					ambientTimer = 20.0f;
