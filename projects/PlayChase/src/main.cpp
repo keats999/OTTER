@@ -339,7 +339,7 @@ int main() {
 		// Create a material and set some properties for it
 		ShaderMaterial::sptr stoneMat = ShaderMaterial::Create();  
 		stoneMat->Shader = shader;
-		//stoneMat->Set("s_Diffuse", stone);
+		stoneMat->Set("s_Diffuse", stone);
 		stoneMat->Set("s_Specular", stoneSpec);
 		stoneMat->Set("u_Shininess", 2.0f);
 		stoneMat->Set("u_TextureMix", 0.0f); 
@@ -527,11 +527,12 @@ int main() {
 
 		GameObject enemy = scene->CreateEntity("Enemy");
 		{
-			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/monkey_quads.obj");
+			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/rat.obj");
 			enemy.emplace<RendererComponent>().SetMesh(vao).SetMaterial(grassMat);
 			auto& enemyCol = enemy.emplace<Collision2D>(pworld->World());
 			enemyCol.CreateDynamicBox(enemySpawn, glm::vec2(2, 2));
 			enemyCol.getBody()->SetUserData(&enemy);
+			enemy.get<Transform>().SetLocalScale(0.5f, 0.5f, 0.5f);
 			//enemyCol.getBody()->SetLinearDamping(1.0);
 			BehaviourBinding::Bind<EnemyBehaviour>(enemy);
 			BehaviourBinding::Get<EnemyBehaviour>(enemy)->SetTarget(player);
