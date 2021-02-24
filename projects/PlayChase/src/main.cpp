@@ -91,6 +91,7 @@ int main() {
 		float     lightLinearFalloff = 0.09f;
 		float     lightQuadraticFalloff = 0.032f;
 		int		  mode = 0;
+		bool	  textures = true;
 
 		Texture2DData::sptr rampImage = Texture2DData::LoadFromFile("images/Ramp.png");
 		Texture2D::sptr texRamp = Texture2D::Create();
@@ -109,6 +110,7 @@ int main() {
 		shader->SetUniform("u_LightAttenuationLinear", lightLinearFalloff);
 		shader->SetUniform("u_LightAttenuationQuadratic", lightQuadraticFalloff);
 		shader->SetUniform("u_Mode", mode);
+		shader->SetUniform("u_Textures", textures);
 		
 		shader->SetUniform("s_RampTexture", 1);
 
@@ -219,6 +221,11 @@ int main() {
 					activeEffect = 0;
 				else
 					activeEffect = 3;
+			}
+
+			if (ImGui::Button("Toggle Textures")) {
+				textures = !textures;
+				shader->SetUniform("u_Textures", (int)textures);
 			}
 			/*if (ImGui::CollapsingHeader("Scene Level Lighting Settings"))
 			{
@@ -332,7 +339,7 @@ int main() {
 		// Create a material and set some properties for it
 		ShaderMaterial::sptr stoneMat = ShaderMaterial::Create();  
 		stoneMat->Shader = shader;
-		stoneMat->Set("s_Diffuse", stone);
+		//stoneMat->Set("s_Diffuse", stone);
 		stoneMat->Set("s_Specular", stoneSpec);
 		stoneMat->Set("u_Shininess", 2.0f);
 		stoneMat->Set("u_TextureMix", 0.0f); 

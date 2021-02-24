@@ -28,6 +28,7 @@ uniform float u_TextureMix;
 uniform vec3  u_CamPos;
 
 uniform int u_Mode;
+uniform int u_Textures;
 
 //cel shading
 uniform float lightIntensity = 10.0;
@@ -83,6 +84,10 @@ void main() {
 	vec4 textureColor = mix(textureColor1, textureColor2, u_TextureMix);
 
 	vec3 result = inColor * textureColor.rgb;
+	if (u_Textures == 1)
+	{
+		result = vec3(1.0, 1.0, 1.0);
+	}
 
 	if(u_Mode == 1)
 	{
@@ -93,13 +98,13 @@ void main() {
 		result = (
 		(u_AmbientCol * u_AmbientStrength) + // global ambient light
 		(ambient) * attenuation // light factors from our single light
-		) * inColor * textureColor.rgb; // Object color
+		) * result; // Object color
 	}
 	else if(u_Mode == 3)
 	{
 		result = (
 		(diffuse + specular) * attenuation // light factors from our single light
-		) * inColor * textureColor.rgb; // Object color
+		) * result; // Object color
 	}
 	else if(u_Mode == 4)
 	{
@@ -114,7 +119,7 @@ void main() {
 		result = (
 		(u_AmbientCol * u_AmbientStrength) + // global ambient light
 		(ambient + (diffuseOut*edge) + specular) * attenuation // light factors from our single light
-		) * inColor * textureColor.rgb; // Object color
+		) * result; // Object color
 	}
 	else if(u_Mode == 5)
 	{
@@ -123,7 +128,7 @@ void main() {
 		result = (
         (u_AmbientCol * u_AmbientStrength) + // global ambient light
         (ambient + (diffuse*rampColor.rgb) + specular) * attenuation // light factors from our single light
-        ) * inColor * textureColor.rgb *rampColor.rgb;
+        ) * result *rampColor.rgb;
 	}
 	else if(u_Mode == 6)
 	{
@@ -132,14 +137,14 @@ void main() {
 		result = (
         (u_AmbientCol * u_AmbientStrength) + // global ambient light
         (ambient + diffuse + (specular*rampColor.rgb)) * attenuation // light factors from our single light
-        ) * inColor * textureColor.rgb *rampColor.rgb;
+        ) * result *rampColor.rgb;
 	}
 	else
 	{
 		result = (
 		(u_AmbientCol * u_AmbientStrength) + // global ambient light
 		(ambient + diffuse + specular) * attenuation // light factors from our single light
-		) * inColor * textureColor.rgb; // Object color	
+		) * result; // Object color	
 	}
 
 	frag_color = vec4(result, textureColor.a);
