@@ -487,15 +487,6 @@ int main() {
 			BehaviourBinding::Get<EnemyBehaviour>(enemy)->SetTarget(player);
 		}
 
-		GameObject enemy = scene->CreateEntity("monkey_quads");
-		{
-			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/monkey_quads.obj");
-			enemy.emplace<RendererComponent>().SetMesh(vao).SetMaterial(stoneMat);
-			enemy.get<Transform>().SetLocalPosition(0.0f, 0.0f, 2.0f);
-			enemy.get<Transform>().SetLocalRotation(0.0f, 0.0f, -90.0f);
-			BehaviourBinding::BindDisabled<SimpleMoveBehaviour>(enemy);
-		}
-
 		// Create an object to be our camera
 		GameObject cameraObject = scene->CreateEntity("Camera");
 		{
