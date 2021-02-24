@@ -4,6 +4,7 @@
 #include "Graphics/Post/GreyscaleEffect.h"
 #include "Graphics/Post/SepiaEffect.h"
 #include "Graphics/Post/ColorCorrection.h"
+#include "Graphics/Post/BloomEffect.h"
 
 #include <iostream>
 #include <Logging.h>
