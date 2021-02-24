@@ -733,6 +733,7 @@ int main() {
 			time.DeltaTime = time.DeltaTime > 1.0f ? 1.0f : time.DeltaTime;
 
 			engine.Update();
+			BehaviourBinding::Get<EnemyBehaviour>(enemy)->Update(enemy);
 
 			// Update our FPS tracker data
 			fpsBuffer[frameIx] = 1.0f / time.DeltaTime;

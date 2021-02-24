@@ -17,7 +17,7 @@ void EnemyBehaviour::Update(entt::handle entity)
 	
 	if (nodeIndex >= nodes.size() - 1 || nodes.size() <= 1)
 	{
-		nodes = MapManager::Instance().aStar(targetpos, transform.GetLocalPosition());
+		nodes = MapManager::Instance().aStar(transform.GetLocalPosition(), targetpos);
 		nodeIndex = 0;
 	}
 	else
