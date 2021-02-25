@@ -8,7 +8,7 @@ void PlayerBehaviour::Update(entt::handle entity)
 	
 	Transform& playerT = entity.get<Transform>();
 
-	_shader->SetUniform("u_LightPos",glm::vec3(playerT.GetLocalPosition().x, 4.0 , playerT.GetLocalPosition().z));
+	_shader->SetUniform("u_LightPos",glm::vec3(playerT.GetLocalPosition().x, -1.0 , playerT.GetLocalPosition().z));
 	
 	int controlState = 0;
 
@@ -41,8 +41,8 @@ void PlayerBehaviour::Update(entt::handle entity)
 	switch (controlState) {
 	case 3:   desiredSpeed = _maxForwardSpeed;  break;
 	case 4: desiredSpeed = _maxBackwardSpeed; break;
-	case 1:  desiredTorque = -10.0;  break;
-	case 2: desiredTorque = 10.0; break;
+	//case 1:  desiredTorque = -10.0;  break;
+	//case 2: desiredTorque = 10.0; break;
 	default: collider.updateFriction(); return;//do nothing
 	}
 

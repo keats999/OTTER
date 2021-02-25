@@ -30,6 +30,8 @@
 #include "Behaviours/FirstPersonBehaviour.h"
 #include "Behaviours/EnemyBehaviour.h"
 
+#include "Utilities/Globals.h"
+
 #include "Utilities/Trigger.h"
 #include "Triggers/CoinTrigger.h"
 
@@ -90,8 +92,8 @@ int main() {
 		float     lightAmbientPow = 0.05f;
 		float     lightSpecularPow = 1.0f;
 		glm::vec3 ambientCol = glm::vec3(1.0f);
-		float     ambientPow = 0.1f;
-		float     lightLinearFalloff = 0.09f;
+		float     ambientPow = 0.025f;
+		float     lightLinearFalloff = 0.9f;
 		float     lightQuadraticFalloff = 0.032f;
 		int		  mode = 0;
 		bool	  textures = true;
@@ -299,6 +301,11 @@ int main() {
 		Texture2D::sptr simpleFlora = Texture2D::LoadFromFile("images/SimpleFlora.png");
 		Texture2D::sptr coin = Texture2D::LoadFromFile("images/coin.png");
 
+		Texture2D::sptr tstr = Texture2D::LoadFromFile("images/tubestr.png");
+		Texture2D::sptr ttee = Texture2D::LoadFromFile("images/tubetee.png");
+		Texture2D::sptr tlbw = Texture2D::LoadFromFile("images/tubelbw.png");
+		Texture2D::sptr tqd = Texture2D::LoadFromFile("images/tubeqd.png");
+
 		Texture2D::sptr blue = Texture2D::LoadFromFile("images/blue.png");
 		Texture2D::sptr green = Texture2D::LoadFromFile("images/green.png");
 		Texture2D::sptr orange = Texture2D::LoadFromFile("images/orange.png");
@@ -425,7 +432,6 @@ int main() {
 					//Create tube material
 					ShaderMaterial::sptr tMat = ShaderMaterial::Create();
 					tMat->Shader = shader;
-					tMat->Set("s_Specular", noSpec);
 					tMat->Set("u_Shininess", 8.0f);
 					tMat->Set("u_TextureMix", 0.0f);
 
@@ -457,18 +463,23 @@ int main() {
 					glm::vec2 tubeData = Manager.GetTube(glm::vec2(i, j));
 					switch (int(tubeData.x)) {
 					case 1:
+						tMat->Set("s_Specular", tstr);
 						tubee.emplace<RendererComponent>().SetMesh(tubestr).SetMaterial(tMat);
 						break;
 					case 2:
+						tMat->Set("s_Specular", tlbw);
 						tubee.emplace<RendererComponent>().SetMesh(tubelbw).SetMaterial(tMat);
 						break;
 					case 3:
+						tMat->Set("s_Specular", ttee);
 						tubee.emplace<RendererComponent>().SetMesh(tubetee).SetMaterial(tMat);
 						break;
 					case 4:
+						tMat->Set("s_Specular", tqd);
 						tubee.emplace<RendererComponent>().SetMesh(tubeqd).SetMaterial(tMat);
 						break;
 					default:
+						tMat->Set("s_Specular", noSpec);
 						tubee.emplace<RendererComponent>().SetMesh(tubend).SetMaterial(tMat);
 						pspawn = true;
 						canspawn = false;
@@ -501,7 +512,7 @@ int main() {
 						coinT.SetLocalPosition(coord1, 0, coord2);
 						coinT.SetLocalRotation(90, 0, 90);
 						TriggerBinding::Bind<CoinTrigger>(coine);
-						coincount++;
+						Globals::Instance().coinmax++;
 					}
 				}
 				else if (map[i][j] == 0) {
@@ -510,7 +521,7 @@ int main() {
 					auto& wallCol = walle.emplace<Collision2D>(pworld->World());
 					//wallCol.getBody()->SetUserData(&walle);
 					wallCol.CreateStaticBox(glm::vec2(coord1, coord2), glm::vec2(unitsize / 2, unitsize / 2), ENVIRONMENT, PLAYER);
-				auto& wallT = walle.get<Transform>();
+					auto& wallT = walle.get<Transform>();
 					wallT.SetLocalPosition(coord1, 0, coord2);
 				}
 			}
