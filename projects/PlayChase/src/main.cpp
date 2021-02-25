@@ -61,6 +61,7 @@ int main() {
 
 	// Enable texturing
 	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
 
 	// Push another scope so most memory should be freed *before* we exit the app
 	{
@@ -315,8 +316,9 @@ int main() {
 		Texture2D::sptr testUI = Texture2D::LoadFromFile("images/testUI.png");
 
 		// Load the cube map
-		//TextureCubeMap::sptr environmentMap = TextureCubeMap::LoadFromImages("images/cubemaps/skybox/sample.jpg");
-		TextureCubeMap::sptr environmentMap = TextureCubeMap::LoadFromImages("images/cubemaps/skybox/ToonSky.jpg"); 
+		TextureCubeMap::sptr environmentMap = TextureCubeMap::LoadFromImages("images/cubemaps/skybox/sample.jpg");
+		Texture2D::sptr uiTex = Texture2D::LoadFromFile("images/testUI.png");
+		//TextureCubeMap::sptr environmentMap = TextureCubeMap::LoadFromImages("images/cubemaps/skybox/ToonSky.jpg"); 
 
 		// Creating an empty texture
 		Texture2DDescription desc = Texture2DDescription();  
@@ -640,7 +642,7 @@ int main() {
 			skyboxMat->Shader = skybox;  
 			skyboxMat->Set("s_Environment", environmentMap);
 			skyboxMat->Set("u_EnvironmentRotation", glm::mat3(glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1, 0, 0))));
-			skyboxMat->RenderLayer = 100;
+			skyboxMat->RenderLayer = 1;
 
 			MeshBuilder<VertexPosNormTexCol> mesh;
 			MeshFactory::AddIcoSphere(mesh, glm::vec3(0.0f), 1.0f);
@@ -653,6 +655,20 @@ int main() {
 		}
 		////////////////////////////////////////////////////////////////////////////////////////
 
+		/////////////////////////////////// UI ///////////////////////////////////////////////
+		ShaderMaterial::sptr uiMat = ShaderMaterial::Create();
+		uiMat->Shader = uiShader;
+		uiMat->Set("s_UiTexture", uiTex);
+
+		GameObject ui = scene->CreateEntity("Ui");
+		{
+			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
+			ui.emplace<RendererComponent>().SetMesh(vao).SetMaterial(uiMat);
+			ui.get<Transform>().SetLocalPosition(player.get<Transform>().GetLocalPosition() + glm::vec3(0.0f, 0.0f, 0.1f));
+			ui.get<Transform>().SetLocalRotation(90.0f, 270.0f, 0.0f);
+			ui.get<Transform>().SetLocalScale(0.1f, 0.1f, 0.1f);
+		}
+		////////////////////////////////////////////////////////////////////////////////////////
 
 		// We'll use a vector to store all our key press events for now (this should probably be a behaviour eventually)
 		std::vector<KeyPressWatcher> keyToggles;
@@ -665,7 +681,7 @@ int main() {
 
 			keyToggles.emplace_back(GLFW_KEY_ESCAPE, [&]() { BehaviourBinding::Get<FirstPersonBehaviour>(cameraObject)->ToggleMouse(); });
 
-			keyToggles.emplace_back(GLFW_KEY_1, [&]() { 
+			keyToggles.emplace_back(GLFW_KEY_1, [&]() {
 				mode = 1;
 				});
 			keyToggles.emplace_back(GLFW_KEY_2, [&]() {
@@ -752,6 +768,9 @@ int main() {
 			time.DeltaTime = time.DeltaTime > 1.0f ? 1.0f : time.DeltaTime;
 
 			engine.Update();
+			ui.get<Transform>().SetLocalPosition(player.get<Transform>().GetLocalPosition() + (glm::vec3(-0.11f, 0.0f, -0.11f) * glm::vec3(sin(glm::radians(player.get<Transform>().GetLocalRotation().y)), 0.0f, cos(glm::radians(player.get<Transform>().GetLocalRotation().y)))));
+			ui.get<Transform>().SetLocalRotation(90.0f, player.get<Transform>().GetLocalRotation().y, 0.0f);
+			ui.get<Transform>().SetLocalScale(0.11f * BackendHandler::aspectRatio, 0.11f, 0.11f);
 			BehaviourBinding::Get<EnemyBehaviour>(enemy)->Update(enemy);
 
 			// Update our FPS tracker data
@@ -779,6 +798,7 @@ int main() {
 					}
 				}
 			});
+			//update sound
 			std::cout << player.get<Transform>().GetLocalPosition().x << " " << player.get<Transform>().GetLocalPosition().y << " " << player.get<Transform>().GetLocalPosition().z << "\n";
 			listener.SetForward(cameraObject.get<Camera>().GetForward());
 			listener.SetPosition(player.get<Transform>().GetLocalPosition());
@@ -795,6 +815,7 @@ int main() {
 			}
 			else
 				ambientTimer -= time.DeltaTime;
+
 			pworld->Update(time.DeltaTime);
 			// Clear the screen
 			testBuffer->Clear();

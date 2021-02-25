@@ -1,6 +1,9 @@
 #include "BackendHandler.h"
 
 GLFWwindow* BackendHandler::window = nullptr;
+int BackendHandler::windowWidth = 0;
+int BackendHandler::windowHeight = 0;
+float BackendHandler::aspectRatio = 1.0f;
 std::vector<std::function<void()>> BackendHandler::imGuiCallbacks;
 
 
@@ -71,10 +74,13 @@ void BackendHandler::GlfwWindowResizedCallback(GLFWwindow* window, int width, in
 		buf.Reshape(width, height);
 	});
 	Application::Instance().ActiveScene->Registry().view<BloomEffect>().each([=](BloomEffect& buf)
-		{
-			buf.Reshape(width, height);
-		});
+	{
+		buf.Reshape(width, height);
+	});
 
+	windowWidth = width;
+	windowHeight = height;
+	aspectRatio = float(width) / float(height);
 }
 
 bool BackendHandler::InitGLFW()
@@ -90,6 +96,9 @@ bool BackendHandler::InitGLFW()
 
 	//Create a new GLFW window
 	window = glfwCreateWindow(800, 800, "Play Chase", nullptr, nullptr);
+	windowWidth = 800;
+	windowHeight = 800;
+	aspectRatio = 1.0f;
 	glfwMakeContextCurrent(window);
 
 	// Set our window resized callback
