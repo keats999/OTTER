@@ -29,11 +29,17 @@
 #include "Behaviours/PlayerBehaviour.h"
 #include "Behaviours/FirstPersonBehaviour.h"
 #include "Behaviours/EnemyBehaviour.h"
+#include "Behaviours/CoinBehaviour.h"
+#include "Behaviours/GameBehaviour.h"
+#include "Behaviours/MenuBehaviour.h"
+#include "Behaviours/PauseBehaviour.h"
 
 #include "Utilities/Globals.h"
 
 #include "Utilities/Trigger.h"
 #include "Triggers/CoinTrigger.h"
+#include "Triggers/EnemyTrigger.h"
+#include "Triggers/ExitTrigger.h"
 
 #include "Utilities/MapManager.h"
 #include "Utilities/Collision2D.h"
@@ -301,6 +307,7 @@ int main() {
 		Texture2D::sptr boxSpec = Texture2D::LoadFromFile("images/box-reflections.bmp");
 		Texture2D::sptr simpleFlora = Texture2D::LoadFromFile("images/SimpleFlora.png");
 		Texture2D::sptr coin = Texture2D::LoadFromFile("images/coin.png");
+		Texture2D::sptr rattex = Texture2D::LoadFromFile("images/f.png");
 
 		Texture2D::sptr tstr = Texture2D::LoadFromFile("images/tubestr.png");
 		Texture2D::sptr ttee = Texture2D::LoadFromFile("images/tubetee.png");
@@ -343,13 +350,14 @@ int main() {
 
 		// Create a scene, and set it to be the active scene in the application
 		GameScene::sptr scene = GameScene::Create("test");
-		Application::Instance().ActiveScene = scene;
 		PhysicsWorld::sptr pworld = PhysicsWorld::Create(scene);
 
 		GameScene::sptr menuscene = GameScene::Create("MainMenu");
 		GameScene::sptr pausescene = GameScene::Create("PauseMenu");
 		GameScene::sptr winscene = GameScene::Create("Win");
 		GameScene::sptr endscene = GameScene::Create("GameOver");
+
+		Application::Instance().ActiveScene = menuscene;
 
 		Globals::Instance().scenes.push_back(menuscene);	//0
 		Globals::Instance().scenes.push_back(scene);		//1
@@ -358,8 +366,7 @@ int main() {
 		Globals::Instance().scenes.push_back(endscene);		//4
 
 		// We can create a group ahead of time to make iterating on the group faster
-		entt::basic_group<entt::entity, entt::exclude_t<>, entt::get_t<Transform>, RendererComponent> renderGroup =
-			Application::Instance().ActiveScene->Registry().group<RendererComponent>(entt::get_t<Transform>());
+		
 
 		// Create a material and set some properties for it
 		ShaderMaterial::sptr stoneMat = ShaderMaterial::Create();  
@@ -389,6 +396,13 @@ int main() {
 		simpleFloraMat->Set("s_Specular", noSpec);
 		simpleFloraMat->Set("u_Shininess", 8.0f);
 		simpleFloraMat->Set("u_TextureMix", 0.0f);
+
+		ShaderMaterial::sptr ratMat = ShaderMaterial::Create();
+		ratMat->Shader = shader;
+		ratMat->Set("s_Diffuse", rattex);
+		ratMat->Set("s_Specular", noSpec);
+		ratMat->Set("u_Shininess", 8.0f);
+		ratMat->Set("u_TextureMix", 0.0f);
 
 		ShaderMaterial::sptr testuiMat = ShaderMaterial::Create();
 		simpleFloraMat->Shader = uiShader;
@@ -519,6 +533,7 @@ int main() {
 						auto& coinT = coine.get<Transform>();
 						coinT.SetLocalPosition(coord1, 0, coord2);
 						coinT.SetLocalRotation(90, 0, 90);
+						BehaviourBinding::Bind<CoinBehaviour>(coine);
 						TriggerBinding::Bind<CoinTrigger>(coine);
 						Globals::Instance().coinmax++;
 					}
@@ -554,15 +569,16 @@ int main() {
 		GameObject enemy = scene->CreateEntity("Enemy");
 		{
 			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/rat.obj");
-			enemy.emplace<RendererComponent>().SetMesh(vao).SetMaterial(grassMat);
+			enemy.emplace<RendererComponent>().SetMesh(vao).SetMaterial(ratMat);
 			auto& enemyCol = enemy.emplace<Collision2D>(pworld->World());
-			enemyCol.CreateDynamicBox(enemySpawn, glm::vec2(2, 2), ENEMY, PLAYER);
+			enemyCol.CreateDynamicBox(enemySpawn, glm::vec2(1, 1), ENEMY, PLAYER);
 			enemyCol.getBody()->SetUserData(&enemy);
 			enemyCol.getFixture()->SetSensor(true);
 			enemyCol.getFixture()->SetEntity(enemy.entity());
 			enemy.get<Transform>().SetLocalScale(0.5f, 0.5f, 0.5f);
 			BehaviourBinding::Bind<EnemyBehaviour>(enemy);
 			BehaviourBinding::Get<EnemyBehaviour>(enemy)->SetTarget(player);
+			TriggerBinding::Bind<EnemyTrigger>(enemy);
 		}
 
 		GameObject exit = scene->CreateEntity("Exit");
@@ -644,7 +660,21 @@ int main() {
 			bloomEffect->Init(width, height);
 		}
 		post.push_back(bloomEffect);
+		//////////////////////////////////////////////////////////////////////////////////////////
 
+		/////////////////////////////////// CONTROLLERS //////////////////////////////////////////
+		GameObject gameController = scene->CreateEntity("GameController");
+		{
+			//BehaviourBinding::Bind<GameBehaviour>(gameController);
+		}
+		GameObject menuController = menuscene->CreateEntity("MenuController");
+		{
+			BehaviourBinding::Bind<MenuBehaviour>(menuController);
+		}
+		GameObject pauseController = pausescene->CreateEntity("PauseController");
+		{
+			BehaviourBinding::Bind<PauseBehaviour>(pauseController);
+		}
 		#pragma endregion 
 		//////////////////////////////////////////////////////////////////////////////////////////
 
@@ -671,6 +701,7 @@ int main() {
 			skyboxObj.get<Transform>().SetLocalPosition(0.0f, 0.0f, 0.0f);
 			skyboxObj.get_or_emplace<RendererComponent>().SetMesh(meshVao).SetMaterial(skyboxMat);
 		}
+
 		////////////////////////////////////////////////////////////////////////////////////////
 
 		/////////////////////////////////// UI ///////////////////////////////////////////////
@@ -804,6 +835,8 @@ int main() {
 					watcher.Poll(BackendHandler::window);
 				}
 			}
+			entt::basic_group<entt::entity, entt::exclude_t<>, entt::get_t<Transform>, RendererComponent> renderGroup =
+				Application::Instance().ActiveScene->Registry().group<RendererComponent>(entt::get_t<Transform>());
 
 			// Iterate over all the behaviour binding components
 			Application::Instance().ActiveScene->Registry().view<BehaviourBinding>().each([&](entt::entity entity, BehaviourBinding& binding) {
@@ -814,7 +847,7 @@ int main() {
 					}
 				}
 			});
-
+			
 			ui.get<Transform>().SetLocalPosition(player.get<Transform>().GetLocalPosition() + (glm::vec3(-0.11f, 0.0f, -0.11f) * glm::vec3(sin(glm::radians(player.get<Transform>().GetLocalRotation().y)), 0.0f, cos(glm::radians(player.get<Transform>().GetLocalRotation().y)))));
 			ui.get<Transform>().SetLocalRotation(90.0f, player.get<Transform>().GetLocalRotation().y, 0.0f);
 			ui.get<Transform>().SetLocalScale(0.11f * BackendHandler::aspectRatio, 0.11f, 0.11f);
@@ -831,13 +864,15 @@ int main() {
 			enemyAmbient.SetPosition(enemy.get<Transform>().GetLocalPosition());
 			if (ambientTimer <= 0.0f)
 			{
-					ambientTimer = 20.0f;
-					enemyAmbient.Play();
+				ambientTimer = 20.0f;
+				enemyAmbient.Play();
 			}
 			else
 				ambientTimer -= time.DeltaTime;
 
 			pworld->Update(time.DeltaTime);
+			
+			
 			// Clear the screen
 			testBuffer->Clear();
 			for (int i = 0; i < effects.size(); i++)
@@ -849,7 +884,7 @@ int main() {
 				post[i]->Clear();
 			}
 
-			glClearColor(0.08f, 0.17f, 0.31f, 1.0f);
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glEnable(GL_DEPTH_TEST);
 			glClearDepth(1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

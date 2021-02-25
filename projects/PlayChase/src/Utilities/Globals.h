@@ -11,6 +11,5 @@ public:
 	int coins = 0;
 	int coinmax = 0;
 	bool alive = true;
-	int active_index = 0;
 	std::vector<GameScene::sptr> scenes;
 };
