@@ -18,7 +18,7 @@ void FirstPersonBehaviour::Update(entt::handle entity)
 	transform.SetLocalPosition(playpos);
 	if (_trapped) {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		_rotationX += static_cast<float>(mx - _prevMouseX) * 0.5f;
+		_rotationX += static_cast<float>(mx - _prevMouseX) * 0.1f;
 		_rotationY += static_cast<float>(my - _prevMouseY) * 0.3f;
 		glm::quat rotX = glm::angleAxis(glm::radians(-_rotationX), glm::vec3(0, 1, 0));
 		glm::quat rotY = glm::angleAxis(glm::radians(-_rotationY), glm::vec3(1, 0, 0));

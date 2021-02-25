@@ -713,9 +713,6 @@ int main() {
 		{
 			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
 			ui.emplace<RendererComponent>().SetMesh(vao).SetMaterial(uiMat);
-			ui.get<Transform>().SetLocalPosition(player.get<Transform>().GetLocalPosition() + glm::vec3(0.0f, 0.0f, 0.1f));
-			ui.get<Transform>().SetLocalRotation(90.0f, 270.0f, 0.0f);
-			ui.get<Transform>().SetLocalScale(0.1f, 0.1f, 0.1f);
 		}
 		////////////////////////////////////////////////////////////////////////////////////////
 
@@ -848,8 +845,8 @@ int main() {
 				}
 			});
 			
-			ui.get<Transform>().SetLocalPosition(player.get<Transform>().GetLocalPosition() + (glm::vec3(-0.11f, 0.0f, -0.11f) * glm::vec3(sin(glm::radians(player.get<Transform>().GetLocalRotation().y)), 0.0f, cos(glm::radians(player.get<Transform>().GetLocalRotation().y)))));
-			ui.get<Transform>().SetLocalRotation(90.0f, player.get<Transform>().GetLocalRotation().y, 0.0f);
+			ui.get<Transform>().SetLocalPosition(cameraObject.get<Transform>().GetLocalPosition() + (glm::vec3(-0.11f, 0.0f, -0.11f) * glm::vec3(sin(glm::radians((int(cameraObject.get<Transform>().GetLocalRotation().x) != 180) ? cameraObject.get<Transform>().GetLocalRotation().y : -cameraObject.get<Transform>().GetLocalRotation().y + cameraObject.get<Transform>().GetLocalRotation().x)), 0.0f, cos(glm::radians((int(cameraObject.get<Transform>().GetLocalRotation().x) != 180) ? cameraObject.get<Transform>().GetLocalRotation().y : -cameraObject.get<Transform>().GetLocalRotation().y + cameraObject.get<Transform>().GetLocalRotation().x)))));
+			ui.get<Transform>().SetLocalRotation(90.0f, (int(cameraObject.get<Transform>().GetLocalRotation().x) != 180) ? cameraObject.get<Transform>().GetLocalRotation().y : -cameraObject.get<Transform>().GetLocalRotation().y + cameraObject.get<Transform>().GetLocalRotation().x, 0.0f);
 			ui.get<Transform>().SetLocalScale(0.11f * BackendHandler::aspectRatio, 0.11f, 0.11f);
 
 			//update sound
