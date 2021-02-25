@@ -721,6 +721,7 @@ int main() {
 		// Get ref to Listener
 		AudioListener& listener = engine.GetListener(); // Can use this listener to change the player's 3D position
 		listener.SetUp(glm::vec3(0.0f, 1.0f, 0.0f));
+		listener.SetForward(glm::vec3(1.0f, 0.0f, 0.0f));
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 
 		// Initialize our timing instance and grab a reference for our use
@@ -766,10 +767,13 @@ int main() {
 					}
 				}
 			});
+			std::cout << player.get<Transform>().GetLocalPosition().x << " " << player.get<Transform>().GetLocalPosition().y << " " << player.get<Transform>().GetLocalPosition().z << "\n";
 			listener.SetForward(cameraObject.get<Camera>().GetForward());
-			listener.SetPosition(cameraObject.get<Camera>().GetPosition());
-			music.SetPosition(cameraObject.get<Camera>().GetPosition());
-			playerThumping.SetPosition(cameraObject.get<Camera>().GetPosition());
+			listener.SetPosition(player.get<Transform>().GetLocalPosition());
+			std::cout << listener.GetPosition().x << " " << listener.GetPosition().y << " " << listener.GetPosition().z << "\n";
+			music.SetPosition(listener.GetPosition());
+			std::cout << music.GetPosition().x << " " << music.GetPosition().y << " " << music.GetPosition().z << "\n\n";
+			playerThumping.SetPosition(player.get<Transform>().GetLocalPosition());
 			enemyScratching.SetPosition(enemy.get<Transform>().GetLocalPosition());
 			enemyAmbient.SetPosition(enemy.get<Transform>().GetLocalPosition());
 			if (ambientTimer <= 0.0f)
