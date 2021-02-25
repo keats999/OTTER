@@ -147,15 +147,15 @@ glm::vec2 MapManager::GetTube(glm::vec2 pos)
 }
 glm::vec2 MapManager::TrnsToPos(glm::vec3 pos) {
 	glm::vec2 p;
-	p.x = int(round(pos.x) / unitsize);
-	p.y = int(round(pos.z) / unitsize);
+	p.y = int(round(pos.x) / unitsize);
+	p.x = int(round(pos.z) / unitsize);
 	return p;
 }
 glm::vec3 MapManager::PosToTrns(glm::vec2 pos) {
 	glm::vec3 p;
-	p.x = int(pos.x * unitsize);
+	p.x = int(pos.y * unitsize);
 	p.y = 0;
-	p.z = int(pos.y * unitsize);
+	p.z = int(pos.x * unitsize);
 	return p;
 }
 //Borrowed from https://dev.to/jansonsa/a-star-a-path-finding-c-4a4h

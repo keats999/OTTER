@@ -88,7 +88,7 @@ int main() {
 		shader->LoadShaderPartFromFile("shaders/frag_blinn_phong_textured.glsl", GL_FRAGMENT_SHADER);
 		shader->Link();
 
-		glm::vec3 lightPos = glm::vec3(0.0f, 4.0f, 0.0f);
+		glm::vec3 lightPos = glm::vec3(0.0f, -1.0f, 0.0f);
 		glm::vec3 lightCol = glm::vec3(0.9f, 0.85f, 0.5f);
 		float     lightAmbientPow = 0.05f;
 		float     lightSpecularPow = 1.0f;
@@ -337,6 +337,7 @@ int main() {
 		// We need to tell our scene system what extra component types we want to support
 		GameScene::RegisterComponentType<RendererComponent>();
 		GameScene::RegisterComponentType<BehaviourBinding>();
+		GameScene::RegisterComponentType<TriggerBinding>();
 		GameScene::RegisterComponentType<Collision2D>();
 		GameScene::RegisterComponentType<Camera>();
 
@@ -345,9 +346,20 @@ int main() {
 		Application::Instance().ActiveScene = scene;
 		PhysicsWorld::sptr pworld = PhysicsWorld::Create(scene);
 
+		GameScene::sptr menuscene = GameScene::Create("MainMenu");
+		GameScene::sptr pausescene = GameScene::Create("PauseMenu");
+		GameScene::sptr winscene = GameScene::Create("Win");
+		GameScene::sptr endscene = GameScene::Create("GameOver");
+
+		Globals::Instance().scenes.push_back(menuscene);	//0
+		Globals::Instance().scenes.push_back(scene);		//1
+		Globals::Instance().scenes.push_back(pausescene);	//2
+		Globals::Instance().scenes.push_back(winscene);		//3
+		Globals::Instance().scenes.push_back(endscene);		//4
+
 		// We can create a group ahead of time to make iterating on the group faster
 		entt::basic_group<entt::entity, entt::exclude_t<>, entt::get_t<Transform>, RendererComponent> renderGroup =
-			scene->Registry().group<RendererComponent>(entt::get_t<Transform>());
+			Application::Instance().ActiveScene->Registry().group<RendererComponent>(entt::get_t<Transform>());
 
 		// Create a material and set some properties for it
 		ShaderMaterial::sptr stoneMat = ShaderMaterial::Create();  
@@ -408,6 +420,7 @@ int main() {
 		std::vector<GameObject> walls;
 
 		glm::vec2 spawn = glm::vec2(0, 0);
+		glm::vec2 exitloc = glm::vec2(0, 0);
 		glm::vec2 enemySpawn = glm::vec2(0, 0);
 
 		//Call map managing tool and pass level data
@@ -483,17 +496,10 @@ int main() {
 					default:
 						tMat->Set("s_Specular", noSpec);
 						tubee.emplace<RendererComponent>().SetMesh(tubend).SetMaterial(tMat);
+						Manager.saferooms.push_back(glm::vec2(coord1, coord2));
 						pspawn = true;
 						canspawn = false;
 						break;
-					}
-
-					//If valid spot to spawn player, set spawn coordinates to tubing piece
-					if (pspawn) {
-						spawn = glm::vec2(coord1, coord2);
-					}
-					else if (!pspawn && enemySpawn == glm::vec2(0, 0)) {
-						enemySpawn = glm::vec2(coord1, coord2);
 					}
 					
 					//Set tubing orientation based on coordinates and rotation data given by the manager
@@ -529,7 +535,9 @@ int main() {
 			}
 		}
 
-
+		 exitloc = Manager.saferooms[0];
+		 spawn = Manager.saferooms[Manager.saferooms.size() - 1];
+		 enemySpawn = exitloc;
 
 		GameObject player = scene->CreateEntity("Player");
 		{
@@ -557,6 +565,16 @@ int main() {
 			BehaviourBinding::Get<EnemyBehaviour>(enemy)->SetTarget(player);
 		}
 
+		GameObject exit = scene->CreateEntity("Exit");
+		{
+			//VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
+			//player.emplace<RendererComponent>().SetMesh(vao).SetMaterial(stoneMat);
+			auto& exitCol = exit.emplace<Collision2D>(pworld->World());
+			exitCol.CreateStaticBox(exitloc, glm::vec2(2, 2), TRIGGER, PLAYER);
+			exitCol.getFixture()->SetSensor(true);
+			exitCol.getFixture()->SetEntity(exit.entity());
+
+		}
 		// Create an object to be our camera
 		GameObject cameraObject = scene->CreateEntity("Camera");
 		{
@@ -768,10 +786,8 @@ int main() {
 			time.DeltaTime = time.DeltaTime > 1.0f ? 1.0f : time.DeltaTime;
 
 			engine.Update();
-			ui.get<Transform>().SetLocalPosition(player.get<Transform>().GetLocalPosition() + (glm::vec3(-0.11f, 0.0f, -0.11f) * glm::vec3(sin(glm::radians(player.get<Transform>().GetLocalRotation().y)), 0.0f, cos(glm::radians(player.get<Transform>().GetLocalRotation().y)))));
-			ui.get<Transform>().SetLocalRotation(90.0f, player.get<Transform>().GetLocalRotation().y, 0.0f);
-			ui.get<Transform>().SetLocalScale(0.11f * BackendHandler::aspectRatio, 0.11f, 0.11f);
-			BehaviourBinding::Get<EnemyBehaviour>(enemy)->Update(enemy);
+			
+			//BehaviourBinding::Get<EnemyBehaviour>(enemy)->Update(enemy);
 
 			// Update our FPS tracker data
 			fpsBuffer[frameIx] = 1.0f / time.DeltaTime;
@@ -790,14 +806,19 @@ int main() {
 			}
 
 			// Iterate over all the behaviour binding components
-			scene->Registry().view<BehaviourBinding>().each([&](entt::entity entity, BehaviourBinding& binding) {
+			Application::Instance().ActiveScene->Registry().view<BehaviourBinding>().each([&](entt::entity entity, BehaviourBinding& binding) {
 				// Iterate over all the behaviour scripts attached to the entity, and update them in sequence (if enabled)
 				for (const auto& behaviour : binding.Behaviours) {
 					if (behaviour->Enabled) {
-						behaviour->Update(entt::handle(scene->Registry(), entity));
+						behaviour->Update(entt::handle(Application::Instance().ActiveScene->Registry(), entity));
 					}
 				}
 			});
+
+			ui.get<Transform>().SetLocalPosition(player.get<Transform>().GetLocalPosition() + (glm::vec3(-0.11f, 0.0f, -0.11f) * glm::vec3(sin(glm::radians(player.get<Transform>().GetLocalRotation().y)), 0.0f, cos(glm::radians(player.get<Transform>().GetLocalRotation().y)))));
+			ui.get<Transform>().SetLocalRotation(90.0f, player.get<Transform>().GetLocalRotation().y, 0.0f);
+			ui.get<Transform>().SetLocalScale(0.11f * BackendHandler::aspectRatio, 0.11f, 0.11f);
+
 			//update sound
 			std::cout << player.get<Transform>().GetLocalPosition().x << " " << player.get<Transform>().GetLocalPosition().y << " " << player.get<Transform>().GetLocalPosition().z << "\n";
 			listener.SetForward(cameraObject.get<Camera>().GetForward());
@@ -834,7 +855,7 @@ int main() {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			// Update all world matrices for this frame
-			scene->Registry().view<Transform>().each([](entt::entity entity, Transform& t) {
+			Application::Instance().ActiveScene->Registry().view<Transform>().each([](entt::entity entity, Transform& t) {
 				t.UpdateWorldMatrix();
 			});
 			
@@ -897,13 +918,14 @@ int main() {
 			// Draw our ImGui content
 			BackendHandler::RenderImGui();
 
-			scene->Poll();
+			Application::Instance().ActiveScene->Poll();
 			glfwSwapBuffers(BackendHandler::window);
 			time.LastFrame = time.CurrentFrame;
 		}
 
 		// Nullify scene so that we can release references
 		Application::Instance().ActiveScene = nullptr;
+		Globals::Instance().scenes.clear();
 		BackendHandler::ShutdownImGui();
 		engine.Shutdown();
 	}	

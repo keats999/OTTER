@@ -57,10 +57,12 @@ public:
 	glm::vec2 TrnsToPos(glm::vec3 pos);
 	glm::vec3 PosToTrns(glm::vec2 pos);
 	std::vector<glm::vec3> NodeListToVecList(std::vector<Node> nodes);
-	
+
+	std::vector<glm::vec2> saferooms;
+
 protected:
 	int row = 0, col = 0;
 	int unitsize = 2;
 	bool init = false;
-	std::vector<std::vector<int>> mapdata;
+	std::vector<std::vector<int>> mapdata;	
 };

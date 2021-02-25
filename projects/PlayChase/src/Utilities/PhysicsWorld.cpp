@@ -42,7 +42,8 @@ void PhysicsWorld::CleanupBodies()
 		reg.get<Collision2D>(Collision2D::_bodiesToDelete[i]).RemoveBody();
 
 		//Destroy the entity
-		reg.destroy(Collision2D::_bodiesToDelete[i]);
+		//reg.destroy(Collision2D::_bodiesToDelete[i]);
+		_scene->RemoveEntity(entt::basic_handle(reg, Collision2D::_bodiesToDelete[i]));
 
 		//Clear bodies to delete
 		Collision2D::_bodiesToDelete.clear();
