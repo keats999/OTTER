@@ -1,6 +1,6 @@
 #include "Collision2D.h"
 
-
+std::vector<entt::entity> Collision2D::_bodiesToDelete;
 Collision2D::~Collision2D()
 {
 	//world->DestroyBody(body);

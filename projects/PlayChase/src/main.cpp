@@ -31,6 +31,7 @@
 #include "Behaviours/EnemyBehaviour.h"
 
 #include "Utilities/Trigger.h"
+#include "Triggers/CoinTrigger.h"
 
 #include "Utilities/MapManager.h"
 #include "Utilities/Collision2D.h"
@@ -496,10 +497,10 @@ int main() {
 						coinCol.CreateStaticBox(glm::vec2(coord1, coord2), glm::vec2(unitsize / 2, unitsize / 2), PICKUP, PLAYER);
 						coinCol.getFixture()->SetSensor(true);
 						coinCol.getFixture()->SetEntity(coine.entity());
-						coine.emplace<Trigger>();
 						auto& coinT = coine.get<Transform>();
 						coinT.SetLocalPosition(coord1, 0, coord2);
 						coinT.SetLocalRotation(90, 0, 90);
+						TriggerBinding::Bind<CoinTrigger>(coine);
 						coincount++;
 					}
 				}

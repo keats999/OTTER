@@ -29,4 +29,22 @@ void PhysicsWorld::Update(float dt)
 		transform.SetLocalPosition(pos.x, tpos.y, pos.y);
 		transform.SetLocalRotation(transform.GetLocalRotation().x, -glm::degrees(angle), transform.GetLocalRotation().z);
 	}
+	CleanupBodies();
+}
+
+void PhysicsWorld::CleanupBodies()
+{
+	entt::registry& reg = _scene->Registry();
+
+	for (int i = 0; i < Collision2D::_bodiesToDelete.size(); i++)
+	{
+		//Bodies to delete
+		reg.get<Collision2D>(Collision2D::_bodiesToDelete[i]).RemoveBody();
+
+		//Destroy the entity
+		reg.destroy(Collision2D::_bodiesToDelete[i]);
+
+		//Clear bodies to delete
+		Collision2D::_bodiesToDelete.clear();
+	}
 }

@@ -23,6 +23,8 @@ public:
 	b2World* World() { return _world.get(); }
 	void Update(float dt);
 
+	void CleanupBodies();
+
 private:
 	std::unique_ptr<b2World> _world;
 	std::shared_ptr<GameScene> _scene;

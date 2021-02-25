@@ -36,7 +36,7 @@ public:
 	b2Body* getBody() { return body; }
 	b2Fixture* getFixture() { return fixture; }
 
-	int colcounter = 0;
+	static std::vector<entt::entity> _bodiesToDelete;
 private:
 	b2World* world = nullptr;
 	b2Body* body = nullptr;
