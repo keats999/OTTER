@@ -16,23 +16,15 @@ uniform mat4 u_Model;
 uniform mat3 u_NormalMatrix;
 uniform vec3 u_LightPos;
 uniform mat4 u_UIMatrix;
+uniform mat3 u_EnvironmentRotation;
 
 void main() {
 
-	gl_Position = u_ModelViewProjection * vec4(inPosition, 1.0);
+	vec4 pos = u_UIMatrix * vec4(inPosition, 1.0);
+    gl_Position = pos.xyww;
 
-	// Lecture 5
-	// Pass vertex pos in world space to frag shader
-	outPos = (u_Model * vec4(inPosition, 1.0)).xyz;
-
-	// Normals
-	outNormal = u_NormalMatrix * inNormal;
-
-	// Pass our UV coords to the fragment shader
-	outUV = inUV;
-
-	///////////
-	outColor = inColor;
+    // Normals
+    outNormal = inPosition;
 
 }
 

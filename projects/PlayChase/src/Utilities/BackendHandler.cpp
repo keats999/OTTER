@@ -216,6 +216,7 @@ void BackendHandler::SetupShaderForFrame(const Shader::sptr& shader, const glm::
 	shader->SetUniformMatrix("u_View", view);
 	shader->SetUniformMatrix("u_ViewProjection", projection * view);
 	shader->SetUniformMatrix("u_SkyboxMatrix", projection * glm::mat4(glm::mat3(view)));
+	shader->SetUniformMatrix("u_UIMatrix", projection * glm::mat4(glm::mat3(view)));
 	glm::vec3 camPos = glm::inverse(view) * glm::vec4(0, 0, 0, 1);
 	shader->SetUniform("u_CamPos", camPos);
 }

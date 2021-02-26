@@ -321,9 +321,13 @@ int main() {
 		Texture2D::sptr yellow = Texture2D::LoadFromFile("images/yellow.png");
 
 		Texture2D::sptr testUI = Texture2D::LoadFromFile("images/testUI.png");
+		Texture2D::sptr title = Texture2D::LoadFromFile("images/title_transparent.png");
+		Texture2D::sptr spcelement = Texture2D::LoadFromFile("images/spcelement.png");
+		Texture2D::sptr endelement = Texture2D::LoadFromFile("images/endelement.png");
+
 
 		// Load the cube map
-		TextureCubeMap::sptr environmentMap = TextureCubeMap::LoadFromImages("images/cubemaps/skybox/sample.jpg");
+		TextureCubeMap::sptr environmentMap = TextureCubeMap::LoadFromImages("images/cubemaps/skybox/dark.jpg");
 		Texture2D::sptr uiTex = Texture2D::LoadFromFile("images/testUI.png");
 		//TextureCubeMap::sptr environmentMap = TextureCubeMap::LoadFromImages("images/cubemaps/skybox/ToonSky.jpg"); 
 
@@ -580,7 +584,7 @@ int main() {
 			BehaviourBinding::Get<EnemyBehaviour>(enemy)->SetTarget(player);
 			TriggerBinding::Bind<EnemyTrigger>(enemy);
 		}
-
+		
 		GameObject exit = scene->CreateEntity("Exit");
 		{
 			//VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
@@ -606,6 +610,18 @@ int main() {
 			//BehaviourBinding::Bind<CameraControlBehaviour>(cameraObject);
 			BehaviourBinding::Bind<FirstPersonBehaviour>(cameraObject);
 			BehaviourBinding::Get<FirstPersonBehaviour>(cameraObject)->SetParent(player);
+		}
+		GameObject menucameraObject = menuscene->CreateEntity("Camera");
+		{
+			menucameraObject.get<Transform>().SetLocalPosition(0, 1, 1).LookAt(glm::vec3(0, 0, 0));
+
+			// We'll make our camera a component of the camera object
+			Camera& menucamera = menucameraObject.emplace<Camera>();// Camera::Create();
+			menucamera.SetPosition(glm::vec3(0, 0, 0));
+			menucamera.SetUp(glm::vec3(0, 0, 1));
+			menucamera.LookAt(glm::vec3(0, 0, 0));
+			menucamera.SetFovDegrees(90.0f); // Set an initial FOV
+			menucamera.SetOrthoHeight(0.0f);
 		}
 
 		GameObject framebufferObject = scene->CreateEntity("Basic Buffer");
@@ -673,7 +689,7 @@ int main() {
 		}
 		GameObject pauseController = pausescene->CreateEntity("PauseController");
 		{
-			BehaviourBinding::Bind<PauseBehaviour>(pauseController);
+			//BehaviourBinding::Bind<PauseBehaviour>(pauseController);
 		}
 		#pragma endregion 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -705,9 +721,52 @@ int main() {
 		////////////////////////////////////////////////////////////////////////////////////////
 
 		/////////////////////////////////// UI ///////////////////////////////////////////////
+		
+		ShaderMaterial::sptr endelmtMat = ShaderMaterial::Create();
+		endelmtMat->Shader = uiShader;
+		endelmtMat->Set("s_UiTexture", endelement);
+		endelmtMat->RenderLayer = -1;
+
+		GameObject endCard = endscene->CreateEntity("Ui");
+		{
+			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
+			endCard.emplace<RendererComponent>().SetMesh(vao).SetMaterial(endelmtMat);
+			endCard.get<Transform>().SetLocalRotation(-45, 180, 0);
+			endCard.get<Transform>().SetLocalScale(2, 2, 2);
+		}
+		
+		ShaderMaterial::sptr titleMat = ShaderMaterial::Create();
+		titleMat->Shader = uiShader;
+		titleMat->Set("s_UiTexture", title);
+		titleMat->RenderLayer = -1;
+
+		GameObject titleCard = menuscene->CreateEntity("Ui");
+		{
+			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
+			titleCard.emplace<RendererComponent>().SetMesh(vao).SetMaterial(titleMat);
+			titleCard.get<Transform>().SetLocalRotation(-45, 180, 0);
+			titleCard.get<Transform>().SetLocalPosition(0, 0, 0.25);
+			titleCard.get<Transform>().SetLocalScale(1, 1, 1);
+		}
+
+		ShaderMaterial::sptr spcelMat = ShaderMaterial::Create();
+		spcelMat->Shader = uiShader;
+		spcelMat->Set("s_UiTexture", spcelement);
+		spcelMat->RenderLayer = -1;
+
+		GameObject spaceElement = menuscene->CreateEntity("Ui");
+		{
+			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
+			spaceElement.emplace<RendererComponent>().SetMesh(vao).SetMaterial(spcelMat);
+			spaceElement.get<Transform>().SetLocalRotation(-45, 180, 0);
+			spaceElement.get<Transform>().SetLocalPosition(0, 0, -1.5);
+			spaceElement.get<Transform>().SetLocalScale(2, 2, 2);
+		}
+
 		ShaderMaterial::sptr uiMat = ShaderMaterial::Create();
 		uiMat->Shader = uiShader;
 		uiMat->Set("s_UiTexture", uiTex);
+		uiMat->RenderLayer = -1;
 
 		GameObject ui = scene->CreateEntity("Ui");
 		{
@@ -890,12 +949,25 @@ int main() {
 			Application::Instance().ActiveScene->Registry().view<Transform>().each([](entt::entity entity, Transform& t) {
 				t.UpdateWorldMatrix();
 			});
-			
-			// Grab out camera info from the camera object
+
 			Transform& camTransform = cameraObject.get<Transform>();
-			glm::mat4 view = glm::inverse(camTransform.LocalTransform());
-			glm::mat4 projection = cameraObject.get<Camera>().GetProjection();
-			glm::mat4 viewProjection = projection * view;
+			glm::mat4 view;
+			glm::mat4 projection;
+			glm::mat4 viewProjection;
+
+			if (Application::Instance().ActiveScene == scene) {
+				// Grab out camera info from the camera object
+				camTransform = cameraObject.get<Transform>();
+				view = glm::inverse(camTransform.LocalTransform());
+				projection = cameraObject.get<Camera>().GetProjection();
+				viewProjection = projection * view;
+			}
+			else {
+				camTransform = menucameraObject.get<Transform>();
+				view = glm::inverse(camTransform.LocalTransform());
+				projection = menucameraObject.get<Camera>().GetProjection();
+				viewProjection = projection * view;
+			}
 						
 			// Sort the renderers by shader and material, we will go for a minimizing context switches approach here,
 			// but you could for instance sort front to back to optimize for fill rate if you have intensive fragment shaders

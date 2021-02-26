@@ -35,6 +35,8 @@ void PlayerBehaviour::Update(entt::handle entity)
 
 	Collision2D& collider = entity.get<Collision2D>();
 
+	collider.updateFriction();
+
 	float desiredSpeed = 0;
 	float desiredTorque = 0;
 
@@ -43,7 +45,7 @@ void PlayerBehaviour::Update(entt::handle entity)
 	case 4: desiredSpeed = _maxBackwardSpeed; break;
 	//case 1:  desiredTorque = -10.0;  break;
 	//case 2: desiredTorque = 10.0; break;
-	default: collider.updateFriction(); return;//do nothing
+	default: return;//do nothing
 	}
 
 	//find current speed in forward direction
