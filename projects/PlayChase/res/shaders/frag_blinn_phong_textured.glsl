@@ -76,7 +76,7 @@ void main() {
 	// Get the specular power from the specular map
 	float texSpec = texture(s_Specular, inUV).x;
 	float spec = pow(max(dot(N, h), 0.0), u_Shininess); // Shininess coefficient (can be a uniform)
-	vec3 specular = u_SpecularLightStrength * texSpec * spec * u_LightCol; // Can also use a specular color
+	vec3 specular = u_SpecularLightStrength * (texSpec * u_Textures) * spec * u_LightCol; // Can also use a specular color
 
 	// Get the albedo from the diffuse / albedo map
 	vec4 textureColor1 = texture(s_Diffuse, inUV);
@@ -84,16 +84,12 @@ void main() {
 	vec4 textureColor = mix(textureColor1, textureColor2, u_TextureMix);
 
 	vec3 result = inColor * textureColor.rgb;
-	if (u_Textures == 1)
+	if (u_Textures == 0)
 	{
 		result = vec3(1.0, 1.0, 1.0);
 	}
 
-	if(u_Mode == 1)
-	{
-		result = inColor * textureColor.rgb; // Object color
-	}
-	else if(u_Mode == 2)
+	if(u_Mode == 2)
 	{
 		result = (
 		(u_AmbientCol * u_AmbientStrength) + // global ambient light

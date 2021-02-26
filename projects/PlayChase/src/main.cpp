@@ -103,7 +103,7 @@ int main() {
 		float     lightLinearFalloff = 0.9f;
 		float     lightQuadraticFalloff = 0.032f;
 		int		  mode = 0;
-		bool	  textures = true;
+		int		  textures = 1;
 
 		Texture2DData::sptr rampImage = Texture2DData::LoadFromFile("images/Ramp.png");
 		Texture2D::sptr texRamp = Texture2D::Create();
@@ -236,8 +236,12 @@ int main() {
 			}
 
 			if (ImGui::Button("Toggle Textures")) {
-				textures = !textures;
-				shader->SetUniform("u_Textures", (int)textures);
+				if (textures == 0)
+					textures = 1;
+				else
+					textures = 0;
+
+				shader->SetUniform("u_Textures", textures);
 			}
 			/*if (ImGui::CollapsingHeader("Scene Level Lighting Settings"))
 			{
