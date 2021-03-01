@@ -19,7 +19,7 @@ public:
 
 private:
 	Shader::sptr& _shader = Shader::Create();
-	float _maxForwardSpeed = 5;
-	float _maxBackwardSpeed = -3;
+	float _maxForwardSpeed = 2;
+	float _maxBackwardSpeed = -5;
 	float _maxForce = 10;
 };

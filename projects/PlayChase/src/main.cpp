@@ -318,6 +318,8 @@ int main() {
 		Texture2D::sptr tlbw = Texture2D::LoadFromFile("images/tubelbw.png");
 		Texture2D::sptr tqd = Texture2D::LoadFromFile("images/tubeqd.png");
 
+		Texture2D::sptr metal = Texture2D::LoadFromFile("images/metal.png");
+
 		Texture2D::sptr blue = Texture2D::LoadFromFile("images/blue.png");
 		Texture2D::sptr green = Texture2D::LoadFromFile("images/green.png");
 		Texture2D::sptr orange = Texture2D::LoadFromFile("images/orange.png");
@@ -384,6 +386,13 @@ int main() {
 		stoneMat->Set("u_Shininess", 2.0f);
 		stoneMat->Set("u_TextureMix", 0.0f); 
 
+		ShaderMaterial::sptr metalMat = ShaderMaterial::Create();
+		metalMat->Shader = shader;
+		metalMat->Set("s_Diffuse", metal);
+		metalMat->Set("s_Specular", noSpec);
+		metalMat->Set("u_Shininess", 10.0f);
+		metalMat->Set("u_TextureMix", 0.0f);
+
 		ShaderMaterial::sptr grassMat = ShaderMaterial::Create();
 		grassMat->Shader = shader;
 		grassMat->Set("s_Diffuse", grass);
@@ -430,6 +439,11 @@ int main() {
 		int coincount = 0;
 
 
+		VertexArrayObject::sptr rvtstr = ObjLoader::LoadFromFile("models/rvtstr.obj");
+		VertexArrayObject::sptr rvtlbw = ObjLoader::LoadFromFile("models/rvtlbw.obj");
+		VertexArrayObject::sptr rvttee = ObjLoader::LoadFromFile("models/rvttee.obj");
+		VertexArrayObject::sptr rvtqd = ObjLoader::LoadFromFile("models/rvtqd.obj");
+		std::vector<GameObject> rivets;
 
 		VertexArrayObject::sptr tubestr = ObjLoader::LoadFromFile("models/tubestr.obj");
 		VertexArrayObject::sptr tubelbw = ObjLoader::LoadFromFile("models/tubelbw.obj");
@@ -495,6 +509,8 @@ int main() {
 					//Create tube object
 					GameObject tubee = scene->CreateEntity("Tube");
 					tubes.push_back(tubee);
+					GameObject rvte = scene->CreateEntity("Rivet");
+					rivets.push_back(rvte);
 
 					//Pass the location in the array to the manager to get appropriate piece
 					glm::vec2 tubeData = Manager.GetTube(glm::vec2(i, j));
@@ -502,18 +518,22 @@ int main() {
 					case 1:
 						tMat->Set("s_Specular", tstr);
 						tubee.emplace<RendererComponent>().SetMesh(tubestr).SetMaterial(tMat);
+						rvte.emplace<RendererComponent>().SetMesh(rvtstr).SetMaterial(metalMat);
 						break;
 					case 2:
-						tMat->Set("s_Specular", tlbw);
+						tMat->Set("s_Specular", noSpec);
 						tubee.emplace<RendererComponent>().SetMesh(tubelbw).SetMaterial(tMat);
+						rvte.emplace<RendererComponent>().SetMesh(rvtlbw).SetMaterial(metalMat);
 						break;
 					case 3:
-						tMat->Set("s_Specular", ttee);
+						tMat->Set("s_Specular", noSpec);
 						tubee.emplace<RendererComponent>().SetMesh(tubetee).SetMaterial(tMat);
+						rvte.emplace<RendererComponent>().SetMesh(rvttee).SetMaterial(metalMat);
 						break;
 					case 4:
-						tMat->Set("s_Specular", tqd);
+						tMat->Set("s_Specular", noSpec);
 						tubee.emplace<RendererComponent>().SetMesh(tubeqd).SetMaterial(tMat);
+						rvte.emplace<RendererComponent>().SetMesh(rvtqd).SetMaterial(metalMat);
 						break;
 					default:
 						tMat->Set("s_Specular", noSpec);
@@ -528,6 +548,10 @@ int main() {
 					auto& tubeT = tubee.get<Transform>();
 					tubeT.SetLocalPosition(coord1, 0, coord2);
 					tubeT.SetLocalRotation(glm::vec3(0.0f, tubeData.y, 0.0f));
+
+					auto& rvtT = rvte.get<Transform>();
+					rvtT.SetLocalPosition(coord1, 0, coord2);
+					rvtT.SetLocalRotation(glm::vec3(0.0f, tubeData.y, 0.0f));
 
 					int r = rand() % 5;
 					if (r == 3 && canspawn) {
