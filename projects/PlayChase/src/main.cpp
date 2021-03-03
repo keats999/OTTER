@@ -483,7 +483,7 @@ int main() {
 					//Create tube material
 					ShaderMaterial::sptr tMat = ShaderMaterial::Create();
 					tMat->Shader = shader;
-					tMat->Set("u_Shininess", 8.0f);
+					tMat->Set("u_Shininess", 20.0f);
 					tMat->Set("u_TextureMix", 0.0f);
 
 					//Randomly pick a color and set the material diffuse
@@ -521,12 +521,12 @@ int main() {
 						rvte.emplace<RendererComponent>().SetMesh(rvtstr).SetMaterial(metalMat);
 						break;
 					case 2:
-						tMat->Set("s_Specular", noSpec);
+						tMat->Set("s_Specular", tlbw);
 						tubee.emplace<RendererComponent>().SetMesh(tubelbw).SetMaterial(tMat);
 						rvte.emplace<RendererComponent>().SetMesh(rvtlbw).SetMaterial(metalMat);
 						break;
 					case 3:
-						tMat->Set("s_Specular", noSpec);
+						tMat->Set("s_Specular", ttee);
 						tubee.emplace<RendererComponent>().SetMesh(tubetee).SetMaterial(tMat);
 						rvte.emplace<RendererComponent>().SetMesh(rvttee).SetMaterial(metalMat);
 						break;
@@ -588,8 +588,8 @@ int main() {
 
 		GameObject player = scene->CreateEntity("Player");
 		{
-			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
-			player.emplace<RendererComponent>().SetMesh(vao).SetMaterial(stoneMat);
+			//VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
+			//player.emplace<RendererComponent>().SetMesh(vao).SetMaterial(stoneMat);
 			auto& playerCol = player.emplace<Collision2D>(pworld->World());
 			playerCol.CreateDynamicBox(spawn, glm::vec2(2, 2), PLAYER, ENVIRONMENT|INTERACTABLE|OBJECT|ENEMY|PICKUP|TRIGGER);
 			//playerCol.getBody()->SetAngularDamping(1.0);
