@@ -33,6 +33,7 @@
 #include "Behaviours/GameBehaviour.h"
 #include "Behaviours/MenuBehaviour.h"
 #include "Behaviours/PauseBehaviour.h"
+#include "Behaviours/UIBehaviour.h"
 
 #include "Graphics/UIComponent.h"
 
@@ -440,7 +441,7 @@ int main() {
 		coinMat->Set("u_Shininess", 8.0f);
 		coinMat->Set("u_TextureMix", 0.0f);
 		int coincount = 0;
-
+		
 
 		VertexArrayObject::sptr rvtstr = ObjLoader::LoadFromFile("models/rvtstr.obj");
 		VertexArrayObject::sptr rvtlbw = ObjLoader::LoadFromFile("models/rvtlbw.obj");
@@ -775,6 +776,8 @@ int main() {
 		{
 			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
 			titleCard.emplace<RendererComponent>().SetMesh(vao).SetMaterial(titleMat);
+			//BehaviourBinding::Bind<UIBehaviour>(titleCard);
+			//BehaviourBinding::Get<UIBehaviour>(titleCard)->SetCamera(menucameraObject);
 			titleCard.get<Transform>().SetLocalRotation(-45, 180, 0);
 			titleCard.get<Transform>().SetLocalPosition(0, 0, 0.25);
 			titleCard.get<Transform>().SetLocalScale(1, 1, 1);
@@ -788,7 +791,7 @@ int main() {
 		GameObject spaceElement = menuscene->CreateEntity("Ui");
 		{
 			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
-			spaceElement.emplace<RendererComponent>().SetMesh(vao).SetMaterial(spcelMat);
+			spaceElement.emplace<UIComponent>().SetMesh().SetMaterial(spcelMat);
 			spaceElement.get<Transform>().SetLocalRotation(-45, 180, 0);
 			spaceElement.get<Transform>().SetLocalPosition(0, 0, -1.5);
 			spaceElement.get<Transform>().SetLocalScale(2, 2, 2);
@@ -1074,7 +1077,7 @@ int main() {
 			currentEffect->ApplyEffect(post[activePost]);
 			currentEffect->DrawToScreen();
 			currentEffect->UnbindBuffer();
-
+			
 			// Draw our ImGui content
 			BackendHandler::RenderImGui();
 
