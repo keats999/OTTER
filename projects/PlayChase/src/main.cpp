@@ -34,6 +34,8 @@
 #include "Behaviours/MenuBehaviour.h"
 #include "Behaviours/PauseBehaviour.h"
 
+#include "Graphics/UIComponent.h"
+
 #include "Utilities/Globals.h"
 
 #include "Utilities/Trigger.h"
@@ -95,10 +97,10 @@ int main() {
 		shader->Link();
 
 		glm::vec3 lightPos = glm::vec3(0.0f, -1.0f, 0.0f);
-		glm::vec3 lightCol = glm::vec3(0.9f, 0.85f, 0.65f);
+		glm::vec3 lightCol = glm::vec3(0.9f, 0.85f, 0.6f);
 		float     lightAmbientPow = 0.05f;
 		float     lightSpecularPow = 1.0f;
-		glm::vec3 ambientCol = glm::vec3(1.0f);
+		glm::vec3 ambientCol = glm::vec3(0.5f);
 		float     ambientPow = 0.025f;
 		float     lightLinearFalloff = 0.9f;
 		float     lightQuadraticFalloff = 0.032f;
@@ -127,6 +129,7 @@ int main() {
 		shader->SetUniform("s_RampTexture", 1);
 
 		PostEffect* testBuffer;
+		PostEffect* uiBuffer;
 
 		int activeEffect = 0;
 		std::vector<GameObject> effects;
@@ -135,7 +138,7 @@ int main() {
 
 		BloomEffect* bloomEffect;
 
-		int activePost = 0;
+		int activePost = 1;
 		std::vector<PostEffect*> post;
 		bool ramp=0;
 	
@@ -798,8 +801,9 @@ int main() {
 
 		GameObject ui = scene->CreateEntity("Ui");
 		{
-			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
-			ui.emplace<RendererComponent>().SetMesh(vao).SetMaterial(uiMat);
+			//VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
+			//ui.emplace<RendererComponent>().SetMesh(vao).SetMaterial(uiMat);
+			ui.emplace<UIComponent>().SetMesh().SetMaterial(uiMat);
 		}
 		////////////////////////////////////////////////////////////////////////////////////////
 
@@ -922,6 +926,9 @@ int main() {
 			entt::basic_group<entt::entity, entt::exclude_t<>, entt::get_t<Transform>, RendererComponent> renderGroup =
 				Application::Instance().ActiveScene->Registry().group<RendererComponent>(entt::get_t<Transform>());
 
+			entt::basic_group<entt::entity, entt::exclude_t<>, entt::get_t<Transform>, UIComponent> uiGroup =
+				Application::Instance().ActiveScene->Registry().group<UIComponent>(entt::get_t<Transform>());
+
 			// Iterate over all the behaviour binding components
 			Application::Instance().ActiveScene->Registry().view<BehaviourBinding>().each([&](entt::entity entity, BehaviourBinding& binding) {
 				// Iterate over all the behaviour scripts attached to the entity, and update them in sequence (if enabled)
@@ -1041,13 +1048,33 @@ int main() {
 			testBuffer->UnbindBuffer();
 
 			//testBuffer->DrawToBackbuffer();
+			current = nullptr;
+			currentMat = nullptr;
+
+			post[activePost]->ApplyEffect(testBuffer);
+			post[activePost]->DrawToScreen();
+
+			uiGroup.each([&](entt::entity e, UIComponent& renderer, Transform& transform) {
+				// If the shader has changed, set up it's uniforms
+				if (current != renderer.Material->Shader) {
+					current = renderer.Material->Shader;
+					current->Bind();
+					BackendHandler::SetupShaderForFrame(current, view, projection);
+				}
+				// If the material has changed, apply it
+				if (currentMat != renderer.Material) {
+					currentMat = renderer.Material;
+					currentMat->Apply();
+				}
+				// Render the mesh
+				BackendHandler::RenderVAO(renderer.Material->Shader, renderer.Mesh, viewProjection, transform);
+				});
+
 			PostEffect* currentEffect = &effects[activeEffect].get<ColorCorrection>();
-			currentEffect->ApplyEffect(testBuffer);
+			currentEffect->ApplyEffect(post[activePost]);
 			currentEffect->DrawToScreen();
 			currentEffect->UnbindBuffer();
 
-			post[activePost]->ApplyEffect(currentEffect);
-			post[activePost]->DrawToScreen();
 			// Draw our ImGui content
 			BackendHandler::RenderImGui();
 

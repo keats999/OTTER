@@ -1,6 +1,7 @@
 #pragma once
 #include "Scene.h"
 #include <memory>
+#include <Camera.h>
 
 class Globals {
 public:
