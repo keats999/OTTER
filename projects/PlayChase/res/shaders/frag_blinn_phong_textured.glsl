@@ -105,16 +105,14 @@ void main() {
 	else if(u_Mode == 4)
 	{
 		//Cel Shading
-		vec3 diffuseOut = (dif * u_LightCol) / (dist*dist);
-		diffuseOut = diffuseOut*lightIntensity;
-		diffuseOut=floor(diffuseOut*bands)*scaleFactor;
+		diffuse = floor(diffuse * bands) * scaleFactor;
 
 		//Outline
-		float edge=(dot(viewDir,N) <0.2)? 0.0 : 1.0;
+		float edge=(dot(viewDir,N) < 0.2)? 0.0 : 1.0;
 		
 		result = (
 		(u_AmbientCol * u_AmbientStrength) + // global ambient light
-		(ambient + (diffuseOut*edge) + specular) * attenuation // light factors from our single light
+		(ambient + diffuse + specular) * edge * attenuation // light factors from our single light
 		) * result; // Object color
 	}
 	else if(u_Mode == 5)

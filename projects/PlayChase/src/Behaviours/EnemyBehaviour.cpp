@@ -15,7 +15,7 @@ void EnemyBehaviour::Update(entt::handle entity)
 
 	Transform& transform = entity.get<Transform>();
 	
-	if (nodeIndex >= nodes.size() - 1 || nodes.size() <= 1)
+	if (nodeIndex >= 1 || nodes.size() <= 1)
 	{
 		nodes = MapManager::Instance().aStar(transform.GetLocalPosition(), targetpos);
 		nodeIndex = 0;
