@@ -31,7 +31,7 @@ uniform int u_Mode;
 uniform int u_Textures;
 
 //cel shading
-uniform float lightIntensity = 10.0;
+uniform float lightIntensity = 20.0;
 const int bands = 5;
 const float scaleFactor = 1.0/bands;
 

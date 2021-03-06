@@ -180,8 +180,8 @@ int main() {
 			if (ImGui::Button("Ambient + Specular + Custom")) {
 				mode = 4;
 				shader->SetUniform("u_Mode", mode);
-				activePost = 0;
-
+				activePost = 1;
+				
 			}
 			if (ImGui::Button("Ambient + Specular + Bloom")) {
 				mode = 7;
@@ -431,7 +431,7 @@ int main() {
 		simpleFloraMat->Set("s_Specular", noSpec);
 		simpleFloraMat->Set("u_Shininess", 8.0f);
 		simpleFloraMat->Set("u_TextureMix", 0.0f);
-
+		
 		VertexArrayObject::sptr coinvao = ObjLoader::LoadFromFile("models/coin.obj");
 		std::vector<GameObject> coins;
 		ShaderMaterial::sptr coinMat = ShaderMaterial::Create();
