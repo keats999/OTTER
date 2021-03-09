@@ -110,7 +110,7 @@ void AudioBus::StopAllEvent(const bool& fade)
 	{
 		ErrorCheck(m_Bus->stopAllEvents(FMOD_STUDIO_STOP_IMMEDIATE));
 	}
-	
+
 }
 
 
@@ -123,7 +123,7 @@ void AudioListener::SetPosition(const glm::vec3& pos)
 {
 
 	// Convert glm vec to fmod vec
-	FMOD_VECTOR newPos =  VectorToFmod(pos);
+	FMOD_VECTOR newPos = VectorToFmod(pos);
 
 	// Update our member data
 	m_AttenuationPosition = newPos;
@@ -132,7 +132,7 @@ void AudioListener::SetPosition(const glm::vec3& pos)
 	// Update in fmod studio
 	ErrorCheck(
 		m_StudioSystem->setListenerAttributes(
-			m_ID, 
+			m_ID,
 			&m_Attributes,
 			&m_AttenuationPosition));
 
@@ -330,11 +330,11 @@ void AudioEngine::Init()
 	ErrorCheck(m_StudioSystem->setNumListeners(1));
 	m_Listener.SetID(0);
 	m_Listener.m_StudioSystem = m_StudioSystem;
-	
+
 	// Get the attributes
 	ErrorCheck(
-		m_StudioSystem->getListenerAttributes(0, 
-			&m_Listener.m_Attributes, 
+		m_StudioSystem->getListenerAttributes(0,
+			&m_Listener.m_Attributes,
 			&m_Listener.m_AttenuationPosition));
 
 }
@@ -408,7 +408,7 @@ AudioEvent& AudioEngine::CreateSound(const std::string& eventName, const std::st
 
 		// Create an audio event
 		AudioEvent* newAudioEvent = new AudioEvent(newFMODEvent);
-		
+
 		// Make sure multiple events with the same name aren't created
 		if (m_EventMap.find(eventName) != m_EventMap.end())
 		{
@@ -420,7 +420,7 @@ AudioEvent& AudioEngine::CreateSound(const std::string& eventName, const std::st
 
 		return *newAudioEvent;
 	}
-	
+
 }
 
 AudioEvent& AudioEngine::GetEvent(const std::string& strEventName)
