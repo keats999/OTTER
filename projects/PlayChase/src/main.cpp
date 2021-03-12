@@ -136,8 +136,8 @@ int main() {
 		std::vector<GameObject> effects;
 		
 		GreyscaleEffect* greyscaleEffect;
-
 		BloomEffect* bloomEffect;
+		PixelationEffect* pixelEffect;
 
 		int activePost = 1;
 		std::vector<PostEffect*> post;
@@ -148,104 +148,123 @@ int main() {
 
 		// We'll add some ImGui controls to control our shader
 		BackendHandler::imGuiCallbacks.push_back([&]() {
+			if (ImGui::CollapsingHeader("basic lighting"))
+			{
+				if (ImGui::Button("No Lighting")) {
+					mode = 1;
+					shader->SetUniform("u_Mode", mode);
+					activePost = 0;
 
-			if (ImGui::Button("No Lighting")) {
-				mode = 1;
-				shader->SetUniform("u_Mode", mode);
-				activePost = 0;
+				}
 
-			}
-			
-			if (ImGui::Button("Ambient Only")) {
-				mode = 2;
-				shader->SetUniform("u_Mode", mode);
-				activePost = 0;
+				if (ImGui::Button("Ambient Only")) {
+					mode = 2;
+					shader->SetUniform("u_Mode", mode);
+					activePost = 0;
 
-			}
-			
-			if (ImGui::Button("Specular Only")) {
-				mode = 3;
-				shader->SetUniform("u_Mode", mode);
-				activePost = 0;
+				}
 
-			}
-			
-			if (ImGui::Button("Ambient + Specular")) {
-				mode = 0;
-				shader->SetUniform("u_Mode", mode);
-				activePost = 0;
+				if (ImGui::Button("Specular Only")) {
+					mode = 3;
+					shader->SetUniform("u_Mode", mode);
+					activePost = 0;
 
-			}
+				}
 
-			if (ImGui::Button("Ambient + Specular + Custom")) {
-				mode = 4;
-				shader->SetUniform("u_Mode", mode);
-				activePost = 1;
-				
-			}
-			if (ImGui::Button("Ambient + Specular + Bloom")) {
-				mode = 7;
-				shader->SetUniform("u_Mode", mode);
-				activePost = 1;
-			}
-			if (ImGui::Button("Diffuse Ramp")) {
-				mode = 5;
-				shader->SetUniform("u_Mode", mode);
+				if (ImGui::Button("Ambient + Specular")) {
+					mode = 0;
+					shader->SetUniform("u_Mode", mode);
+					activePost = 0;
+
+				}
+
+				if (ImGui::Button("Ambient + Specular + Custom")) {
+					mode = 4;
+					shader->SetUniform("u_Mode", mode);
+					activePost = 1;
+
+				}
+				if (ImGui::Button("Ambient + Specular + Bloom")) {
+					mode = 7;
+					shader->SetUniform("u_Mode", mode);
+					activePost = 1;
+				}
+				if (ImGui::Button("Diffuse Ramp")) {
+					mode = 5;
+					shader->SetUniform("u_Mode", mode);
 					shader->SetUniform("s_RampTexture", 1);
 					activePost = 0;
 
-			}
-			
-			if (ImGui::Button("Specular Ramp")) {
-				mode = 6;
-				shader->SetUniform("u_Mode", mode);
+				}
+
+				if (ImGui::Button("Specular Ramp")) {
+					mode = 6;
+					shader->SetUniform("u_Mode", mode);
 					shader->SetUniform("s_RampTexture", 1);
 					activePost = 0;
 
-			}
-			if (ImGui::CollapsingHeader("Effect controls")) {
-				BloomEffect* temp = (BloomEffect*)post[activePost];
-				float threshold = temp->GetThreshold();
-				int pass = temp->GetPasses();
-
-				if (ImGui::SliderFloat("Brightness Threshold", &threshold, 0.0f, 1.0f))
-				{
-					temp->SetThreshold(threshold);
-				}
-
-				if (ImGui::SliderInt("Blur", &pass, 0, 10))
-				{
-					temp->SetPasses(pass);
 				}
 			}
-			if (ImGui::Button("Color Grading Warm")) {
-				if (activeEffect == 1)
-					activeEffect = 0;
-				else
-					activeEffect = 1;
-			}
-			
-			if (ImGui::Button("Color Grading Cool")) {
-				if (activeEffect == 2)
-					activeEffect = 0;
-				else
-					activeEffect = 2;
-			}
-			
-			if (ImGui::Button("Color Grading Custom")) {
-				if (activeEffect == 3)
-					activeEffect = 0;
-				else
-					activeEffect = 3;
-			}
+			if (ImGui::CollapsingHeader("Assignment 3"))
+			{
+				if (ImGui::SliderInt("Active Post Effect", &activePost, 0, 2));
 
-			if (ImGui::Button("Toggle Textures")) {
-				if (textures == 0)
-					textures = 1;
-				else
-					textures = 0;
+				if (activePost == 1 && ImGui::CollapsingHeader("Bloom Effect controls")) {
+					BloomEffect* temp = (BloomEffect*)post[activePost];
+					float threshold = temp->GetThreshold();
+					int pass = temp->GetPasses();
 
-				shader->SetUniform("u_Textures", textures);
+					if (ImGui::SliderFloat("Brightness Threshold", &threshold, 0.0f, 1.0f))
+					{
+						temp->SetThreshold(threshold);
+					}
+
+					if (ImGui::SliderInt("Blur", &pass, 0, 10))
+					{
+						temp->SetPasses(pass);
+					}
+				}
+				if (activePost == 2 && ImGui::CollapsingHeader("Pixelation Effect controls")) {
+					PixelationEffect* temp = (PixelationEffect*)post[activePost];
+					float percent = temp->GetPercentOfPixels();
+
+					if (ImGui::SliderFloat("percent of pixels", &percent, 0.0f, 1.0f))
+					{
+						temp->SetPercentOfPixels(percent);
+					}
+				}
+			}
+			if (ImGui::CollapsingHeader("colour correction"))
+			{
+				if (ImGui::Button("Color Grading Warm")) {
+					if (activeEffect == 1)
+						activeEffect = 0;
+					else
+						activeEffect = 1;
+				}
+
+				if (ImGui::Button("Color Grading Cool")) {
+					if (activeEffect == 2)
+						activeEffect = 0;
+					else
+						activeEffect = 2;
+				}
+
+				if (ImGui::Button("Color Grading Custom")) {
+					if (activeEffect == 3)
+						activeEffect = 0;
+					else
+						activeEffect = 3;
+				}
+
+				if (ImGui::Button("Toggle Textures")) {
+					if (textures == 0)
+						textures = 1;
+					else
+						textures = 0;
+
+					shader->SetUniform("u_Textures", textures);
+				}
 			}
 			/*if (ImGui::CollapsingHeader("Scene Level Lighting Settings"))
 			{
@@ -604,14 +623,14 @@ int main() {
 
 		GameObject enemy = scene->CreateEntity("Enemy");
 		{
-			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/rat.obj");
+			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/rat_head_on_clown_body_test_head_attached.obj");
 			enemy.emplace<RendererComponent>().SetMesh(vao).SetMaterial(ratMat);
 			auto& enemyCol = enemy.emplace<Collision2D>(pworld->World());
 			enemyCol.CreateDynamicBox(enemySpawn, glm::vec2(1, 1), ENEMY, PLAYER);
 			enemyCol.getBody()->SetUserData(&enemy);
 			enemyCol.getFixture()->SetSensor(true);
 			enemyCol.getFixture()->SetEntity(enemy.entity());
-			enemy.get<Transform>().SetLocalScale(0.5f, 0.5f, 0.5f);
+			enemy.get<Transform>().SetLocalScale(0.15f, 0.15f, 0.15f);
 			BehaviourBinding::Bind<EnemyBehaviour>(enemy);
 			BehaviourBinding::Get<EnemyBehaviour>(enemy)->SetTarget(player);
 			TriggerBinding::Bind<EnemyTrigger>(enemy);
@@ -708,6 +727,13 @@ int main() {
 			bloomEffect->Init(width, height);
 		}
 		post.push_back(bloomEffect);
+
+		GameObject pixelationEffectObject = scene->CreateEntity("Pixelation Effect");
+		{
+			pixelEffect = &pixelationEffectObject.emplace<PixelationEffect>();
+			pixelEffect->Init(width, height);
+		}
+		post.push_back(pixelEffect);
 		//////////////////////////////////////////////////////////////////////////////////////////
 
 		/////////////////////////////////// CONTROLLERS //////////////////////////////////////////
@@ -877,7 +903,6 @@ int main() {
 		music.Play();
 		AudioEvent& playerThumping = engine.CreateSound("Player Thumping", "event:/Thump");
 		playerThumping.Play();
-		//AudioEvent& enemyThumping = engine.CreateSound("Enemy Thumping", "event:/Thump");  // Dont do anything to this sound yet because we dont have the right model for it
 		AudioEvent& enemyScratching = engine.CreateSound("Enemy Scratching", "event:/Scratching");
 		enemyScratching.Play();
 		AudioEvent& enemyAmbient = engine.CreateSound("Enemy Ambient", "event:/Clown Ambient");

@@ -77,6 +77,10 @@ void BackendHandler::GlfwWindowResizedCallback(GLFWwindow* window, int width, in
 	{
 		buf.Reshape(width, height);
 	});
+	Application::Instance().ActiveScene->Registry().view<PixelationEffect>().each([=](PixelationEffect& buf)
+	{
+		buf.Reshape(width, height);
+	});
 
 	windowWidth = width;
 	windowHeight = height;
