@@ -149,6 +149,9 @@ int main() {
 
 		//Creates our directional Light
 		DirectionalLight theSun;
+		theSun._lightCol = glm::vec4(0.9f, 0.85f, 0.6f, 0.0f);
+		theSun._ambientCol = glm::vec4(0.5f, 0.5f, 0.5f, 0.0f);
+		theSun._lightDirection = glm::vec4(0.f, 3.f, 0.f, 0.0f);
 		UniformBuffer directionalLightBuffer;
 
 		//Allocates enough memory for one directional light (we can change this easily, but we only need 1 directional light)
@@ -717,7 +720,6 @@ int main() {
 		{
 			illuminationBuffer = &illuminationBufferObject.emplace<IlluminationBuffer>();
 			illuminationBuffer->Init(width, height);
-			//illuminationBuffer->EnableSun(false);
 		}
 		GameObject framebufferObject = scene->CreateEntity("Basic Buffer");
 		{
@@ -1071,12 +1073,14 @@ int main() {
 
 			if (Application::Instance().ActiveScene == scene) {
 				// Grab out camera info from the camera object
+				illuminationBuffer->EnableSun(true);
 				camTransform = cameraObject.get<Transform>();
 				view = glm::inverse(camTransform.LocalTransform());
 				projection = cameraObject.get<Camera>().GetProjection();
 				viewProjection = projection * view;
 			}
 			else {
+				illuminationBuffer->EnableSun(false);
 				camTransform = menucameraObject.get<Transform>();
 				view = glm::inverse(camTransform.LocalTransform());
 				projection = menucameraObject.get<Camera>().GetProjection();
@@ -1182,8 +1186,8 @@ int main() {
 			current = nullptr;
 			currentMat = nullptr;
 
-			//post[activePost]->ApplyEffect(testBuffer);
-			//post[activePost]->DrawToScreen();
+			post[activePost]->ApplyEffect(illuminationBuffer);
+			post[activePost]->DrawToScreen();
 
 			uiGroup.each([&](entt::entity e, UIComponent& renderer, Transform& transform) {
 				// If the shader has changed, set up it's uniforms
@@ -1197,16 +1201,14 @@ int main() {
 					currentMat = renderer.Material;
 					currentMat->Apply();
 				}
-				shadowBuffer->BindDepthAsTexture(30);
-				// Render the mesh
-				BackendHandler::RenderVAO(renderer.Material->Shader, renderer.Mesh, viewProjection, transform, lightSpaceViewProj);
+				BackendHandler::RenderVAO(renderer.Material->Shader, renderer.Mesh, viewProjection, transform);
 			});
 
-			/*PostEffect* currentEffect = &effects[activeEffect].get<ColorCorrection>();
+			PostEffect* currentEffect = &effects[activeEffect].get<ColorCorrection>();
 			currentEffect->ApplyEffect(post[activePost]);
 			currentEffect->DrawToScreen();
 			currentEffect->UnbindBuffer();
-			*/
+			
 			// Draw our ImGui content
 			BackendHandler::RenderImGui();
 			engine.Update();
