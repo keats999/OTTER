@@ -176,6 +176,7 @@ int main() {
 		GreyscaleEffect* greyscaleEffect;
 		BloomEffect* bloomEffect;
 		PixelationEffect* pixelEffect;
+		NightVisionEffect* nightVisionEffect;
 
 		int activePost = 1;
 		std::vector<PostEffect*> post;
@@ -245,7 +246,7 @@ int main() {
 			}
 			if (ImGui::CollapsingHeader("Assignment 3"))
 			{
-				if (ImGui::SliderInt("Active Post Effect", &activePost, 0, 2));
+				if (ImGui::SliderInt("Active Post Effect", &activePost, 0, 3));
 
 				if (activePost == 1 && ImGui::CollapsingHeader("Bloom Effect controls")) {
 					BloomEffect* temp = (BloomEffect*)post[activePost];
@@ -269,6 +270,15 @@ int main() {
 					if (ImGui::SliderFloat("percent of pixels", &percent, 0.0f, 1.0f))
 					{
 						temp->SetPercentOfPixels(percent);
+					}
+				}
+				if (activePost == 3 && ImGui::CollapsingHeader("Night Vision Effect controls")) {
+					NightVisionEffect* temp = (NightVisionEffect*)post[activePost];
+					float intensity = temp->GetIntensity();
+
+					if (ImGui::SliderFloat("percent of pixels", &intensity, 0.0f, 1.0f))
+					{
+						temp->SetIntensity(intensity);
 					}
 				}
 			}
@@ -790,6 +800,13 @@ int main() {
 			pixelEffect->Init(width, height);
 		}
 		post.push_back(pixelEffect);
+
+		GameObject nightVisionEffectObject = scene->CreateEntity("Night Vision Effect Effect");
+		{
+			nightVisionEffect = &nightVisionEffectObject.emplace<NightVisionEffect>();
+			nightVisionEffect->Init(width, height);
+		}
+		post.push_back(nightVisionEffect);
 		//////////////////////////////////////////////////////////////////////////////////////////
 
 		/////////////////////////////////// CONTROLLERS //////////////////////////////////////////
