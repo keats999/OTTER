@@ -16,6 +16,7 @@ float mod(float num1, float num2)
 
 float rand()
 {
+	//credit to appas at https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl for a psudeo random number generator base
 	return abs(fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233)) * (mod(u_Time, 10.0) + 1.0)) * 43758.5453));
 }
 
