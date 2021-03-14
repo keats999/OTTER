@@ -177,6 +177,7 @@ int main() {
 		BloomEffect* bloomEffect;
 		PixelationEffect* pixelEffect;
 		NightVisionEffect* nightVisionEffect;
+		FilmGrainEffect* filmGrainEffect;
 
 		int activePost = 1;
 		std::vector<PostEffect*> post;
@@ -246,7 +247,7 @@ int main() {
 			}
 			if (ImGui::CollapsingHeader("Assignment 3"))
 			{
-				if (ImGui::SliderInt("Active Post Effect", &activePost, 0, 3));
+				if (ImGui::SliderInt("Active Post Effect", &activePost, 0, 4));
 
 				if (activePost == 1 && ImGui::CollapsingHeader("Bloom Effect controls")) {
 					BloomEffect* temp = (BloomEffect*)post[activePost];
@@ -276,7 +277,16 @@ int main() {
 					NightVisionEffect* temp = (NightVisionEffect*)post[activePost];
 					float intensity = temp->GetIntensity();
 
-					if (ImGui::SliderFloat("percent of pixels", &intensity, 0.0f, 1.0f))
+					if (ImGui::SliderFloat("Intensity", &intensity, 0.0f, 1.0f))
+					{
+						temp->SetIntensity(intensity);
+					}
+				}
+				if (activePost == 4 && ImGui::CollapsingHeader("Film Grain Effect controls")) {
+					FilmGrainEffect* temp = (FilmGrainEffect*)post[activePost];
+					float intensity = temp->GetIntensity();
+
+					if (ImGui::SliderFloat("Intensity", &intensity, 0.0f, 1.0f))
 					{
 						temp->SetIntensity(intensity);
 					}
@@ -807,6 +817,13 @@ int main() {
 			nightVisionEffect->Init(width, height);
 		}
 		post.push_back(nightVisionEffect);
+
+		GameObject filmGrainEffectObject = scene->CreateEntity("Film Grain Effect Effect");
+		{
+			filmGrainEffect = &filmGrainEffectObject.emplace<FilmGrainEffect>();
+			filmGrainEffect->Init(width, height);
+		}
+		post.push_back(filmGrainEffect);
 		//////////////////////////////////////////////////////////////////////////////////////////
 
 		/////////////////////////////////// CONTROLLERS //////////////////////////////////////////
@@ -1196,12 +1213,18 @@ int main() {
 				illuminationBuffer->DrawToScreen();
 			}*/
 
+			if (activePost == 4)
+			{
+				FilmGrainEffect* temp = (FilmGrainEffect*)post[activePost];
+				temp->SetTime(float(glfwGetTime()));
+			}
+
 			switch (activeDef) {
 			case 1: gBuffer->DrawBuffer(3); break;
 			case 2: gBuffer->DrawBuffer(1); break;
 			case 3: gBuffer->DrawBuffer(0); break;
 			case 4: illuminationBuffer->DrawIllumBuffer(); break;
-			default: illuminationBuffer->DrawToScreen(); 
+			default: illuminationBuffer->DrawToScreen();
 				post[activePost]->ApplyEffect(illuminationBuffer);
 				post[activePost]->DrawToScreen();
 
