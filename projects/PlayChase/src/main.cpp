@@ -18,6 +18,10 @@
 #include <TextureCubeMap.h>
 #include <TextureCubeMapData.h>
 
+#include <DirectionalLight.h>
+#include <PointLight.h>
+#include <UniformBuffer.h>
+
 #include <Timing.h>
 #include <GameObjectTag.h>
 #include <InputHelpers.h>
@@ -61,6 +65,8 @@ int main() {
 	float minFps, maxFps, avgFps;
 	int selectedVao = 0; // select cube by default
 	std::vector<GameObject> controllables;
+	bool drawGBuffer = false;
+	bool drawIllumBuffer = false;
 
 	BackendHandler::InitAll();
 
@@ -87,14 +93,26 @@ int main() {
 		colorCorrectionShader->LoadShaderPartFromFile("shaders/Post/color_correction_frag.glsl", GL_FRAGMENT_SHADER);
 		colorCorrectionShader->Link();
 
+		Shader::sptr simpleDepthShader = Shader::Create();
+		simpleDepthShader->LoadShaderPartFromFile("shaders/simple_depth_vert.glsl", GL_VERTEX_SHADER);
+		simpleDepthShader->LoadShaderPartFromFile("shaders/simple_depth_frag.glsl", GL_FRAGMENT_SHADER);
+		simpleDepthShader->Link();
+
+		Shader::sptr gBufferShader = Shader::Create();
+		gBufferShader->LoadShaderPartFromFile("shaders/vertex_shader.glsl", GL_VERTEX_SHADER);
+		gBufferShader->LoadShaderPartFromFile("shaders/gBuffer_pass_frag.glsl", GL_FRAGMENT_SHADER);
+		gBufferShader->Link();
+
 		Shader::sptr uiShader = Shader::Create();
 		uiShader->LoadShaderPartFromFile("shaders/ui_vert.glsl", GL_VERTEX_SHADER);
 		uiShader->LoadShaderPartFromFile("shaders/ui_frag.glsl", GL_FRAGMENT_SHADER);
 		uiShader->Link();
 
+		// Load our shaders
 		Shader::sptr shader = Shader::Create();
 		shader->LoadShaderPartFromFile("shaders/vertex_shader.glsl", GL_VERTEX_SHADER);
-		shader->LoadShaderPartFromFile("shaders/frag_blinn_phong_textured.glsl", GL_FRAGMENT_SHADER);
+		//Directional Light Shader
+		shader->LoadShaderPartFromFile("shaders/directional_blinn_phong_frag.glsl", GL_FRAGMENT_SHADER);
 		shader->Link();
 
 		glm::vec3 lightPos = glm::vec3(0.0f, -1.0f, 0.0f);
@@ -129,8 +147,23 @@ int main() {
 		
 		shader->SetUniform("s_RampTexture", 1);
 
+		//Creates our directional Light
+		DirectionalLight theSun;
+		UniformBuffer directionalLightBuffer;
+
+		//Allocates enough memory for one directional light (we can change this easily, but we only need 1 directional light)
+		directionalLightBuffer.AllocateMemory(sizeof(DirectionalLight));
+		//Casts our sun as "data" and sends it to the shader
+		directionalLightBuffer.SendData(reinterpret_cast<void*>(&theSun), sizeof(DirectionalLight));
+
+		directionalLightBuffer.Bind(0);
+
 		PostEffect* testBuffer;
 		PostEffect* uiBuffer;
+
+		Framebuffer* shadowBuffer;
+		GBuffer* gBuffer;
+		IlluminationBuffer* illuminationBuffer;
 
 		int activeEffect = 0;
 		std::vector<GameObject> effects;
@@ -403,42 +436,42 @@ int main() {
 
 		// Create a material and set some properties for it
 		ShaderMaterial::sptr stoneMat = ShaderMaterial::Create();  
-		stoneMat->Shader = shader;
+		stoneMat->Shader = gBufferShader;
 		stoneMat->Set("s_Diffuse", stone);
 		stoneMat->Set("s_Specular", stoneSpec);
 		stoneMat->Set("u_Shininess", 2.0f);
 		stoneMat->Set("u_TextureMix", 0.0f); 
 
 		ShaderMaterial::sptr metalMat = ShaderMaterial::Create();
-		metalMat->Shader = shader;
+		metalMat->Shader = gBufferShader;
 		metalMat->Set("s_Diffuse", metal);
 		metalMat->Set("s_Specular", noSpec);
 		metalMat->Set("u_Shininess", 10.0f);
 		metalMat->Set("u_TextureMix", 0.0f);
 
 		ShaderMaterial::sptr grassMat = ShaderMaterial::Create();
-		grassMat->Shader = shader;
+		grassMat->Shader = gBufferShader;
 		grassMat->Set("s_Diffuse", grass);
 		grassMat->Set("s_Specular", noSpec);
 		grassMat->Set("u_Shininess", 2.0f);
 		grassMat->Set("u_TextureMix", 0.0f);
 
 		ShaderMaterial::sptr boxMat = ShaderMaterial::Create();
-		boxMat->Shader = shader;
+		boxMat->Shader = gBufferShader;
 		boxMat->Set("s_Diffuse", box);
 		boxMat->Set("s_Specular", boxSpec);
 		boxMat->Set("u_Shininess", 8.0f);
 		boxMat->Set("u_TextureMix", 0.0f);
 
 		ShaderMaterial::sptr simpleFloraMat = ShaderMaterial::Create();
-		simpleFloraMat->Shader = shader;
+		simpleFloraMat->Shader = gBufferShader;
 		simpleFloraMat->Set("s_Diffuse", simpleFlora);
 		simpleFloraMat->Set("s_Specular", noSpec);
 		simpleFloraMat->Set("u_Shininess", 8.0f);
 		simpleFloraMat->Set("u_TextureMix", 0.0f);
 
 		ShaderMaterial::sptr ratMat = ShaderMaterial::Create();
-		ratMat->Shader = shader;
+		ratMat->Shader = gBufferShader;
 		ratMat->Set("s_Diffuse", rattex);
 		ratMat->Set("s_Specular", noSpec);
 		ratMat->Set("u_Shininess", 8.0f);
@@ -454,7 +487,7 @@ int main() {
 		VertexArrayObject::sptr coinvao = ObjLoader::LoadFromFile("models/coin.obj");
 		std::vector<GameObject> coins;
 		ShaderMaterial::sptr coinMat = ShaderMaterial::Create();
-		coinMat->Shader = shader;
+		coinMat->Shader = gBufferShader;
 		coinMat->Set("s_Diffuse", coin);
 		coinMat->Set("s_Specular", noSpec);
 		coinMat->Set("u_Shininess", 8.0f);
@@ -505,7 +538,7 @@ int main() {
 					
 					//Create tube material
 					ShaderMaterial::sptr tMat = ShaderMaterial::Create();
-					tMat->Shader = shader;
+					tMat->Shader = gBufferShader;
 					tMat->Set("u_Shininess", 20.0f);
 					tMat->Set("u_TextureMix", 0.0f);
 
@@ -540,27 +573,27 @@ int main() {
 					switch (int(tubeData.x)) {
 					case 1:
 						tMat->Set("s_Specular", tstr);
-						tubee.emplace<RendererComponent>().SetMesh(tubestr).SetMaterial(tMat);
-						rvte.emplace<RendererComponent>().SetMesh(rvtstr).SetMaterial(metalMat);
+						tubee.emplace<RendererComponent>().SetMesh(tubestr).SetMaterial(tMat).SetCastShadow(false);
+						rvte.emplace<RendererComponent>().SetMesh(rvtstr).SetMaterial(metalMat).SetCastShadow(false);
 						break;
 					case 2:
 						tMat->Set("s_Specular", tlbw);
-						tubee.emplace<RendererComponent>().SetMesh(tubelbw).SetMaterial(tMat);
-						rvte.emplace<RendererComponent>().SetMesh(rvtlbw).SetMaterial(metalMat);
+						tubee.emplace<RendererComponent>().SetMesh(tubelbw).SetMaterial(tMat).SetCastShadow(false);
+						rvte.emplace<RendererComponent>().SetMesh(rvtlbw).SetMaterial(metalMat).SetCastShadow(false);
 						break;
 					case 3:
 						tMat->Set("s_Specular", ttee);
-						tubee.emplace<RendererComponent>().SetMesh(tubetee).SetMaterial(tMat);
-						rvte.emplace<RendererComponent>().SetMesh(rvttee).SetMaterial(metalMat);
+						tubee.emplace<RendererComponent>().SetMesh(tubetee).SetMaterial(tMat).SetCastShadow(false);
+						rvte.emplace<RendererComponent>().SetMesh(rvttee).SetMaterial(metalMat).SetCastShadow(false);
 						break;
 					case 4:
 						tMat->Set("s_Specular", noSpec);
-						tubee.emplace<RendererComponent>().SetMesh(tubeqd).SetMaterial(tMat);
-						rvte.emplace<RendererComponent>().SetMesh(rvtqd).SetMaterial(metalMat);
+						tubee.emplace<RendererComponent>().SetMesh(tubeqd).SetMaterial(tMat).SetCastShadow(false);
+						rvte.emplace<RendererComponent>().SetMesh(rvtqd).SetMaterial(metalMat).SetCastShadow(false);
 						break;
 					default:
 						tMat->Set("s_Specular", noSpec);
-						tubee.emplace<RendererComponent>().SetMesh(tubend).SetMaterial(tMat);
+						tubee.emplace<RendererComponent>().SetMesh(tubend).SetMaterial(tMat).SetCastShadow(false);
 						Manager.saferooms.push_back(glm::vec2(coord1, coord2));
 						pspawn = true;
 						canspawn = false;
@@ -674,13 +707,32 @@ int main() {
 			menucamera.SetFovDegrees(90.0f); // Set an initial FOV
 			menucamera.SetOrthoHeight(0.0f);
 		}
+		GameObject gBufferObject = scene->CreateEntity("G Buffer");
+		{
+			gBuffer = &gBufferObject.emplace<GBuffer>();
+			gBuffer->Init(width, height);
+		}
 
+		GameObject illuminationBufferObject = scene->CreateEntity("Illumination Buffer");
+		{
+			illuminationBuffer = &illuminationBufferObject.emplace<IlluminationBuffer>();
+			illuminationBuffer->Init(width, height);
+			//illuminationBuffer->EnableSun(false);
+		}
 		GameObject framebufferObject = scene->CreateEntity("Basic Buffer");
 		{
 			testBuffer = &framebufferObject.emplace<PostEffect>();
 			testBuffer->Init(width, height);
 		}
+		int shadowWidth = 4096;
+		int shadowHeight = 4096;
 
+		GameObject shadowBufferObject = scene->CreateEntity("Shadow Buffer");
+		{
+			shadowBuffer = &shadowBufferObject.emplace<Framebuffer>();
+			shadowBuffer->AddDepthTarget();
+			shadowBuffer->Init(shadowWidth, shadowHeight);
+		}
 		GameObject noColorCorrectionObj = scene->CreateEntity("Color Correct");
 		{
 			ColorCorrection* noColorCorrectEffect = &noColorCorrectionObj.emplace<ColorCorrection>();
@@ -753,7 +805,7 @@ int main() {
 		//////////////////////////////////////////////////////////////////////////////////////////
 
 		/////////////////////////////////// SKYBOX ///////////////////////////////////////////////
-		{
+		
 			// Load our shaders
 			Shader::sptr skybox = std::make_shared<Shader>();
 			skybox->LoadShaderPartFromFile("shaders/skybox-shader.vert.glsl", GL_VERTEX_SHADER);
@@ -764,7 +816,7 @@ int main() {
 			skyboxMat->Shader = skybox;  
 			skyboxMat->Set("s_Environment", environmentMap);
 			skyboxMat->Set("u_EnvironmentRotation", glm::mat3(glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1, 0, 0))));
-			skyboxMat->RenderLayer = 1;
+			skyboxMat->RenderLayer = 10;
 
 			MeshBuilder<VertexPosNormTexCol> mesh;
 			MeshFactory::AddIcoSphere(mesh, glm::vec3(0.0f), 1.0f);
@@ -773,8 +825,8 @@ int main() {
 			
 			GameObject skyboxObj = scene->CreateEntity("skybox");  
 			skyboxObj.get<Transform>().SetLocalPosition(0.0f, 0.0f, 0.0f);
-			skyboxObj.get_or_emplace<RendererComponent>().SetMesh(meshVao).SetMaterial(skyboxMat);
-		}
+			//skyboxObj.get_or_emplace<RendererComponent>().SetMesh(meshVao).SetMaterial(skyboxMat);
+		
 
 		////////////////////////////////////////////////////////////////////////////////////////
 
@@ -998,8 +1050,11 @@ int main() {
 			{
 				post[i]->Clear();
 			}
+			shadowBuffer->Clear();
+			gBuffer->Clear();
+			illuminationBuffer->Clear();
 
-			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glClearColor(1.0f, 1.0f, 1.0f, 0.3f);
 			glEnable(GL_DEPTH_TEST);
 			glClearDepth(1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1027,7 +1082,16 @@ int main() {
 				projection = menucameraObject.get<Camera>().GetProjection();
 				viewProjection = projection * view;
 			}
-						
+			
+			//Set up light space matrix
+			glm::mat4 lightProjectionMatrix = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, -30.0f, 30.0f);
+			glm::mat4 lightViewMatrix = glm::lookAt(glm::vec3(-illuminationBuffer->GetSunRef()._lightDirection), glm::vec3(), glm::vec3(0.0f, 0.0f, 1.0f));
+			glm::mat4 lightSpaceViewProj = lightProjectionMatrix * lightViewMatrix;
+
+			illuminationBuffer->SetLightSpaceViewProj(lightSpaceViewProj);
+			glm::vec3 camPos = glm::inverse(view) * glm::vec4(0, 0, 0, 1);
+			illuminationBuffer->SetCamPos(camPos);
+
 			// Sort the renderers by shader and material, we will go for a minimizing context switches approach here,
 			// but you could for instance sort front to back to optimize for fill rate if you have intensive fragment shaders
 			renderGroup.sort<RendererComponent>([](const RendererComponent& l, const RendererComponent& r) {
@@ -1050,8 +1114,23 @@ int main() {
 			Shader::sptr current = nullptr;
 			ShaderMaterial::sptr currentMat = nullptr;
 
-			testBuffer->BindBuffer(0);
+			glViewport(0, 0, shadowWidth, shadowHeight);
+			shadowBuffer->Bind();
 
+			renderGroup.each([&](entt::entity e, RendererComponent& renderer, Transform& transform) {
+				// Render the mesh
+				if (renderer.CastShadows)
+				{
+					BackendHandler::RenderVAO(simpleDepthShader, renderer.Mesh, viewProjection, transform, lightSpaceViewProj);
+				}
+				});
+
+			shadowBuffer->Unbind();
+
+			glfwGetWindowSize(BackendHandler::window, &width, &height);
+
+			glViewport(0, 0, width, height);
+			gBuffer->Bind();
 			// Iterate over the render group components and draw them
 			renderGroup.each( [&](entt::entity e, RendererComponent& renderer, Transform& transform) {
 				// If the shader has changed, set up it's uniforms
@@ -1065,18 +1144,46 @@ int main() {
 					currentMat = renderer.Material;
 					currentMat->Apply();
 				}
+
+				shadowBuffer->BindDepthAsTexture(30);
 				// Render the mesh
-				BackendHandler::RenderVAO(renderer.Material->Shader, renderer.Mesh, viewProjection, transform);
+				BackendHandler::RenderVAO(renderer.Material->Shader, renderer.Mesh, viewProjection, transform, lightSpaceViewProj);
 			});
 
-			testBuffer->UnbindBuffer();
+			gBuffer->Unbind();
+
+			illuminationBuffer->BindBuffer(0);
+			skybox->Bind();
+			BackendHandler::SetupShaderForFrame(skybox, view, projection);
+			skyboxMat->Apply();
+			BackendHandler::RenderVAO(skybox, meshVao, viewProjection, skyboxObj.get<Transform>(), lightSpaceViewProj);
+			skybox->UnBind();
+
+			illuminationBuffer->UnbindBuffer();
+
+			shadowBuffer->BindDepthAsTexture(30);
+
+			illuminationBuffer->ApplyEffect(gBuffer);
+
+			if (drawGBuffer)
+			{
+				gBuffer->DrawBuffersToScreen();
+			}
+			else if (drawIllumBuffer)
+			{
+				illuminationBuffer->DrawIllumBuffer();
+			}
+			else
+			{
+				illuminationBuffer->DrawToScreen();
+			}
 
 			//testBuffer->DrawToBackbuffer();
 			current = nullptr;
 			currentMat = nullptr;
 
-			post[activePost]->ApplyEffect(testBuffer);
-			post[activePost]->DrawToScreen();
+			//post[activePost]->ApplyEffect(testBuffer);
+			//post[activePost]->DrawToScreen();
 
 			uiGroup.each([&](entt::entity e, UIComponent& renderer, Transform& transform) {
 				// If the shader has changed, set up it's uniforms
@@ -1090,15 +1197,16 @@ int main() {
 					currentMat = renderer.Material;
 					currentMat->Apply();
 				}
+				shadowBuffer->BindDepthAsTexture(30);
 				// Render the mesh
-				BackendHandler::RenderVAO(renderer.Material->Shader, renderer.Mesh, viewProjection, transform);
-				});
+				BackendHandler::RenderVAO(renderer.Material->Shader, renderer.Mesh, viewProjection, transform, lightSpaceViewProj);
+			});
 
-			PostEffect* currentEffect = &effects[activeEffect].get<ColorCorrection>();
+			/*PostEffect* currentEffect = &effects[activeEffect].get<ColorCorrection>();
 			currentEffect->ApplyEffect(post[activePost]);
 			currentEffect->DrawToScreen();
 			currentEffect->UnbindBuffer();
-			
+			*/
 			// Draw our ImGui content
 			BackendHandler::RenderImGui();
 			engine.Update();
@@ -1107,7 +1215,7 @@ int main() {
 			glfwSwapBuffers(BackendHandler::window);
 			time.LastFrame = time.CurrentFrame;
 		}
-
+		directionalLightBuffer.Unbind(0);
 		// Nullify scene so that we can release references
 		Application::Instance().ActiveScene = nullptr;
 		Globals::Instance().scenes.clear();

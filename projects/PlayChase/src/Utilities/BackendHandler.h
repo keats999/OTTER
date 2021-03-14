@@ -7,6 +7,9 @@
 #include "Graphics/Post/BloomEffect.h"
 #include "Graphics/Post/PixelationEffect.h"
 
+#include "Graphics/GBuffer.h"
+#include "Graphics/IlluminationBuffer.h"
+
 #include <iostream>
 #include <Logging.h>
 
@@ -59,7 +62,7 @@ public:
 	static void RenderImGui();
 
 	//Render our VAO
-	static void RenderVAO(const Shader::sptr& shader, const VertexArrayObject::sptr& vao, const glm::mat4& viewProjection, const Transform& transform);
+	static void RenderVAO(const Shader::sptr& shader, const VertexArrayObject::sptr& vao, const glm::mat4& viewProjection, const Transform& transform, const glm::mat4& lightSpaceMat = glm::mat4());
 	static void RenderGUI(const Shader::sptr& shader, const VertexArrayObject::sptr& vao, const Transform& transform);
 	static void SetupShaderForFrame(const Shader::sptr& shader, const glm::mat4& view, const glm::mat4& projection);
 
