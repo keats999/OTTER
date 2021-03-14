@@ -168,6 +168,8 @@ int main() {
 		GBuffer* gBuffer;
 		IlluminationBuffer* illuminationBuffer;
 
+		int activeDef = 0;
+
 		int activeEffect = 0;
 		std::vector<GameObject> effects;
 		
@@ -902,26 +904,21 @@ int main() {
 			keyToggles.emplace_back(GLFW_KEY_ESCAPE, [&]() { BehaviourBinding::Get<FirstPersonBehaviour>(cameraObject)->ToggleMouse(); });
 
 			keyToggles.emplace_back(GLFW_KEY_1, [&]() {
-				mode = 1;
+				activeDef = 0;
 				});
 			keyToggles.emplace_back(GLFW_KEY_2, [&]() {
-				mode = 2;
+				activeDef = 1;
 				});
 			keyToggles.emplace_back(GLFW_KEY_3, [&]() {
-				mode = 3;
+				activeDef = 2;
 				});
 			keyToggles.emplace_back(GLFW_KEY_4, [&]() {
-				mode = 0;
+				activeDef = 3;
 				});
 			keyToggles.emplace_back(GLFW_KEY_5, [&]() {
-				mode = 4;
+				activeDef = 4;
 				});
-			keyToggles.emplace_back(GLFW_KEY_6, [&]() {
-				mode = 5;
-				});
-			keyToggles.emplace_back(GLFW_KEY_7, [&]() {
-				mode = 6;
-				});
+
 			/*controllables.push_back(obj2);
 
 			keyToggles.emplace_back(GLFW_KEY_KP_ADD, [&]() {
@@ -1169,7 +1166,7 @@ int main() {
 
 			illuminationBuffer->ApplyEffect(gBuffer);
 
-			if (drawGBuffer)
+			/*if (drawGBuffer)
 			{
 				gBuffer->DrawBuffersToScreen();
 			}
@@ -1180,15 +1177,29 @@ int main() {
 			else
 			{
 				illuminationBuffer->DrawToScreen();
+			}*/
+
+			switch (activeDef) {
+			case 1: gBuffer->DrawBuffer(3); break;
+			case 2: gBuffer->DrawBuffer(1); break;
+			case 3: gBuffer->DrawBuffer(0); break;
+			case 4: illuminationBuffer->DrawIllumBuffer(); break;
+			default: illuminationBuffer->DrawToScreen(); 
+				post[activePost]->ApplyEffect(illuminationBuffer);
+				post[activePost]->DrawToScreen();
+
+				PostEffect* currentEffect = &effects[activeEffect].get<ColorCorrection>();
+				currentEffect->ApplyEffect(post[activePost]);
+				currentEffect->DrawToScreen();
+				currentEffect->UnbindBuffer(); break;
 			}
 
 			//testBuffer->DrawToBackbuffer();
+			
+
+			
 			current = nullptr;
 			currentMat = nullptr;
-
-			post[activePost]->ApplyEffect(illuminationBuffer);
-			post[activePost]->DrawToScreen();
-
 			uiGroup.each([&](entt::entity e, UIComponent& renderer, Transform& transform) {
 				// If the shader has changed, set up it's uniforms
 				if (current != renderer.Material->Shader) {
@@ -1202,12 +1213,7 @@ int main() {
 					currentMat->Apply();
 				}
 				BackendHandler::RenderVAO(renderer.Material->Shader, renderer.Mesh, viewProjection, transform);
-			});
-
-			PostEffect* currentEffect = &effects[activeEffect].get<ColorCorrection>();
-			currentEffect->ApplyEffect(post[activePost]);
-			currentEffect->DrawToScreen();
-			currentEffect->UnbindBuffer();
+				});
 			
 			// Draw our ImGui content
 			BackendHandler::RenderImGui();

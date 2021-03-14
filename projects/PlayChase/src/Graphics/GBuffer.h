@@ -35,7 +35,7 @@ public:
 	//Draws out the buffers to the screen
 	void DrawBuffersToScreen();
 
-	Framebuffer* GetBuffer() { return &_gBuffer; }
+	void DrawBuffer(int target);
 
 	//Reshape the framebuffer
 	void Reshape(unsigned width, unsigned height);
