@@ -2,7 +2,6 @@
 
 #include "Utilities/Util.h"
 #include "Graphics/Post/GreyscaleEffect.h"
-#include "Graphics/Post/NightVisionEffect.h"
 #include "Graphics/Post/FilmGrainEffect.h"
 #include "Graphics/Post/SepiaEffect.h"
 #include "Graphics/Post/ColorCorrection.h"

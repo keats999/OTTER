@@ -81,10 +81,6 @@ void BackendHandler::GlfwWindowResizedCallback(GLFWwindow* window, int width, in
 	{
 		buf.Reshape(width, height);
 	});
-	Application::Instance().ActiveScene->Registry().view<NightVisionEffect>().each([=](NightVisionEffect& buf)
-	{
-		buf.Reshape(width, height);
-	});
 	Application::Instance().ActiveScene->Registry().view<FilmGrainEffect>().each([=](FilmGrainEffect& buf)
 	{
 		buf.Reshape(width, height);

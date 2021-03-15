@@ -175,11 +175,10 @@ int main() {
 		
 		GreyscaleEffect* greyscaleEffect;
 		BloomEffect* bloomEffect;
-		PixelationEffect* pixelEffect;
-		NightVisionEffect* nightVisionEffect;
 		FilmGrainEffect* filmGrainEffect;
+		PixelationEffect* pixelEffect;
 
-		int activePost = 1;
+		int activePost = 0;
 		std::vector<PostEffect*> post;
 		bool ramp=0;
 	
@@ -247,7 +246,7 @@ int main() {
 			}
 			if (ImGui::CollapsingHeader("Assignment 3"))
 			{
-				if (ImGui::SliderInt("Active Post Effect", &activePost, 0, 4));
+				if (ImGui::SliderInt("Active Post Effect", &activePost, 0, 3));
 
 				if (activePost == 1 && ImGui::CollapsingHeader("Bloom Effect controls")) {
 					BloomEffect* temp = (BloomEffect*)post[activePost];
@@ -264,31 +263,22 @@ int main() {
 						temp->SetPasses(pass);
 					}
 				}
-				if (activePost == 2 && ImGui::CollapsingHeader("Pixelation Effect controls")) {
-					PixelationEffect* temp = (PixelationEffect*)post[activePost];
-					float percent = temp->GetPercentOfPixels();
-
-					if (ImGui::SliderFloat("percent of pixels", &percent, 0.0f, 1.0f))
-					{
-						temp->SetPercentOfPixels(percent);
-					}
-				}
-				if (activePost == 3 && ImGui::CollapsingHeader("Night Vision Effect controls")) {
-					NightVisionEffect* temp = (NightVisionEffect*)post[activePost];
-					float intensity = temp->GetIntensity();
-
-					if (ImGui::SliderFloat("Intensity", &intensity, 0.0f, 1.0f))
-					{
-						temp->SetIntensity(intensity);
-					}
-				}
-				if (activePost == 4 && ImGui::CollapsingHeader("Film Grain Effect controls")) {
+				if (activePost == 2 && ImGui::CollapsingHeader("Film Grain Effect controls")) {
 					FilmGrainEffect* temp = (FilmGrainEffect*)post[activePost];
 					float intensity = temp->GetIntensity();
 
 					if (ImGui::SliderFloat("Intensity", &intensity, 0.0f, 1.0f))
 					{
 						temp->SetIntensity(intensity);
+					}
+				}
+				if (activePost == 3 && ImGui::CollapsingHeader("Pixelation Effect controls")) {
+					PixelationEffect* temp = (PixelationEffect*)post[activePost];
+					float percent = temp->GetPercentOfPixels();
+
+					if (ImGui::SliderFloat("percent of pixels", &percent, 0.0f, 1.0f))
+					{
+						temp->SetPercentOfPixels(percent);
 					}
 				}
 			}
@@ -804,26 +794,19 @@ int main() {
 		}
 		post.push_back(bloomEffect);
 
-		GameObject pixelationEffectObject = scene->CreateEntity("Pixelation Effect");
-		{
-			pixelEffect = &pixelationEffectObject.emplace<PixelationEffect>();
-			pixelEffect->Init(width, height);
-		}
-		post.push_back(pixelEffect);
-
-		GameObject nightVisionEffectObject = scene->CreateEntity("Night Vision Effect Effect");
-		{
-			nightVisionEffect = &nightVisionEffectObject.emplace<NightVisionEffect>();
-			nightVisionEffect->Init(width, height);
-		}
-		post.push_back(nightVisionEffect);
-
 		GameObject filmGrainEffectObject = scene->CreateEntity("Film Grain Effect Effect");
 		{
 			filmGrainEffect = &filmGrainEffectObject.emplace<FilmGrainEffect>();
 			filmGrainEffect->Init(width, height);
 		}
 		post.push_back(filmGrainEffect);
+
+		GameObject pixelationEffectObject = scene->CreateEntity("Pixelation Effect");
+		{
+			pixelEffect = &pixelationEffectObject.emplace<PixelationEffect>();
+			pixelEffect->Init(width, height);
+		}
+		post.push_back(pixelEffect);
 		//////////////////////////////////////////////////////////////////////////////////////////
 
 		/////////////////////////////////// CONTROLLERS //////////////////////////////////////////
@@ -1213,7 +1196,7 @@ int main() {
 				illuminationBuffer->DrawToScreen();
 			}*/
 
-			if (activePost == 4)
+			if (post[activePost] == filmGrainEffect)
 			{
 				FilmGrainEffect* temp = (FilmGrainEffect*)post[activePost];
 				temp->SetTime(float(glfwGetTime()));
