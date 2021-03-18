@@ -59,6 +59,7 @@ public:
 	std::vector<glm::vec3> NodeListToVecList(std::vector<Node> nodes);
 
 	std::vector<glm::vec2> saferooms;
+	std::vector<int> safeindexes;
 
 protected:
 	int row = 0, col = 0;

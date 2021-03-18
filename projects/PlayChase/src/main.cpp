@@ -178,10 +178,12 @@ int main() {
 		FilmGrainEffect* filmGrainEffect;
 		PixelationEffect* pixelEffect;
 
-
+		int activePost = 1;
 		std::vector<PostEffect*> post;
 		bool ramp=0;
-	
+		
+		std::vector<GameObject> enemies;
+
 		int width, height;
 		glfwGetWindowSize(BackendHandler::window, &width, &height);
 
@@ -404,7 +406,11 @@ int main() {
 		Texture2D::sptr spcelement = Texture2D::LoadFromFile("images/spcelement.png");
 		Texture2D::sptr endelement = Texture2D::LoadFromFile("images/endelement.png");
 
+		Texture2D::sptr dep = Texture2D::LoadFromFile("images/deposit.png");
+		Texture2D::sptr scrn = Texture2D::LoadFromFile("images/screens/screen9.png");
+		Texture2D::sptr disp = Texture2D::LoadFromFile("images/display.png");
 
+		
 		// Load the cube map
 		TextureCubeMap::sptr environmentMap = TextureCubeMap::LoadFromImages("images/cubemaps/skybox/dark.jpg");
 		Texture2D::sptr uiTex = Texture2D::LoadFromFile("images/testUI.png");
@@ -479,6 +485,27 @@ int main() {
 		boxMat->Set("s_Specular", boxSpec);
 		boxMat->Set("u_Shininess", 8.0f);
 		boxMat->Set("u_TextureMix", 0.0f);
+
+		ShaderMaterial::sptr depositMat = ShaderMaterial::Create();
+		depositMat->Shader = gBufferShader;
+		depositMat->Set("s_Diffuse", dep);
+		depositMat->Set("s_Specular", noSpec);
+		depositMat->Set("u_Shininess", 2.0f);
+		depositMat->Set("u_TextureMix", 0.0f);
+
+		ShaderMaterial::sptr displayMat = ShaderMaterial::Create();
+		displayMat->Shader = gBufferShader;
+		displayMat->Set("s_Diffuse", disp);
+		displayMat->Set("s_Specular", noSpec);
+		displayMat->Set("u_Shininess", 2.0f);
+		displayMat->Set("u_TextureMix", 0.0f);
+
+		ShaderMaterial::sptr screenMat = ShaderMaterial::Create();
+		screenMat->Shader = gBufferShader;
+		screenMat->Set("s_Diffuse", scrn);
+		screenMat->Set("s_Specular", noSpec);
+		screenMat->Set("u_Shininess", 2.0f);
+		screenMat->Set("u_TextureMix", 0.0f);
 
 		ShaderMaterial::sptr simpleFloraMat = ShaderMaterial::Create();
 		simpleFloraMat->Shader = gBufferShader;
@@ -612,6 +639,7 @@ int main() {
 						tMat->Set("s_Specular", noSpec);
 						tubee.emplace<RendererComponent>().SetMesh(tubend).SetMaterial(tMat).SetCastShadow(false);
 						Manager.saferooms.push_back(glm::vec2(coord1, coord2));
+						Manager.safeindexes.push_back(tubes.size()-1);
 						pspawn = true;
 						canspawn = false;
 						break;
@@ -659,6 +687,37 @@ int main() {
 		 spawn = Manager.saferooms[Manager.saferooms.size() - 1];
 		 enemySpawn = exitloc;
 
+
+		 GameObject deposit = scene->CreateEntity("Deposit");
+		 {
+			 VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/deposit.obj");
+			 int spawnindex = Manager.safeindexes[Manager.safeindexes.size()-1];
+			 GameObject spawntube = tubes[spawnindex];
+			deposit.get<Transform>().SetLocalPosition(spawntube.get<Transform>().GetLocalPosition());
+			deposit.get<Transform>().SetLocalRotation(spawntube.get<Transform>().GetLocalRotation());
+			deposit.emplace<RendererComponent>().SetMesh(vao).SetMaterial(depositMat).SetCastShadow(false);
+		 }
+
+		 GameObject display = scene->CreateEntity("Display");
+		 {
+			 VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/display.obj");
+			 int spawnindex = Manager.safeindexes[Manager.safeindexes.size() - 1];
+			 GameObject spawntube = tubes[spawnindex];
+			 display.get<Transform>().SetLocalPosition(spawntube.get<Transform>().GetLocalPosition());
+			 display.get<Transform>().SetLocalRotation(spawntube.get<Transform>().GetLocalRotation());
+			 display.emplace<RendererComponent>().SetMesh(vao).SetMaterial(displayMat).SetCastShadow(false);
+		 }
+		 GameObject displayscreen = scene->CreateEntity("Screen");
+		 {
+			 VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/screen.obj");
+			 int spawnindex = Manager.safeindexes[Manager.safeindexes.size() - 1];
+			 GameObject spawntube = tubes[spawnindex];
+			 displayscreen.get<Transform>().SetLocalPosition(spawntube.get<Transform>().GetLocalPosition());
+			 displayscreen.get<Transform>().SetLocalRotation(spawntube.get<Transform>().GetLocalRotation());
+			 displayscreen.get<Transform>().SetLocalScale(1.f, 1.f, 1.f);
+			 displayscreen.emplace<RendererComponent>().SetMesh(vao).SetMaterial(screenMat).SetCastShadow(false);
+		 }
+		 
 		GameObject player = scene->CreateEntity("Player");
 		{
 			//VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
@@ -673,7 +732,7 @@ int main() {
 
 		GameObject enemy = scene->CreateEntity("Enemy");
 		{
-			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/ratresize.obj");
+			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/rat1.obj");
 			enemy.emplace<RendererComponent>().SetMesh(vao).SetMaterial(ratMat);
 			auto& enemyCol = enemy.emplace<Collision2D>(pworld->World());
 			enemyCol.CreateDynamicBox(enemySpawn, glm::vec2(1, 1), ENEMY, PLAYER);
@@ -894,7 +953,7 @@ int main() {
 		GameObject spaceElement = menuscene->CreateEntity("Ui");
 		{
 			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
-			spaceElement.emplace<UIComponent>().SetMaterial(spcelMat);
+			spaceElement.emplace<UIComponent>().SetMesh().SetMaterial(spcelMat);
 			spaceElement.get<Transform>().SetLocalRotation(-45, 180, 0);
 			spaceElement.get<Transform>().SetLocalPosition(0, 0, -1.5);
 			spaceElement.get<Transform>().SetLocalScale(2, 2, 2);
@@ -909,7 +968,7 @@ int main() {
 		{
 			//VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
 			//ui.emplace<RendererComponent>().SetMesh(vao).SetMaterial(uiMat);
-			ui.emplace<UIComponent>().SetMaterial(uiMat);
+			ui.emplace<UIComponent>().SetMesh().SetMaterial(uiMat);
 		}
 		////////////////////////////////////////////////////////////////////////////////////////
 

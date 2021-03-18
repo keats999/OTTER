@@ -7,6 +7,7 @@
 #include "Graphics/Post/ColorCorrection.h"
 #include "Graphics/Post/BloomEffect.h"
 #include "Graphics/Post/PixelationEffect.h"
+#include "Graphics/Post/NightVisionEffect.h"
 
 #include "Graphics/GBuffer.h"
 #include "Graphics/IlluminationBuffer.h"
