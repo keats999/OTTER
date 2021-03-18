@@ -972,6 +972,33 @@ int main() {
 		}
 		////////////////////////////////////////////////////////////////////////////////////////
 
+		//////////////////////////////////////// Sound Setup //////////////////////////////////////////////
+		// Setup FMOD
+		AudioEngine& engine = AudioEngine::Instance();
+		engine.Init();
+		engine.LoadBank("Master");
+		engine.LoadBank("Master.strings");
+
+		// Add sound events
+		AudioEvent& music = engine.CreateSound("Music", "event:/BGM");// Right-click event in fmod -> copy path
+		music.Play();
+		AudioEvent& playerThumping = engine.CreateSound("Player Thumping", "event:/Thump");
+		playerThumping.Play();
+		AudioEvent& enemyScratching = engine.CreateSound("Enemy Scratching", "event:/Scratching");
+		enemyScratching.Play();
+		AudioEvent& enemyAmbient = engine.CreateSound("Enemy Ambient", "event:/Clown Ambient");
+
+		//add modifiers to the sounds (can be done dynamically)
+		playerThumping.SetParameter("Moving", 0);
+		enemyScratching.SetParameter("Moving", 1);
+
+		// Get ref to Listener
+		AudioListener& listener = engine.GetListener(); // Can use this listener to change the player's 3D position
+		listener.SetUp(glm::vec3(0.0f, 1.0f, 0.0f));
+
+		bool paused = false;
+		///////////////////////////////////////////////////////////////////////////////////////////////////
+
 		// We'll use a vector to store all our key press events for now (this should probably be a behaviour eventually)
 		std::vector<KeyPressWatcher> keyToggles;
 		{
@@ -981,7 +1008,13 @@ int main() {
 			// use std::bind
 			keyToggles.emplace_back(GLFW_KEY_T, [&]() { cameraObject.get<Camera>().ToggleOrtho(); });
 
-			keyToggles.emplace_back(GLFW_KEY_ESCAPE, [&]() { BehaviourBinding::Get<FirstPersonBehaviour>(cameraObject)->ToggleMouse(); });
+			keyToggles.emplace_back(GLFW_KEY_ESCAPE, [&]() {
+				BehaviourBinding::Get<FirstPersonBehaviour>(cameraObject)->ToggleMouse();
+				paused = !paused;
+				music.SetParameter("Paused", int(paused));
+				playerThumping.SetParameter("Paused", int(paused));
+				enemyScratching.SetParameter("Paused", int(paused)); }
+			);
 
 			keyToggles.emplace_back(GLFW_KEY_1, [&]() {
 				activeDef = 0;
@@ -1021,31 +1054,6 @@ int main() {
 				behaviour->Relative = !behaviour->Relative;
 				});*/
 		}
-
-		//////////////////////////////////////// Sound Setup //////////////////////////////////////////////
-		// Setup FMOD
-		AudioEngine& engine = AudioEngine::Instance();
-		engine.Init();
-		engine.LoadBank("Master");
-		engine.LoadBank("Master.strings");
-		
-		// Add sound events
-		AudioEvent& music = engine.CreateSound("Music", "event:/BGM");// Right-click event in fmod -> copy path
-		music.Play();
-		AudioEvent& playerThumping = engine.CreateSound("Player Thumping", "event:/Thump");
-		playerThumping.Play();
-		AudioEvent& enemyScratching = engine.CreateSound("Enemy Scratching", "event:/Scratching");
-		enemyScratching.Play();
-		AudioEvent& enemyAmbient = engine.CreateSound("Enemy Ambient", "event:/Clown Ambient");
-		
-		//add modifiers to the sounds (can be done dynamically)
-		playerThumping.SetParameter("Moving", 0);
-		enemyScratching.SetParameter("Moving", 1);
-		
-		// Get ref to Listener
-		AudioListener& listener = engine.GetListener(); // Can use this listener to change the player's 3D position
-		listener.SetUp(glm::vec3(0.0f, 1.0f, 0.0f));
-		///////////////////////////////////////////////////////////////////////////////////////////////////
 
 		// Initialize our timing instance and grab a reference for our use
 		Timing& time = Timing::Instance();
