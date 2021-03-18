@@ -178,7 +178,7 @@ int main() {
 		FilmGrainEffect* filmGrainEffect;
 		PixelationEffect* pixelEffect;
 
-		int activePost = 0;
+
 		std::vector<PostEffect*> post;
 		bool ramp=0;
 	
@@ -314,6 +314,8 @@ int main() {
 					shader->SetUniform("u_Textures", textures);
 				}
 			}
+			auto behaviour = BehaviourBinding::Get<EnemyBehaviour>(enemies[0]);
+			ImGui::Checkbox("Enemy Active", &behaviour->Enabled);
 			/*if (ImGui::CollapsingHeader("Scene Level Lighting Settings"))
 			{
 				if (ImGui::ColorPicker3("Ambient Color", glm::value_ptr(ambientCol))) {
@@ -671,7 +673,7 @@ int main() {
 
 		GameObject enemy = scene->CreateEntity("Enemy");
 		{
-			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/rat_head_on_clown_body_test_head_attached.obj");
+			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/ratresize.obj");
 			enemy.emplace<RendererComponent>().SetMesh(vao).SetMaterial(ratMat);
 			auto& enemyCol = enemy.emplace<Collision2D>(pworld->World());
 			enemyCol.CreateDynamicBox(enemySpawn, glm::vec2(1, 1), ENEMY, PLAYER);
@@ -679,10 +681,12 @@ int main() {
 			enemyCol.getFixture()->SetSensor(true);
 			enemyCol.getFixture()->SetEntity(enemy.entity());
 			enemy.get<Transform>().SetLocalScale(0.15f, 0.15f, 0.15f);
+			enemy.get<Transform>().SetLocalPosition(0.f, -0.1f, 0.f);
 			BehaviourBinding::Bind<EnemyBehaviour>(enemy);
 			BehaviourBinding::Get<EnemyBehaviour>(enemy)->SetTarget(player);
 			TriggerBinding::Bind<EnemyTrigger>(enemy);
 		}
+		enemies.push_back(enemy);
 		
 		GameObject exit = scene->CreateEntity("Exit");
 		{
@@ -820,7 +824,7 @@ int main() {
 		}
 		GameObject pauseController = pausescene->CreateEntity("PauseController");
 		{
-			//BehaviourBinding::Bind<PauseBehaviour>(pauseController);
+			BehaviourBinding::Bind<PauseBehaviour>(pauseController);
 		}
 		#pragma endregion 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -890,7 +894,7 @@ int main() {
 		GameObject spaceElement = menuscene->CreateEntity("Ui");
 		{
 			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
-			spaceElement.emplace<UIComponent>().SetMesh().SetMaterial(spcelMat);
+			spaceElement.emplace<UIComponent>().SetMaterial(spcelMat);
 			spaceElement.get<Transform>().SetLocalRotation(-45, 180, 0);
 			spaceElement.get<Transform>().SetLocalPosition(0, 0, -1.5);
 			spaceElement.get<Transform>().SetLocalScale(2, 2, 2);
@@ -905,7 +909,7 @@ int main() {
 		{
 			//VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
 			//ui.emplace<RendererComponent>().SetMesh(vao).SetMaterial(uiMat);
-			ui.emplace<UIComponent>().SetMesh().SetMaterial(uiMat);
+			ui.emplace<UIComponent>().SetMaterial(uiMat);
 		}
 		////////////////////////////////////////////////////////////////////////////////////////
 
