@@ -151,7 +151,7 @@ int main() {
 		DirectionalLight theSun;
 		theSun._lightCol = glm::vec4(0.9f, 0.85f, 0.6f, 0.0f);
 		theSun._ambientCol = glm::vec4(0.5f, 0.5f, 0.5f, 0.0f);
-		theSun._lightDirection = glm::vec4(0.f, 3.f, 0.f, 0.0f);
+		theSun._lightDirection = glm::vec4(0.f, 0.f, 0.f, 0.0f);
 		UniformBuffer directionalLightBuffer;
 
 		//Allocates enough memory for one directional light (we can change this easily, but we only need 1 directional light)
@@ -316,6 +316,9 @@ int main() {
 					shader->SetUniform("u_Textures", textures);
 				}
 			}
+			if (ImGui::DragFloat4("Light Dir", glm::value_ptr(theSun._lightDirection), 0.01f, -10.0f, 10.0f)) {
+				directionalLightBuffer.SendData(reinterpret_cast<void*>(&theSun), sizeof(DirectionalLight));
+			}
 			auto behaviour = BehaviourBinding::Get<EnemyBehaviour>(enemies[0]);
 			ImGui::Checkbox("Enemy Active", &behaviour->Enabled);
 			/*if (ImGui::CollapsingHeader("Scene Level Lighting Settings"))
@@ -386,7 +389,7 @@ int main() {
 		Texture2D::sptr boxSpec = Texture2D::LoadFromFile("images/box-reflections.bmp");
 		Texture2D::sptr simpleFlora = Texture2D::LoadFromFile("images/SimpleFlora.png");
 		Texture2D::sptr coin = Texture2D::LoadFromFile("images/coin.png");
-		Texture2D::sptr rattex = Texture2D::LoadFromFile("images/f.png");
+		Texture2D::sptr rattex = Texture2D::LoadFromFile("images/ratTex.png");
 
 		Texture2D::sptr tstr = Texture2D::LoadFromFile("images/tubestr.png");
 		Texture2D::sptr ttee = Texture2D::LoadFromFile("images/tubetee.png");
@@ -687,6 +690,16 @@ int main() {
 		 spawn = Manager.saferooms[Manager.saferooms.size() - 1];
 		 enemySpawn = exitloc;
 
+		 /*GameObject shade = scene->CreateEntity("shade");
+		 {
+			 VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
+			 shade.emplace<RendererComponent>().SetMesh(vao).SetMaterial(stoneMat);
+			 shade.get<Transform>().SetLocalRotation(0, 90, 0);
+			 int spawnindex = Manager.safeindexes[Manager.safeindexes.size() - 1];
+			 GameObject spawntube = tubes[spawnindex];
+			 shade.get<Transform>().SetLocalPosition(10, 10, 10);
+			 shade.get<Transform>().SetLocalScale(15, 15, 15);
+		 }*/
 
 		 GameObject deposit = scene->CreateEntity("Deposit");
 		 {
