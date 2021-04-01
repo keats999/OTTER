@@ -1,6 +1,6 @@
-# Blender v2.83.5 OBJ File: 'rat_body_headless_with_texture_single_texture_uv_test.blend'
+# Blender v2.92.0 OBJ File: 'rat_single_uv.blend'
 # www.blender.org
-mtllib rat1.mtl
+mtllib rat_single_uv frame 1.mtl
 o Torso_Sphere.007
 v -0.293707 -2.548243 2.472541
 v -0.285993 -2.570615 2.369617
@@ -10872,7 +10872,7 @@ vn 0.8831 0.1884 -0.4295
 vn 0.6001 0.0571 -0.7979
 vn 0.4941 0.0161 -0.8692
 vn 0.5314 0.0464 -0.8459
-usemtl Material.002
+usemtl Material.007
 s 1
 f 1935/2847/1935 1948/2848/1936 2062/2849/1937
 f 1936/2850/1938 1953/2851/1939 1941/2852/1940
