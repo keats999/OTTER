@@ -98,28 +98,6 @@ void ObjAnimation::LoadFromFolder(const std::string& folderName, const int numOf
 	currentVertexInfo = vertexInfo[0];
 }
 
-std::vector<std::vector<VertexPosNormTexCol>> LERP(std::vector<std::vector<VertexPosNormTexCol>> frame1, std::vector<std::vector<VertexPosNormTexCol>> frame2, float t)
-{
-	std::vector<std::vector<VertexPosNormTexCol>> returnValue;
-	for (int i = 0; i < frame1.size(); i++)
-	{
-		std::vector<VertexPosNormTexCol> faceVertcies;
-		for (int j = 0; j < frame1[i].size(); j++)
-		{
-			VertexPosNormTexCol vertex;
-
-			vertex.Position = frame1[i][j].Position + (frame2[i][j].Position - frame1[i][j].Position) * t;
-			vertex.Normal = frame1[i][j].Normal + (frame2[i][j].Normal - frame1[i][j].Normal) * t;
-			vertex.UV = frame1[i][j].UV + (frame2[i][j].UV - frame1[i][j].UV) * t;
-			vertex.Color = frame1[i][j].Color + (frame2[i][j].Color - frame1[i][j].Color) * t;
-
-			faceVertcies.push_back(vertex);
-		}
-		returnValue.push_back(faceVertcies);
-	}
-	return returnValue;
-}
-
 void ObjAnimation::UpdateAnimation(float deltaTime)
 {
 	if (vertexInfo.size() == 0)
@@ -133,19 +111,18 @@ void ObjAnimation::UpdateAnimation(float deltaTime)
 	else
 	{
 		totalTime += deltaTime;
-		if (totalTime >= 0.2f)
+		if (totalTime >= 0.07f)
 		{
 			totalTime = 0.0f;
-			currentFrame = nextFrame;
-			nextFrame++;
+			currentFrame++;
 
-			if (nextFrame == vertexInfo.size())
+			if (currentFrame == vertexInfo.size())
 			{
-				nextFrame = 0;
+				currentFrame = 0;
 			}
-		}
 
-		currentVertexInfo = LERP(vertexInfo[currentFrame], vertexInfo[nextFrame], totalTime);
+			currentVertexInfo = vertexInfo[currentFrame];
+		}
 	}
 }
 

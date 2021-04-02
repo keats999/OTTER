@@ -1197,7 +1197,7 @@ int main() {
 			illuminationBuffer->SetCamPos(camPos);
 
 			//Animations
-			//enemy.get<ObjAnimation>().UpdateAnimation(time.DeltaTime);
+			enemy.get<ObjAnimation>().UpdateAnimation(time.DeltaTime);
 			enemy.get<RendererComponent>().SetMesh(enemy.get<ObjAnimation>().LoadMesh()).SetMaterial(ratMat);
 
 			// Sort the renderers by shader and material, we will go for a minimizing context switches approach here,

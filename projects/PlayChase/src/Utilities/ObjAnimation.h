@@ -33,6 +33,5 @@ private:
 	std::vector<std::vector<VertexPosNormTexCol>> currentVertexInfo;
 
 	int currentFrame = 0;
-	int nextFrame = 1;
 	float totalTime = 0.0f;
 };
