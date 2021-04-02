@@ -653,10 +653,12 @@ int main() {
 					auto& tubeT = tubee.get<Transform>();
 					tubeT.SetLocalPosition(coord1, 0, coord2);
 					tubeT.SetLocalRotation(glm::vec3(0.0f, tubeData.y, 0.0f));
+					tubeT.SetLocalScale(glm::vec3(1.05f, 1.0f, 1.05f));
 
 					auto& rvtT = rvte.get<Transform>();
 					rvtT.SetLocalPosition(coord1, 0, coord2);
 					rvtT.SetLocalRotation(glm::vec3(0.0f, tubeData.y, 0.0f));
+					rvtT.SetLocalScale(glm::vec3(1.05f, 1.0f, 1.05f));
 
 					int r = rand() % 5;
 					if (r == 3 && canspawn) {
@@ -691,7 +693,7 @@ int main() {
 		 spawn = Manager.saferooms[Manager.saferooms.size() - 1];
 		 enemySpawn = exitloc;
 
-		 /*GameObject shade = scene->CreateEntity("shade");
+		 GameObject shade = scene->CreateEntity("shade");
 		 {
 			 VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
 			 shade.emplace<RendererComponent>().SetMesh(vao).SetMaterial(stoneMat);
@@ -700,7 +702,7 @@ int main() {
 			 GameObject spawntube = tubes[spawnindex];
 			 shade.get<Transform>().SetLocalPosition(10, 10, 10);
 			 shade.get<Transform>().SetLocalScale(15, 15, 15);
-		 }*/
+		 }
 
 		 GameObject deposit = scene->CreateEntity("Deposit");
 		 {
@@ -1197,7 +1199,7 @@ int main() {
 			illuminationBuffer->SetCamPos(camPos);
 
 			//Animations
-			enemy.get<ObjAnimation>().UpdateAnimation(time.DeltaTime);
+			//enemy.get<ObjAnimation>().UpdateAnimation(time.DeltaTime);
 			enemy.get<RendererComponent>().SetMesh(enemy.get<ObjAnimation>().LoadMesh()).SetMaterial(ratMat);
 
 			// Sort the renderers by shader and material, we will go for a minimizing context switches approach here,
