@@ -101,12 +101,13 @@ void ObjAnimation::LoadFromFolder(const std::string& folderName, const int numOf
 std::vector<std::vector<VertexPosNormTexCol>> LERP(std::vector<std::vector<VertexPosNormTexCol>> frame1, std::vector<std::vector<VertexPosNormTexCol>> frame2, float t)
 {
 	std::vector<std::vector<VertexPosNormTexCol>> returnValue;
-	std::vector<VertexPosNormTexCol> faceVertcies;
-	VertexPosNormTexCol vertex;
 	for (int i = 0; i < frame1.size(); i++)
 	{
+		std::vector<VertexPosNormTexCol> faceVertcies;
 		for (int j = 0; j < frame1[i].size(); j++)
 		{
+			VertexPosNormTexCol vertex;
+
 			vertex.Position = frame1[i][j].Position + (frame2[i][j].Position - frame1[i][j].Position) * t;
 			vertex.Normal = frame1[i][j].Normal + (frame2[i][j].Normal - frame1[i][j].Normal) * t;
 			vertex.UV = frame1[i][j].UV + (frame2[i][j].UV - frame1[i][j].UV) * t;
@@ -132,15 +133,15 @@ void ObjAnimation::UpdateAnimation(float deltaTime)
 	else
 	{
 		totalTime += deltaTime;
-		if (totalTime >= 1.0f)
+		if (totalTime >= 0.2f)
 		{
-			totalTime -= 1.0f;
+			totalTime = 0.0f;
 			currentFrame = nextFrame;
 			nextFrame++;
 
 			if (nextFrame == vertexInfo.size())
 			{
-				nextFrame == 0;
+				nextFrame = 0;
 			}
 		}
 

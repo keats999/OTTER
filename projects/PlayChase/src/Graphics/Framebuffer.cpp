@@ -26,6 +26,7 @@ ColorTarget::~ColorTarget()
 
 void ColorTarget::Unload()
 {
+	if (_textures.size() > 0)
 	glDeleteTextures(_numAttachments, &_textures[0].GetHandle());
 }
 

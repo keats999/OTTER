@@ -746,10 +746,9 @@ int main() {
 
 		GameObject enemy = scene->CreateEntity("Enemy");
 		{
-			//enemy.emplace<ObjAnimation>();
-			//enemy.get<ObjAnimation>().LoadFromFolder("rat", 19);
-			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/rat/rat_1.obj");
-			enemy.emplace<RendererComponent>().SetMesh(vao/*enemy.get<ObjAnimation>().LoadMesh()*/).SetMaterial(ratMat);
+			enemy.emplace<ObjAnimation>();
+			enemy.get<ObjAnimation>().LoadFromFolder("rat", 21);
+			enemy.emplace<RendererComponent>().SetMesh(enemy.get<ObjAnimation>().LoadMesh()).SetMaterial(ratMat);
 			auto& enemyCol = enemy.emplace<Collision2D>(pworld->World());
 			enemyCol.CreateDynamicBox(enemySpawn, glm::vec2(1, 1), ENEMY, PLAYER);
 			enemyCol.getBody()->SetUserData(&enemy);
@@ -1199,7 +1198,7 @@ int main() {
 
 			//Animations
 			//enemy.get<ObjAnimation>().UpdateAnimation(time.DeltaTime);
-			//enemy.get<RendererComponent>().SetMesh(enemy.get<ObjAnimation>().LoadMesh()).SetMaterial(ratMat);
+			enemy.get<RendererComponent>().SetMesh(enemy.get<ObjAnimation>().LoadMesh()).SetMaterial(ratMat);
 
 			// Sort the renderers by shader and material, we will go for a minimizing context switches approach here,
 			// but you could for instance sort front to back to optimize for fill rate if you have intensive fragment shaders
