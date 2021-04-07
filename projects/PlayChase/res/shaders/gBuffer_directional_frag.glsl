@@ -76,16 +76,16 @@ float ShadowCalculation(vec4 fragPosLightSpace, float bias)
 	return shadow;
 }
 
-vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
+/*vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
-    vec3 lightDir = normalize(light.position - fragPos);
+    vec3 lightDir = normalize(light._lightPos - fragPos);
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
     // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     // attenuation
-    float distance    = length(light.position - fragPos);
+    float distance    = length(light._lightPos - fragPos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + 
   			     light.quadratic * (distance * distance));    
     // combine results
@@ -96,7 +96,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     diffuse  *= attenuation;
     specular *= attenuation;
     return (ambient + diffuse + specular);
-} 
+} */
 
 void main() {
 	//Albedo

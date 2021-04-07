@@ -1205,9 +1205,9 @@ int main() {
 			illuminationBuffer->SetLightSpaceViewProj(lightSpaceViewProj);
 			glm::vec3 camPos = glm::inverse(view) * glm::vec4(0, 0, 0, 1);
 			illuminationBuffer->SetCamPos(camPos);
-
+			
 			//Animations
-			//enemy.get<ObjAnimation>().UpdateAnimation(time.DeltaTime);
+			enemy.get<ObjAnimation>().UpdateAnimation(time.DeltaTime);
 			enemy.get<RendererComponent>().SetMesh(enemy.get<ObjAnimation>().LoadMesh()).SetMaterial(ratMat);
 
 			// Sort the renderers by shader and material, we will go for a minimizing context switches approach here,
