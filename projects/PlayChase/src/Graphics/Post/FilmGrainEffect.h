@@ -15,6 +15,6 @@ public:
 	void SetTime(float timeNum);
 	
 private:
-	float _intensity = 0.5f;
+	float _intensity = 0.2f;
 	float _time = 0.0f;
 };

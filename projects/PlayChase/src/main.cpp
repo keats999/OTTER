@@ -39,6 +39,7 @@
 #include "Behaviours/MenuBehaviour.h"
 #include "Behaviours/PauseBehaviour.h"
 #include "Behaviours/UIBehaviour.h"
+#include "Behaviours/ExitBehaviour.h"
 
 #include "Graphics/UIComponent.h"
 
@@ -153,6 +154,9 @@ int main() {
 		theSun._lightCol = glm::vec4(0.9f, 0.85f, 0.6f, 0.0f);
 		theSun._ambientCol = glm::vec4(0.5f, 0.5f, 0.5f, 0.0f);
 		theSun._lightDirection = glm::vec4(0.f, 0.f, 0.f, 0.0f);
+		//theSun._ambientPow = 0.05f;
+		//theSun._lightAmbientPow = 0.09f;
+		//theSun._lightSpecularPow = 1.5f;
 		UniformBuffer directionalLightBuffer;
 
 		//Allocates enough memory for one directional light (we can change this easily, but we only need 1 directional light)
@@ -179,7 +183,7 @@ int main() {
 		FilmGrainEffect* filmGrainEffect;
 		PixelationEffect* pixelEffect;
 
-		int activePost = 1;
+		int activePost = 2;
 		std::vector<PostEffect*> post;
 		bool ramp=0;
 		
@@ -693,7 +697,7 @@ int main() {
 		 spawn = Manager.saferooms[Manager.saferooms.size() - 1];
 		 enemySpawn = exitloc;
 
-		 GameObject shade = scene->CreateEntity("shade");
+		 /*GameObject shade = scene->CreateEntity("shade");
 		 {
 			 VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
 			 shade.emplace<RendererComponent>().SetMesh(vao).SetMaterial(stoneMat);
@@ -702,6 +706,18 @@ int main() {
 			 GameObject spawntube = tubes[spawnindex];
 			 shade.get<Transform>().SetLocalPosition(10, 10, 10);
 			 shade.get<Transform>().SetLocalScale(15, 15, 15);
+		 }*/
+
+		 int endindex = Manager.safeindexes[0];
+		 GameObject exit = scene->CreateEntity("Exit");
+		 {
+			 VertexArrayObject::sptr newtube = ObjLoader::LoadFromFile("models/tubesc.obj");
+			 auto& exitCol = exit.emplace<Collision2D>(pworld->World());
+			 exitCol.CreateStaticBox(Manager.saferooms[0], glm::vec2(1, 1), TRIGGER, PLAYER);
+			 exitCol.getFixture()->SetSensor(true);
+			 exitCol.getFixture()->SetEntity(exit.entity());
+			 TriggerBinding::BindDisabled<ExitTrigger>(exit);
+			 BehaviourBinding::Bind <ExitBehaviour>(exit);
 		 }
 
 		 GameObject deposit = scene->CreateEntity("Deposit");
@@ -764,16 +780,8 @@ int main() {
 		}
 		enemies.push_back(enemy);
 		
-		GameObject exit = scene->CreateEntity("Exit");
-		{
-			//VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
-			//player.emplace<RendererComponent>().SetMesh(vao).SetMaterial(stoneMat);
-			auto& exitCol = exit.emplace<Collision2D>(pworld->World());
-			exitCol.CreateStaticBox(exitloc, glm::vec2(2, 2), TRIGGER, PLAYER);
-			exitCol.getFixture()->SetSensor(true);
-			exitCol.getFixture()->SetEntity(exit.entity());
+	
 
-		}
 		// Create an object to be our camera
 		GameObject cameraObject = scene->CreateEntity("Camera");
 		{
@@ -1315,7 +1323,7 @@ int main() {
 			
 			current = nullptr;
 			currentMat = nullptr;
-			uiGroup.each([&](entt::entity e, UIComponent& renderer, Transform& transform) {
+			/*uiGroup.each([&](entt::entity e, UIComponent& renderer, Transform& transform) {
 				// If the shader has changed, set up it's uniforms
 				if (current != renderer.Material->Shader) {
 					current = renderer.Material->Shader;
@@ -1328,7 +1336,7 @@ int main() {
 					currentMat->Apply();
 				}
 				BackendHandler::RenderVAO(renderer.Material->Shader, renderer.Mesh, viewProjection, transform);
-				});
+				});*/
 			
 			// Draw our ImGui content
 			BackendHandler::RenderImGui();

@@ -21,6 +21,21 @@ struct DirectionalLight
 	float _shadowBias;
 };
 
+struct PointLight {    
+	vec4 _lightPos;
+	vec4 _lightCol;
+	vec4 _ambientCol;
+
+	float _lightLinearFalloff;
+	float _lightQuadraticFalloff;
+	float _ambientPow;
+	float _lightAmbientPow;
+	float _lightSpecularPow;
+};  
+
+#define NR_POINT_LIGHTS 4  
+uniform PointLight pointLights[NR_POINT_LIGHTS];
+
 layout (std140, binding = 0) uniform u_Lights
 {
 	DirectionalLight sun;
@@ -60,6 +75,28 @@ float ShadowCalculation(vec4 fragPosLightSpace, float bias)
 	//Return the value
 	return shadow;
 }
+
+vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
+{
+    vec3 lightDir = normalize(light.position - fragPos);
+    // diffuse shading
+    float diff = max(dot(normal, lightDir), 0.0);
+    // specular shading
+    vec3 reflectDir = reflect(-lightDir, normal);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    // attenuation
+    float distance    = length(light.position - fragPos);
+    float attenuation = 1.0 / (light.constant + light.linear * distance + 
+  			     light.quadratic * (distance * distance));    
+    // combine results
+    vec3 ambient  = light.ambient  * vec3(texture(material.diffuse, TexCoords));
+    vec3 diffuse  = light.diffuse  * diff * vec3(texture(material.diffuse, TexCoords));
+    vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
+    ambient  *= attenuation;
+    diffuse  *= attenuation;
+    specular *= attenuation;
+    return (ambient + diffuse + specular);
+} 
 
 void main() {
 	//Albedo

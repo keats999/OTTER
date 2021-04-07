@@ -11,6 +11,8 @@ void main()
 {
 	vec4 colorA = texture(u_Scene, inUv);
 	vec4 colorB = texture(u_Bloom, inUv);
-
+	if(colorB.r < 0.01){
+		colorB = vec4(0.0, 0.0, 0.0, 0.0);
+	}
 	FragColor = 1.0 - (1.0 - colorA) * (1.0 - colorB);
 }
