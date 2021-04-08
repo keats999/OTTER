@@ -410,7 +410,7 @@ int main() {
 		Texture2D::sptr yellow = Texture2D::LoadFromFile("images/yellow.png");
 
 		Texture2D::sptr testUI = Texture2D::LoadFromFile("images/testUI.png");
-		Texture2D::sptr title = Texture2D::LoadFromFile("images/title_transparent.png");
+		Texture2D::sptr title = Texture2D::LoadFromFile("images/title_transparent_info.png");
 		Texture2D::sptr spcelement = Texture2D::LoadFromFile("images/spcelement.png");
 		Texture2D::sptr endelement = Texture2D::LoadFromFile("images/endelement.png");
 
@@ -798,7 +798,7 @@ int main() {
 			BehaviourBinding::Bind<FirstPersonBehaviour>(cameraObject);
 			BehaviourBinding::Get<FirstPersonBehaviour>(cameraObject)->SetParent(player);
 		}
-		GameObject menucameraObject = menuscene->CreateEntity("Camera");
+		GameObject menucameraObject = menuscene->CreateEntity("Menu Camera");
 		{
 			menucameraObject.get<Transform>().SetLocalPosition(0, 1, 1).LookAt(glm::vec3(0, 0, 0));
 

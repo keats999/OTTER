@@ -1,4 +1,5 @@
 #include "BackendHandler.h"
+#include "Utilities/Globals.h"
 
 GLFWwindow* BackendHandler::window = nullptr;
 int BackendHandler::windowWidth = 0;
@@ -53,47 +54,47 @@ void BackendHandler::GlfwWindowResizedCallback(GLFWwindow* window, int width, in
 	{
 		cam.ResizeWindow(width, height);
 	});
-	Application::Instance().ActiveScene->Registry().view<Framebuffer>().each([=](Framebuffer& buf)
+	Globals::Instance().scenes[1]->Registry().view<Framebuffer>().each([=](Framebuffer& buf)
 	{
 		buf.Reshape(width, height);
 	});
-	Application::Instance().ActiveScene->Registry().view<PostEffect>().each([=](PostEffect& buf)
+	Globals::Instance().scenes[1]->Registry().view<PostEffect>().each([=](PostEffect& buf)
 	{
 		buf.Reshape(width, height);
 	});
-	Application::Instance().ActiveScene->Registry().view<GreyscaleEffect>().each([=](GreyscaleEffect& buf)
+	Globals::Instance().scenes[1]->Registry().view<GreyscaleEffect>().each([=](GreyscaleEffect& buf)
 	{
 		buf.Reshape(width, height);
 	});
-	Application::Instance().ActiveScene->Registry().view<SepiaEffect>().each([=](SepiaEffect& buf)
+	Globals::Instance().scenes[1]->Registry().view<SepiaEffect>().each([=](SepiaEffect& buf)
 	{
 		buf.Reshape(width, height);
 	});
-	Application::Instance().ActiveScene->Registry().view<ColorCorrection>().each([=](ColorCorrection& buf)
+	Globals::Instance().scenes[1]->Registry().view<ColorCorrection>().each([=](ColorCorrection& buf)
 	{
 		buf.Reshape(width, height);
 	});
-	Application::Instance().ActiveScene->Registry().view<BloomEffect>().each([=](BloomEffect& buf)
+	Globals::Instance().scenes[1]->Registry().view<BloomEffect>().each([=](BloomEffect& buf)
 	{
 		buf.Reshape(width, height);
 	});
-	Application::Instance().ActiveScene->Registry().view<PixelationEffect>().each([=](PixelationEffect& buf)
+	Globals::Instance().scenes[1]->Registry().view<PixelationEffect>().each([=](PixelationEffect& buf)
 	{
 		buf.Reshape(width, height);
 	});
-	Application::Instance().ActiveScene->Registry().view<FilmGrainEffect>().each([=](FilmGrainEffect& buf)
+	Globals::Instance().scenes[1]->Registry().view<FilmGrainEffect>().each([=](FilmGrainEffect& buf)
 	{
 		buf.Reshape(width, height);
 	});
-	Application::Instance().ActiveScene->Registry().view<NightVisionEffect>().each([=](NightVisionEffect& buf)
+	Globals::Instance().scenes[1]->Registry().view<NightVisionEffect>().each([=](NightVisionEffect& buf)
 		{
 			buf.Reshape(width, height);
 		});
-	Application::Instance().ActiveScene->Registry().view<GBuffer>().each([=](GBuffer& buf)
+	Globals::Instance().scenes[1]->Registry().view<GBuffer>().each([=](GBuffer& buf)
 	{
 		buf.Reshape(width, height);
 	});
-	Application::Instance().ActiveScene->Registry().view<IlluminationBuffer>().each([=](IlluminationBuffer& buf)
+	Globals::Instance().scenes[1]->Registry().view<IlluminationBuffer>().each([=](IlluminationBuffer& buf)
 	{
 		buf.Reshape(width, height);
 	});
