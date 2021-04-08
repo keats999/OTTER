@@ -117,7 +117,7 @@ int main() {
 		Shader::sptr shader = Shader::Create();
 		shader->LoadShaderPartFromFile("shaders/vertex_shader.glsl", GL_VERTEX_SHADER);
 		//Directional Light Shader
-		shader->LoadShaderPartFromFile("shaders/directional_blinn_phong_frag.glsl", GL_FRAGMENT_SHADER);
+		shader->LoadShaderPartFromFile("shaders/frag_blinn_phong_textured.glsl", GL_FRAGMENT_SHADER);
 		shader->Link();
 
 		glm::vec3 lightPos = glm::vec3(0.0f, -1.0f, 0.0f);
@@ -494,7 +494,7 @@ int main() {
 		stoneMat->Set("u_Emission", 0.0f);
 
 		ShaderMaterial::sptr metalMat = ShaderMaterial::Create();
-		metalMat->Shader = gBufferShader;
+		metalMat->Shader = shader;
 		metalMat->Set("s_Diffuse", metal);
 		metalMat->Set("s_Specular", noSpec);
 		metalMat->Set("u_Shininess", 10.0f);
@@ -518,7 +518,7 @@ int main() {
 		boxMat->Set("u_Emission", 0.0f);
 
 		ShaderMaterial::sptr depositMat = ShaderMaterial::Create();
-		depositMat->Shader = gBufferShader;
+		depositMat->Shader = shader;
 		depositMat->Set("s_Diffuse", dep);
 		depositMat->Set("s_Specular", noSpec);
 		depositMat->Set("u_Shininess", 2.0f);
@@ -526,7 +526,7 @@ int main() {
 		depositMat->Set("u_Emission", 0.0f);
 		
 		ShaderMaterial::sptr displayMat = ShaderMaterial::Create();
-		displayMat->Shader = gBufferShader;
+		displayMat->Shader = shader;
 		displayMat->Set("s_Diffuse", disp);
 		displayMat->Set("s_Specular", noSpec);
 		displayMat->Set("u_Shininess", 2.0f);
@@ -534,7 +534,7 @@ int main() {
 		displayMat->Set("u_Emission", 0.0f);
 
 		ShaderMaterial::sptr screenMat = ShaderMaterial::Create();
-		screenMat->Shader = gBufferShader;
+		screenMat->Shader = shader;
 		screenMat->Set("s_Diffuse", scrn);
 		screenMat->Set("s_Specular", noSpec);
 		screenMat->Set("u_Shininess", 2.0f);
@@ -542,7 +542,7 @@ int main() {
 		screenMat->Set("u_Emission", 1.0f);
 
 		ShaderMaterial::sptr doorMat = ShaderMaterial::Create();
-		doorMat->Shader = gBufferShader;
+		doorMat->Shader = shader;
 		doorMat->Set("s_Diffuse", glass);
 		doorMat->Set("s_Specular", noSpec);
 		doorMat->Set("u_Shininess", 2.0f);
@@ -550,7 +550,7 @@ int main() {
 		doorMat->Set("u_Emission", 0.0f);
 
 		ShaderMaterial::sptr simpleFloraMat = ShaderMaterial::Create();
-		simpleFloraMat->Shader = gBufferShader;
+		simpleFloraMat->Shader = shader;
 		simpleFloraMat->Set("s_Diffuse", simpleFlora);
 		simpleFloraMat->Set("s_Specular", noSpec);
 		simpleFloraMat->Set("u_Shininess", 8.0f);
@@ -558,7 +558,7 @@ int main() {
 		simpleFloraMat->Set("u_Emission", 0.0f);
 
 		ShaderMaterial::sptr ratMat = ShaderMaterial::Create();
-		ratMat->Shader = gBufferShader;
+		ratMat->Shader = shader;
 		ratMat->Set("s_Diffuse", rattex);
 		ratMat->Set("s_Specular", noSpec);
 		ratMat->Set("u_Shininess", 8.0f);
@@ -575,7 +575,7 @@ int main() {
 		
 		VertexArrayObject::sptr coinvao = ObjLoader::LoadFromFile("models/coin.obj");
 		ShaderMaterial::sptr coinMat = ShaderMaterial::Create();
-		coinMat->Shader = gBufferShader;
+		coinMat->Shader = shader;
 		coinMat->Set("s_Diffuse", coin);
 		coinMat->Set("s_Specular", noSpec);
 		coinMat->Set("u_Shininess", 8.0f);
@@ -630,10 +630,10 @@ int main() {
 					
 					//Create tube material
 					ShaderMaterial::sptr tMat = ShaderMaterial::Create();
-					tMat->Shader = gBufferShader;
+					tMat->Shader = shader;
 					tMat->Set("u_Shininess", 20.0f);
 					tMat->Set("u_TextureMix", 0.0f);
-					tMat->Set("u_Emission", 1.0f);
+					tMat->Set("u_Emission", 0.0f);
 
 					//Randomly pick a color and set the material diffuse
 					int c = rand() % 5;
@@ -1261,13 +1261,13 @@ int main() {
 				behaviour->Relative = !behaviour->Relative;
 				});*/
 		}
-
+		
 		// Initialize our timing instance and grab a reference for our use
 		Timing& time = Timing::Instance();
 		time.LastFrame = glfwGetTime();
 		float ambientTimer = 20.0f;
 
-		glClearColor(1.0f, 1.0f, 1.0f, 0.3f);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.3f);
 
 		///// Game loop /////
 		while (!glfwWindowShouldClose(BackendHandler::window)) {
@@ -1311,7 +1311,7 @@ int main() {
 					}
 				}
 			});
-			playerLight._lightPos = glm::vec4(cameraObject.get<Transform>().GetLocalPosition(), 0.0f);
+			//playerLight._lightPos = glm::vec4(cameraObject.get<Transform>().GetLocalPosition(), 0.0f);
 			ui.get<Transform>().SetLocalPosition(cameraObject.get<Transform>().GetLocalPosition() + (glm::vec3(-0.11f, 0.0f, -0.11f) * glm::vec3(sin(glm::radians((int(cameraObject.get<Transform>().GetLocalRotation().x) != 180) ? cameraObject.get<Transform>().GetLocalRotation().y : -cameraObject.get<Transform>().GetLocalRotation().y + cameraObject.get<Transform>().GetLocalRotation().x)), 0.0f, cos(glm::radians((int(cameraObject.get<Transform>().GetLocalRotation().x) != 180) ? cameraObject.get<Transform>().GetLocalRotation().y : -cameraObject.get<Transform>().GetLocalRotation().y + cameraObject.get<Transform>().GetLocalRotation().x)))));
 			ui.get<Transform>().SetLocalRotation(90.0f, (int(cameraObject.get<Transform>().GetLocalRotation().x) != 180) ? cameraObject.get<Transform>().GetLocalRotation().y : -cameraObject.get<Transform>().GetLocalRotation().y + cameraObject.get<Transform>().GetLocalRotation().x, 0.0f);
 			ui.get<Transform>().SetLocalScale(0.11f * BackendHandler::aspectRatio, 0.11f, 0.11f);
@@ -1346,9 +1346,9 @@ int main() {
 			{
 				post[i]->Clear();
 			}
-			shadowBuffer->Clear();
-			gBuffer->Clear();
-			illuminationBuffer->Clear();
+			//shadowBuffer->Clear();
+			//gBuffer->Clear();
+			//illuminationBuffer->Clear();
 
 			glEnable(GL_DEPTH_TEST);
 			glClearDepth(1.0f);
@@ -1366,14 +1366,14 @@ int main() {
 
 			if (Application::Instance().ActiveScene == scene) {
 				// Grab out camera info from the camera object
-				illuminationBuffer->EnableSun(true);
+				//illuminationBuffer->EnableSun(true);
 				camTransform = cameraObject.get<Transform>();
 				view = glm::inverse(camTransform.LocalTransform());
 				projection = cameraObject.get<Camera>().GetProjection();
 				viewProjection = projection * view;
 			}
 			else {
-				illuminationBuffer->EnableSun(false);
+				//illuminationBuffer->EnableSun(false);
 				camTransform = menucameraObject.get<Transform>();
 				view = glm::inverse(camTransform.LocalTransform());
 				projection = menucameraObject.get<Camera>().GetProjection();
@@ -1418,7 +1418,7 @@ int main() {
 			Shader::sptr current = nullptr;
 			ShaderMaterial::sptr currentMat = nullptr;
 
-			glViewport(0, 0, shadowWidth, shadowHeight);
+			/*glViewport(0, 0, shadowWidth, shadowHeight);
 			shadowBuffer->Bind();
 
 			renderGroup.each([&](entt::entity e, RendererComponent& renderer, Transform& transform) {
@@ -1429,12 +1429,13 @@ int main() {
 				}
 				});
 
-			shadowBuffer->Unbind();
+			shadowBuffer->Unbind();*/
 
 			glfwGetWindowSize(BackendHandler::window, &width, &height);
 
 			glViewport(0, 0, width, height);
-			gBuffer->Bind();
+			//gBuffer->Bind();
+			testBuffer->BindBuffer(0);
 			// Iterate over the render group components and draw them
 			renderGroup.each( [&](entt::entity e, RendererComponent& renderer, Transform& transform) {
 				// If the shader has changed, set up it's uniforms
@@ -1449,12 +1450,12 @@ int main() {
 					currentMat->Apply();
 				}
 
-				shadowBuffer->BindDepthAsTexture(30);
+				//shadowBuffer->BindDepthAsTexture(30);
 				// Render the mesh
 				BackendHandler::RenderVAO(renderer.Material->Shader, renderer.Mesh, viewProjection, transform, lightSpaceViewProj);
 			});
-
-			gBuffer->Unbind();
+			testBuffer->UnbindBuffer();
+			/*gBuffer->Unbind();
 
 			illuminationBuffer->BindBuffer(0);
 			skybox->Bind();
@@ -1467,7 +1468,7 @@ int main() {
 
 			shadowBuffer->BindDepthAsTexture(30);
 
-			illuminationBuffer->ApplyEffect(gBuffer);
+			illuminationBuffer->ApplyEffect(gBuffer);*/
 
 			/*if (drawGBuffer)
 			{
@@ -1488,7 +1489,7 @@ int main() {
 				temp->SetTime(float(glfwGetTime()));
 			}
 
-			switch (activeDef) {
+			/*switch (activeDef) {
 			case 1: gBuffer->DrawBuffer(3); break;
 			case 2: gBuffer->DrawBuffer(1); break;
 			case 3: gBuffer->DrawBuffer(0); break;
@@ -1502,11 +1503,17 @@ int main() {
 				currentEffect->DrawToScreen();
 				currentEffect->UnbindBuffer(); break;
 			}
-
+			*/
 			//testBuffer->DrawToBackbuffer();
 			
 
-			
+			post[activePost]->ApplyEffect(testBuffer);
+			post[activePost]->DrawToScreen();
+
+			PostEffect* currentEffect = &effects[activeEffect].get<ColorCorrection>();
+			currentEffect->ApplyEffect(post[activePost]);
+			currentEffect->DrawToScreen();
+			currentEffect->UnbindBuffer();
 			current = nullptr;
 			currentMat = nullptr;
 			/*uiGroup.each([&](entt::entity e, UIComponent& renderer, Transform& transform) {

@@ -90,6 +90,6 @@ void main() {
 		(ambient + (diffuseOut*edge) + specular) * attenuation // light factors from our single light
 		) * inColor * textureColor.rgb; // Object color
 	}
-
+	
 	frag_color = vec4(result, textureColor.a);
 }

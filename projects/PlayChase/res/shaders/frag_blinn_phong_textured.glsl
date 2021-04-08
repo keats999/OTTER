@@ -24,7 +24,7 @@ uniform float u_LightAttenuationLinear;
 uniform float u_LightAttenuationQuadratic;
 
 uniform float u_TextureMix;
-
+uniform float u_Emission;
 uniform vec3  u_CamPos;
 
 uniform int u_Mode;
@@ -83,6 +83,9 @@ void main() {
 	vec4 textureColor2 = texture(s_Diffuse2, inUV);
 	vec4 textureColor = mix(textureColor1, textureColor2, u_TextureMix);
 
+	if (textureColor.a <= 0.1){
+		discard;
+	}
 	vec3 result = inColor * textureColor.rgb;
 	if (u_Textures == 0)
 	{
@@ -140,6 +143,6 @@ void main() {
 		(ambient + diffuse + specular) * attenuation // light factors from our single light
 		) * result; // Object color	
 	}
-
+	result = mix(result, textureColor.rgb, u_Emission);
 	frag_color = vec4(result, textureColor.a);
 }
