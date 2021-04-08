@@ -7,7 +7,7 @@ void SafeRoomBehaviour::Update(entt::handle entity)
 	if (locked) {
 		entity.get<Transform>().SetLocalPosition(glm::vec3(pos.x, 0.0, pos.z));
 		locktimer += dt;
-		if (locktimer > 8.0f) {
+		if (locktimer > 5.0f) {
 			locktimer = 0.0f;
 			MapManager::Instance().set_data(roomi, roomj, true);
 			locked = false;

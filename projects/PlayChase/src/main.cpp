@@ -40,6 +40,7 @@
 #include "Behaviours/PauseBehaviour.h"
 #include "Behaviours/UIBehaviour.h"
 #include "Behaviours/ExitBehaviour.h"
+#include "Behaviours/SafeRoomBehaviour.h"
 #include "Behaviours/EndBehaviour.h"
 
 #include "Graphics/UIComponent.h"
