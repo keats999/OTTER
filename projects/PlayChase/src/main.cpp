@@ -432,7 +432,7 @@ int main() {
 		Texture2D::sptr title = Texture2D::LoadFromFile("images/title_transparent_info.png");
 		Texture2D::sptr pauseTex = Texture2D::LoadFromFile("images/pauseelement.png");
 		Texture2D::sptr endelement = Texture2D::LoadFromFile("images/endelement.png");
-		Texture2D::sptr winelement = Texture2D::LoadFromFile("images/title_transparent_info.png");
+		Texture2D::sptr winelement = Texture2D::LoadFromFile("images/winelement.png");
 
 		Texture2D::sptr dep = Texture2D::LoadFromFile("images/deposit.png");
 		Texture2D::sptr scrn = Texture2D::LoadFromFile("images/screens/screen9.png");
