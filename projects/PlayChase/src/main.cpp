@@ -151,15 +151,20 @@ int main() {
 		shader->SetUniform("u_Textures", textures);
 		
 		shader->SetUniform("s_RampTexture", 1);
-
+		
 		//Creates our directional Light
 		DirectionalLight theSun;
 		theSun._lightCol = glm::vec4(0.9f, 0.85f, 0.6f, 0.0f);
 		theSun._ambientCol = glm::vec4(0.5f, 0.5f, 0.5f, 0.0f);
-		theSun._lightDirection = glm::vec4(0.f, 0.f, 0.f, 0.0f);
+		theSun._lightDirection = glm::vec4(0.f, 10.f, 0.f, 0.0f);
+		theSun._shadowBias = 0.05;
 		//theSun._ambientPow = 0.05f;
 		//theSun._lightAmbientPow = 0.09f;
 		//theSun._lightSpecularPow = 1.5f;
+
+		PointLight playerLight;
+		playerLight._lightPos = glm::vec4(0.f, 0.f, 0.f, 0.0f);
+
 		UniformBuffer directionalLightBuffer;
 
 		//Allocates enough memory for one directional light (we can change this easily, but we only need 1 directional light)
@@ -168,6 +173,15 @@ int main() {
 		directionalLightBuffer.SendData(reinterpret_cast<void*>(&theSun), sizeof(DirectionalLight));
 
 		directionalLightBuffer.Bind(0);
+
+		UniformBuffer pointLightBuffer;
+
+		//Allocates enough memory for one directional light (we can change this easily, but we only need 1 directional light)
+		pointLightBuffer.AllocateMemory(sizeof(PointLight));
+		//Casts our sun as "data" and sends it to the shader
+		pointLightBuffer.SendData(reinterpret_cast<void*>(&playerLight), sizeof(PointLight));
+
+		pointLightBuffer.Bind(1);
 
 		PostEffect* testBuffer;
 		PostEffect* uiBuffer;
@@ -385,7 +399,7 @@ int main() {
 		glEnable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
 		glDepthFunc(GL_LEQUAL); // New 
-
+		
 		#pragma region TEXTURE LOADING
 
 		// Load some textures from files
@@ -407,7 +421,7 @@ int main() {
 		Texture2D::sptr metal = Texture2D::LoadFromFile("images/metal.png");
 
 		Texture2D::sptr blue = Texture2D::LoadFromFile("images/blue.png");
-		Texture2D::sptr green = Texture2D::LoadFromFile("images/green.png");
+		Texture2D::sptr green = Texture2D::LoadFromFile("images/green.png"); 
 		Texture2D::sptr orange = Texture2D::LoadFromFile("images/orange.png");
 		Texture2D::sptr red = Texture2D::LoadFromFile("images/red.png");
 		Texture2D::sptr yellow = Texture2D::LoadFromFile("images/yellow.png");
@@ -680,7 +694,7 @@ int main() {
 						srooms.push_back(sroome);
 						sroome.emplace<RendererComponent>().SetMesh(escdoor).SetMaterial(doorMat);
 						auto& srCol = sroome.emplace<Collision2D>(pworld->World());
-						srCol.CreateStaticBox(glm::vec2(coord1, coord2), glm::vec2(unitsize / 2, unitsize / 2), TRIGGER, PLAYER);
+						srCol.CreateStaticBox(glm::vec2(coord1, coord2), glm::vec2(unitsize / 4, unitsize / 4), TRIGGER, PLAYER);
 						srCol.getFixture()->SetSensor(true);
 						srCol.getFixture()->SetEntity(sroome.entity());
 						srCol.SetAngle(glm::radians(-tubeData.y));
@@ -693,7 +707,7 @@ int main() {
 						TriggerBinding::Get<SafeRoomTrigger>(sroome)->SetRoom(i, j);
 						if (!endcreated) {
 							auto& exitCol = tubee.emplace<Collision2D>(pworld->World());
-							exitCol.CreateStaticBox(glm::vec2(coord1, coord2), glm::vec2(1, 1), TRIGGER, PLAYER);
+							exitCol.CreateStaticBox(glm::vec2(coord1, coord2), glm::vec2(0.5, 0.5), TRIGGER, PLAYER);
 							exitCol.getFixture()->SetSensor(true);
 							exitCol.getFixture()->SetEntity(tubee.entity());
 							exitCol.SetAngle(glm::radians(-tubeData.y));
@@ -1297,7 +1311,7 @@ int main() {
 					}
 				}
 			});
-			
+			playerLight._lightPos = glm::vec4(cameraObject.get<Transform>().GetLocalPosition(), 0.0f);
 			ui.get<Transform>().SetLocalPosition(cameraObject.get<Transform>().GetLocalPosition() + (glm::vec3(-0.11f, 0.0f, -0.11f) * glm::vec3(sin(glm::radians((int(cameraObject.get<Transform>().GetLocalRotation().x) != 180) ? cameraObject.get<Transform>().GetLocalRotation().y : -cameraObject.get<Transform>().GetLocalRotation().y + cameraObject.get<Transform>().GetLocalRotation().x)), 0.0f, cos(glm::radians((int(cameraObject.get<Transform>().GetLocalRotation().x) != 180) ? cameraObject.get<Transform>().GetLocalRotation().y : -cameraObject.get<Transform>().GetLocalRotation().y + cameraObject.get<Transform>().GetLocalRotation().x)))));
 			ui.get<Transform>().SetLocalRotation(90.0f, (int(cameraObject.get<Transform>().GetLocalRotation().x) != 180) ? cameraObject.get<Transform>().GetLocalRotation().y : -cameraObject.get<Transform>().GetLocalRotation().y + cameraObject.get<Transform>().GetLocalRotation().x, 0.0f);
 			ui.get<Transform>().SetLocalScale(0.11f * BackendHandler::aspectRatio, 0.11f, 0.11f);

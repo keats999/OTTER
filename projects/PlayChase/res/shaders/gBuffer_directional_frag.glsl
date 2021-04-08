@@ -20,8 +20,8 @@ struct DirectionalLight
 	
 	float _shadowBias;
 };
-
-struct PointLight {    
+ 
+ struct PointLight {    
 	vec4 _lightPos;
 	vec4 _lightCol;
 	vec4 _ambientCol;
@@ -33,12 +33,17 @@ struct PointLight {
 	float _lightSpecularPow;
 };  
 
-#define NR_POINT_LIGHTS 4  
-uniform PointLight pointLights[NR_POINT_LIGHTS];
+//#define NR_POINT_LIGHTS 0  
+//uniform PointLight pointLights[NR_POINT_LIGHTS];
 
 layout (std140, binding = 0) uniform u_Lights
 {
 	DirectionalLight sun;
+};
+
+layout (std140, binding = 1) uniform u_pointLights
+{
+	PointLight playerLight;
 };
 
 layout (binding = 30) uniform sampler2D s_ShadowMap;
@@ -77,28 +82,6 @@ float ShadowCalculation(vec4 fragPosLightSpace, float bias)
 	return shadow;
 }
 
-/*vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
-{
-    vec3 lightDir = normalize(light._lightPos - fragPos);
-    // diffuse shading
-    float diff = max(dot(normal, lightDir), 0.0);
-    // specular shading
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    // attenuation
-    float distance    = length(light._lightPos - fragPos);
-    float attenuation = 1.0 / (light.constant + light.linear * distance + 
-  			     light.quadratic * (distance * distance));    
-    // combine results
-    vec3 ambient  = light.ambient  * vec3(texture(material.diffuse, TexCoords));
-    vec3 diffuse  = light.diffuse  * diff * vec3(texture(material.diffuse, TexCoords));
-    vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
-    ambient  *= attenuation;
-    diffuse  *= attenuation;
-    specular *= attenuation;
-    return (ambient + diffuse + specular);
-} */
-
 void main() {
 	//Albedo
 	vec4 textureColor = texture(s_albedoTex, inUV);
@@ -126,12 +109,31 @@ void main() {
 	vec4 fragPosLightSpace = u_LightSpaceMatrix * vec4(fragPos, 1.0);
 	float shadow = ShadowCalculation(fragPosLightSpace, sun._shadowBias);
 
+	vec3 pointTotal = vec3(0.0, 0.0, 0.0);
+
+	vec3 lightDirP = normalize(playerLight._lightPos.xyz - fragPos);
+		// diffuse shading
+	float difP = max(dot(N, lightDirP), 0.0);
+		// specular shading
+	vec3 reflectDir = reflect(-lightDir, N);
+	float specP = pow(max(dot(viewDir, reflectDir), 0.0), 1.0);
+		//float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+		// attenuation
+	float dist   = length(playerLight._lightPos.xyz - fragPos);
+	float attenuation = 1.0 / (playerLight._ambientPow + playerLight._lightLinearFalloff * dist + 
+  				 playerLight._lightQuadraticFalloff * (dist * dist));    
+	// combine results
+	vec3 ambientP  = playerLight._ambientCol.xyz * playerLight._lightAmbientPow * attenuation * textureColor.xyz;
+	vec3 diffuseP  = playerLight._lightCol.xyz * difP * attenuation * textureColor.xyz;
+	vec3 specularP = playerLight._lightCol.xyz * specP * texSpec * playerLight._lightSpecularPow * attenuation;
+	pointTotal += ambientP + diffuseP + specularP;
+
 	vec3 result = (
 		(sun._ambientPow * sun._ambientCol.xyz) + // global ambient light
 		(1.0 - shadow) * //Shadow value
-		(diffuse + specular));
-	
-	result = mix(result, textureColor.rgb, u_Emission);
+		(diffuse + specular + pointTotal));
+
+	//result = mix(result, textureColor.rgb, u_Emission);
 	if(textureColor.a < 0.31){
 		result = vec3(0.0, 0.0, 0.0);
 	}

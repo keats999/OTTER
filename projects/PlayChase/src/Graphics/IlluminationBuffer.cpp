@@ -28,9 +28,12 @@ void IlluminationBuffer::Init(unsigned width, unsigned height)
 
 	_sunBuffer.AllocateMemory(sizeof(DirectionalLight));
 
+	_plightBuffer.AllocateMemory(sizeof(PointLight));
+
 	if (_sunEnabled)
 	{
 		_sunBuffer.SendData(reinterpret_cast<void*>(&_sun), sizeof(DirectionalLight));
+		_plightBuffer.SendData(reinterpret_cast<void*>(&_pLight), sizeof(PointLight));
 	}
 
 	PostEffect::Init(width, height);
@@ -39,6 +42,7 @@ void IlluminationBuffer::Init(unsigned width, unsigned height)
 void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer)
 {
 	_sunBuffer.SendData(reinterpret_cast<void*>(&_sun), sizeof(DirectionalLight));
+	_plightBuffer.SendData(reinterpret_cast<void*>(&_pLight), sizeof(PointLight));
 
 	if (_sunEnabled)
 	{
@@ -48,6 +52,7 @@ void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer)
 
 		
 		_sunBuffer.Bind(0);
+		_plightBuffer.Bind(1);
 
 		gBuffer->BindLighting();
 
@@ -56,6 +61,7 @@ void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer)
 		gBuffer->UnbindLighting();
 
 		_sunBuffer.Unbind(0);
+		_plightBuffer.Unbind(1);
 
 		_shaders[Lights::DIRECTIONAL]->UnBind();
 	}

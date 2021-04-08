@@ -43,8 +43,10 @@ private:
 	glm::vec3 _camPos;
 
 	UniformBuffer _sunBuffer;
+	UniformBuffer _plightBuffer;
 
 	bool _sunEnabled = true;
 	
 	DirectionalLight _sun;
+	PointLight _pLight;
 };
