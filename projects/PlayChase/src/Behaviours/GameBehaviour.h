@@ -8,4 +8,3 @@ class GameBehaviour :
 public:
     void Update(entt::handle entity) override;
 };
-

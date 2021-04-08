@@ -1,8 +1,7 @@
-#include "MenuBehaviour.h"
+#include "EndBehaviour.h"
 #include "Utilities/Globals.h"
-#include "glad/glad.h"
 
-void MenuBehaviour::Update(entt::handle entity)
+void EndBehaviour::Update(entt::handle entity)
 {
 	GLFWwindow* window = Application::Instance().Window;
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {

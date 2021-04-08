@@ -1,44 +1,56 @@
 #include "EnemyBehaviour.h"
 
 #include "Application.h"
+#include "Utilities/Globals.h"
 #include "Timing.h"
 #include "Transform.h"
 #include "Utilities/MapManager.h"
 
 void EnemyBehaviour::Update(entt::handle entity)
 {
-	float dt = Timing::Instance().DeltaTime;
-	GLFWwindow* window = Application::Instance().Window;
 
-	entt::registry& reg = entity.registry();
-	auto targetpos = reg.get<Transform>(_target).GetLocalPosition();
-
-	Transform& transform = entity.get<Transform>();
-	
-	if (nodeIndex >= 1 || nodes.size() <= 1)
+	if (Application::Instance().ActiveScene == Globals::Instance().scenes[1])
 	{
-		nodes = MapManager::Instance().aStar(transform.GetLocalPosition(), targetpos);
-		nodeIndex = 0;
-	}
-	else
-	{
-		timeSpentMoving += dt / 2;
+		float dt = Timing::Instance().DeltaTime;
+		GLFWwindow* window = Application::Instance().Window;
 
-		if (timeSpentMoving >= 1)
-		{
-			nodeIndex++;
-			timeSpentMoving = 0;
-		}
+		entt::registry& reg = entity.registry();
+		auto targetpos = reg.get<Transform>(_target).GetLocalPosition();
 
-		if (nodeIndex < nodes.size() - 1)
+		Transform& transform = entity.get<Transform>();
+
+		if (nodeIndex >= 1 || nodes.size() <= 1)
 		{
-			glm::vec3 oldPos = transform.GetLocalPosition();
-			Collision2D& col = entity.get<Collision2D>();
-			col.getBody()->SetTransform(b2Vec2(LERP(nodes[nodeIndex], nodes[nodeIndex + 1], timeSpentMoving).x, LERP(nodes[nodeIndex], nodes[nodeIndex + 1], timeSpentMoving).z), col.getBody()->GetAngle());
-			glm::vec2 deltaPos = glm::vec2(col.getBody()->GetTransform().p.x - oldPos.x, col.getBody()->GetTransform().p.y - oldPos.z);
-			col.getBody()->SetAngle((deltaPos.x > 0.0001f) ? 3.1415928979323f / 2.0f : (deltaPos.x < -0.0001f) ? 3.1415928979323f * 3.0f / 2.0f : (deltaPos.y > 0.0001f) ? 3.1415928979323f : 0.0f);
+			nodes = MapManager::Instance().aStar(transform.GetLocalPosition(), targetpos);
+			nodeIndex = 0;
+		}
+		else
+		{
+			timeSpentMoving += dt / 2;
+
+			if (timeSpentMoving >= 1)
+			{
+				nodeIndex++;
+				timeSpentMoving = 0;
+			}
+
+			if (nodeIndex < nodes.size() - 1)
+			{
+				glm::vec3 oldPos = transform.GetLocalPosition();
+				Collision2D& col = entity.get<Collision2D>();
+				col.getBody()->SetTransform(b2Vec2(LERP(nodes[nodeIndex], nodes[nodeIndex + 1], timeSpentMoving).x, LERP(nodes[nodeIndex], nodes[nodeIndex + 1], timeSpentMoving).z), col.getBody()->GetAngle());
+				glm::vec2 deltaPos = glm::vec2(col.getBody()->GetTransform().p.x - oldPos.x, col.getBody()->GetTransform().p.y - oldPos.z);
+				col.getBody()->SetAngle((deltaPos.x > 0.0001f) ? 3.1415928979323f / 2.0f : (deltaPos.x < -0.0001f) ? 3.1415928979323f * 3.0f / 2.0f : (deltaPos.y > 0.0001f) ? 3.1415928979323f : 0.0f);
+			}
 		}
 	}
+}
+
+void EnemyBehaviour::ResetAStar(glm::vec2 start, entt::handle target)
+{
+	SetTarget(target);
+	nodes = MapManager::Instance().aStar(glm::vec3(start.x, 0.0f, start.y), target.get<Transform>().GetLocalPosition());
+	nodeIndex = 0;
 }
 
 template <typename T>

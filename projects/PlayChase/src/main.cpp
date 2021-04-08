@@ -40,7 +40,7 @@
 #include "Behaviours/PauseBehaviour.h"
 #include "Behaviours/UIBehaviour.h"
 #include "Behaviours/ExitBehaviour.h"
-#include "Behaviours/SafeRoomBehaviour.h"
+#include "Behaviours/EndBehaviour.h"
 
 #include "Graphics/UIComponent.h"
 
@@ -415,7 +415,7 @@ int main() {
 
 		Texture2D::sptr testUI = Texture2D::LoadFromFile("images/testUI.png");
 		Texture2D::sptr title = Texture2D::LoadFromFile("images/title_transparent_info.png");
-		Texture2D::sptr spcelement = Texture2D::LoadFromFile("images/spcelement.png");
+		Texture2D::sptr pauseTex = Texture2D::LoadFromFile("images/pauseelement.png");
 		Texture2D::sptr endelement = Texture2D::LoadFromFile("images/endelement.png");
 
 		Texture2D::sptr dep = Texture2D::LoadFromFile("images/deposit.png");
@@ -766,7 +766,7 @@ int main() {
 		/* GameObject exit = scene->CreateEntity("Exit");
 		 {
 			 VertexArrayObject::sptr newtube = ObjLoader::LoadFromFile("models/tubesc.obj");
-			 auto& exitCol = exit.emplace<Collision2D>(pworld->World());
+			 auto& exitCol = exitObject.emplace<Collision2D>(pworld->World());
 			 exitCol.CreateStaticBox(Manager.saferooms[0], glm::vec2(1, 1), TRIGGER, PLAYER);
 			 exitCol.getFixture()->SetSensor(true);
 			 exitCol.getFixture()->SetEntity(exit.entity());
@@ -859,10 +859,46 @@ int main() {
 			// We'll make our camera a component of the camera object
 			Camera& menucamera = menucameraObject.emplace<Camera>();// Camera::Create();
 			menucamera.SetPosition(glm::vec3(0, 0, 0));
-			menucamera.SetUp(glm::vec3(0, 0, 1));
-			menucamera.LookAt(glm::vec3(0, 0, 0));
+			menucamera.SetUp(glm::vec3(0, 1, 0));
+			menucamera.LookAt(glm::vec3(0, 0, 1));
 			menucamera.SetFovDegrees(90.0f); // Set an initial FOV
 			menucamera.SetOrthoHeight(0.0f);
+		}
+		GameObject pausecameraObject = pausescene->CreateEntity("Pause Camera");
+		{
+			pausecameraObject.get<Transform>().SetLocalPosition(0, 1, 1).LookAt(glm::vec3(0, 0, 0));
+
+			// We'll make our camera a component of the camera object
+			Camera& pausecamera = pausecameraObject.emplace<Camera>();// Camera::Create();
+			pausecamera.SetPosition(glm::vec3(0, 0, 0));
+			pausecamera.SetUp(glm::vec3(0, 1, 0));
+			pausecamera.LookAt(glm::vec3(0, 0, 1));
+			pausecamera.SetFovDegrees(90.0f); // Set an initial FOV
+			pausecamera.SetOrthoHeight(0.0f);
+		}
+		GameObject diecameraObject = endscene->CreateEntity("Die Camera");
+		{
+			diecameraObject.get<Transform>().SetLocalPosition(0, 1, 1).LookAt(glm::vec3(0, 0, 0));
+
+			// We'll make our camera a component of the camera object
+			Camera& diecamera = diecameraObject.emplace<Camera>();// Camera::Create();
+			diecamera.SetPosition(glm::vec3(0, 0, 0));
+			diecamera.SetUp(glm::vec3(0, 1, 0));
+			diecamera.LookAt(glm::vec3(0, 0, 1));
+			diecamera.SetFovDegrees(90.0f); // Set an initial FOV
+			diecamera.SetOrthoHeight(0.0f);
+		}
+		GameObject wincameraObject = winscene->CreateEntity("win Camera");
+		{
+			wincameraObject.get<Transform>().SetLocalPosition(0, 1, 1).LookAt(glm::vec3(0, 0, 0));
+
+			// We'll make our camera a component of the camera object
+			Camera& wincamera = wincameraObject.emplace<Camera>();// Camera::Create();
+			wincamera.SetPosition(glm::vec3(0, 0, 0));
+			wincamera.SetUp(glm::vec3(0, 1, 0));
+			wincamera.LookAt(glm::vec3(0, 0, 1));
+			wincamera.SetFovDegrees(90.0f); // Set an initial FOV
+			wincamera.SetOrthoHeight(0.0f);
 		}
 		GameObject gBufferObject = scene->CreateEntity("G Buffer");
 		{
@@ -954,7 +990,7 @@ int main() {
 		/////////////////////////////////// CONTROLLERS //////////////////////////////////////////
 		GameObject gameController = scene->CreateEntity("GameController");
 		{
-			//BehaviourBinding::Bind<GameBehaviour>(gameController);
+			BehaviourBinding::Bind<GameBehaviour>(gameController);
 		}
 		GameObject menuController = menuscene->CreateEntity("MenuController");
 		{
@@ -963,6 +999,14 @@ int main() {
 		GameObject pauseController = pausescene->CreateEntity("PauseController");
 		{
 			BehaviourBinding::Bind<PauseBehaviour>(pauseController);
+		}
+		GameObject deadController = endscene->CreateEntity("EndController");
+		{
+			BehaviourBinding::Bind<EndBehaviour>(deadController);
+		}
+		GameObject endController = winscene->CreateEntity("EndController");
+		{
+			BehaviourBinding::Bind<EndBehaviour>(endController);
 		}
 		#pragma endregion 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -1005,6 +1049,7 @@ int main() {
 			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
 			endCard.emplace<RendererComponent>().SetMesh(vao).SetMaterial(endelmtMat);
 			endCard.get<Transform>().SetLocalRotation(-45, 180, 0);
+			endCard.get<Transform>().SetLocalPosition(0.0f, 0.0f, 0.25f);
 			endCard.get<Transform>().SetLocalScale(2, 2, 2);
 		}
 		
@@ -1020,22 +1065,22 @@ int main() {
 			//BehaviourBinding::Bind<UIBehaviour>(titleCard);
 			//BehaviourBinding::Get<UIBehaviour>(titleCard)->SetCamera(menucameraObject);
 			titleCard.get<Transform>().SetLocalRotation(-45, 180, 0);
-			titleCard.get<Transform>().SetLocalPosition(0, 0, 0.25);
-			titleCard.get<Transform>().SetLocalScale(1, 1, 1);
+			titleCard.get<Transform>().SetLocalPosition(0, 0, 0.25f);
 		}
 
-		ShaderMaterial::sptr spcelMat = ShaderMaterial::Create();
-		spcelMat->Shader = uiShader;
-		spcelMat->Set("s_UiTexture", spcelement);
-		spcelMat->RenderLayer = -1;
+		ShaderMaterial::sptr pauseMat = ShaderMaterial::Create();
+		pauseMat->Shader = uiShader;
+		pauseMat->Set("s_UiTexture", pauseTex);
+		pauseMat->RenderLayer = -1;
 
-		GameObject spaceElement = menuscene->CreateEntity("Ui");
+		GameObject pauseCard = pausescene->CreateEntity("Ui");
 		{
 			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
-			spaceElement.emplace<UIComponent>().SetMesh().SetMaterial(spcelMat);
-			spaceElement.get<Transform>().SetLocalRotation(-45, 180, 0);
-			spaceElement.get<Transform>().SetLocalPosition(0, 0, -1.5);
-			spaceElement.get<Transform>().SetLocalScale(2, 2, 2);
+			pauseCard.emplace<RendererComponent>().SetMesh(vao).SetMaterial(pauseMat);
+			//BehaviourBinding::Bind<UIBehaviour>(titleCard);
+			//BehaviourBinding::Get<UIBehaviour>(titleCard)->SetCamera(menucameraObject);
+			pauseCard.get<Transform>().SetLocalRotation(-45, 180, 0);
+			pauseCard.get<Transform>().SetLocalPosition(0, 0, 0.25f);
 		}
 
 		ShaderMaterial::sptr uiMat = ShaderMaterial::Create();
@@ -1074,8 +1119,6 @@ int main() {
 		// Get ref to Listener
 		AudioListener& listener = engine.GetListener(); // Can use this listener to change the player's 3D position
 		listener.SetUp(glm::vec3(0.0f, 1.0f, 0.0f));
-
-		bool paused = false;
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 
 		// We'll use a vector to store all our key press events for now (this should probably be a behaviour eventually)
@@ -1088,12 +1131,48 @@ int main() {
 			keyToggles.emplace_back(GLFW_KEY_T, [&]() { cameraObject.get<Camera>().ToggleOrtho(); });
 
 			keyToggles.emplace_back(GLFW_KEY_ESCAPE, [&]() {
-				BehaviourBinding::Get<FirstPersonBehaviour>(cameraObject)->ToggleMouse();
-				paused = !paused;
-				music.SetParameter("Paused", int(paused));
-				playerThumping.SetParameter("Paused", int(paused));
-				enemyScratching.SetParameter("Paused", int(paused)); }
+				if (Application::Instance().ActiveScene == Globals::Instance().scenes[1])
+				{
+					BehaviourBinding::Get<FirstPersonBehaviour>(cameraObject)->ToggleMouse();
+					music.SetParameter("Paused", 1);
+					playerThumping.SetParameter("Paused", 1);
+					enemyScratching.SetParameter("Paused", 1);
+					BehaviourBinding::Get<EnemyBehaviour>(enemies[0])->Enabled = !BehaviourBinding::Get<EnemyBehaviour>(enemies[0])->Enabled;
+				}
+				else if (Application::Instance().ActiveScene == Globals::Instance().scenes[3] || Application::Instance().ActiveScene == Globals::Instance().scenes[4])
+				{
+					directionalLightBuffer.Unbind(0);
+					Application::Instance().ActiveScene = nullptr;
+					Globals::Instance().scenes.clear();
+					BackendHandler::ShutdownImGui();
+					engine.Shutdown();
+					Logger::Uninitialize();
+					exit(0);
+				}
+				}
 			);
+
+			keyToggles.emplace_back(GLFW_KEY_SPACE, [&]() {
+				if (Application::Instance().ActiveScene == Globals::Instance().scenes[2])
+				{
+					BehaviourBinding::Get<FirstPersonBehaviour>(cameraObject)->ToggleMouse();
+					music.SetParameter("Paused", 0);
+					playerThumping.SetParameter("Paused", 0);
+					enemyScratching.SetParameter("Paused", 0);
+					BehaviourBinding::Get<EnemyBehaviour>(enemies[0])->Enabled = !BehaviourBinding::Get<EnemyBehaviour>(enemies[0])->Enabled;
+				}
+				else if (Application::Instance().ActiveScene == Globals::Instance().scenes[3] || Application::Instance().ActiveScene == Globals::Instance().scenes[4])
+				{
+					Globals::Instance().coins = 0;
+					b2Vec2 spawnLocation = b2Vec2(spawn.x, spawn.y);
+					player.get<Collision2D>().getBody()->SetTransform(spawnLocation, 0.0f);
+					spawnLocation = b2Vec2(enemySpawn.x, enemySpawn.y);
+					enemy.get<Collision2D>().getBody()->SetTransform(spawnLocation, 0.0f);
+					BehaviourBinding::Get<EnemyBehaviour>(enemies[0])->ResetAStar(enemySpawn, player);
+				}
+				}
+			);
+
 
 			keyToggles.emplace_back(GLFW_KEY_1, [&]() {
 				activeDef = 0;
@@ -1138,6 +1217,8 @@ int main() {
 		Timing& time = Timing::Instance();
 		time.LastFrame = glfwGetTime();
 		float ambientTimer = 20.0f;
+
+		glClearColor(1.0f, 1.0f, 1.0f, 0.3f);
 
 		///// Game loop /////
 		while (!glfwWindowShouldClose(BackendHandler::window)) {
@@ -1220,7 +1301,6 @@ int main() {
 			gBuffer->Clear();
 			illuminationBuffer->Clear();
 
-			glClearColor(1.0f, 1.0f, 1.0f, 0.3f);
 			glEnable(GL_DEPTH_TEST);
 			glClearDepth(1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1261,8 +1341,11 @@ int main() {
 			illuminationBuffer->SetCamPos(camPos);
 			
 			//Animations
-			enemy.get<ObjAnimation>().UpdateAnimation(time.DeltaTime);
-			enemy.get<RendererComponent>().SetMesh(enemy.get<ObjAnimation>().LoadMesh()).SetMaterial(ratMat);
+			if (Application::Instance().ActiveScene == Globals::Instance().scenes[1])
+			{
+				enemy.get<ObjAnimation>().UpdateAnimation(time.DeltaTime);
+				enemy.get<RendererComponent>().SetMesh(enemy.get<ObjAnimation>().LoadMesh()).SetMaterial(ratMat);
+			}
 
 			// Sort the renderers by shader and material, we will go for a minimizing context switches approach here,
 			// but you could for instance sort front to back to optimize for fill rate if you have intensive fragment shaders
