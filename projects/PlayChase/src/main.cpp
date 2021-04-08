@@ -40,6 +40,7 @@
 #include "Behaviours/PauseBehaviour.h"
 #include "Behaviours/UIBehaviour.h"
 #include "Behaviours/ExitBehaviour.h"
+#include "Behaviours/EndBehaviour.h"
 
 #include "Graphics/UIComponent.h"
 
@@ -709,15 +710,15 @@ int main() {
 		 }*/
 
 		 int endindex = Manager.safeindexes[0];
-		 GameObject exit = scene->CreateEntity("Exit");
+		 GameObject exitObject = scene->CreateEntity("Exit");
 		 {
 			 VertexArrayObject::sptr newtube = ObjLoader::LoadFromFile("models/tubesc.obj");
-			 auto& exitCol = exit.emplace<Collision2D>(pworld->World());
+			 auto& exitCol = exitObject.emplace<Collision2D>(pworld->World());
 			 exitCol.CreateStaticBox(Manager.saferooms[0], glm::vec2(1, 1), TRIGGER, PLAYER);
 			 exitCol.getFixture()->SetSensor(true);
-			 exitCol.getFixture()->SetEntity(exit.entity());
-			 TriggerBinding::BindDisabled<ExitTrigger>(exit);
-			 BehaviourBinding::Bind <ExitBehaviour>(exit);
+			 exitCol.getFixture()->SetEntity(exitObject.entity());
+			 TriggerBinding::BindDisabled<ExitTrigger>(exitObject);
+			 BehaviourBinding::Bind <ExitBehaviour>(exitObject);
 		 }
 
 		 GameObject deposit = scene->CreateEntity("Deposit");
@@ -946,6 +947,14 @@ int main() {
 		{
 			BehaviourBinding::Bind<PauseBehaviour>(pauseController);
 		}
+		GameObject deadController = endscene->CreateEntity("EndController");
+		{
+			BehaviourBinding::Bind<EndBehaviour>(deadController);
+		}
+		GameObject endController = winscene->CreateEntity("EndController");
+		{
+			BehaviourBinding::Bind<EndBehaviour>(endController);
+		}
 		#pragma endregion 
 		//////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1068,28 +1077,49 @@ int main() {
 			// use std::bind
 			keyToggles.emplace_back(GLFW_KEY_T, [&]() { cameraObject.get<Camera>().ToggleOrtho(); });
 
-			if (Application::Instance().ActiveScene == Globals::Instance().scenes[1])
-			{
-				keyToggles.emplace_back(GLFW_KEY_ESCAPE, [&]() {
+			keyToggles.emplace_back(GLFW_KEY_ESCAPE, [&]() {
+				if (Application::Instance().ActiveScene == Globals::Instance().scenes[1])
+				{
 					BehaviourBinding::Get<FirstPersonBehaviour>(cameraObject)->ToggleMouse();
 					music.SetParameter("Paused", 1);
 					playerThumping.SetParameter("Paused", 1);
 					enemyScratching.SetParameter("Paused", 1);
 					BehaviourBinding::Get<EnemyBehaviour>(enemies[0])->Enabled = !BehaviourBinding::Get<EnemyBehaviour>(enemies[0])->Enabled;
-					}
-				);
-			}
-			else if (Application::Instance().ActiveScene == Globals::Instance().scenes[2])
-			{
-				keyToggles.emplace_back(GLFW_KEY_SPACE, [&]() {
+				}
+				else if (Application::Instance().ActiveScene == Globals::Instance().scenes[3] || Application::Instance().ActiveScene == Globals::Instance().scenes[4])
+				{
+					directionalLightBuffer.Unbind(0);
+					Application::Instance().ActiveScene = nullptr;
+					Globals::Instance().scenes.clear();
+					BackendHandler::ShutdownImGui();
+					engine.Shutdown();
+					Logger::Uninitialize();
+					exit(0);
+				}
+				}
+			);
+
+			keyToggles.emplace_back(GLFW_KEY_SPACE, [&]() {
+				if (Application::Instance().ActiveScene == Globals::Instance().scenes[2])
+				{
 					BehaviourBinding::Get<FirstPersonBehaviour>(cameraObject)->ToggleMouse();
 					music.SetParameter("Paused", 0);
 					playerThumping.SetParameter("Paused", 0);
 					enemyScratching.SetParameter("Paused", 0);
 					BehaviourBinding::Get<EnemyBehaviour>(enemies[0])->Enabled = !BehaviourBinding::Get<EnemyBehaviour>(enemies[0])->Enabled;
-					}
-				);
-			}
+				}
+				else if (Application::Instance().ActiveScene == Globals::Instance().scenes[3] || Application::Instance().ActiveScene == Globals::Instance().scenes[4])
+				{
+					Globals::Instance().coins = 0;
+					b2Vec2 spawnLocation = b2Vec2(spawn.x, spawn.y);
+					player.get<Collision2D>().getBody()->SetTransform(spawnLocation, 0.0f);
+					spawnLocation = b2Vec2(enemySpawn.x, enemySpawn.y);
+					enemy.get<Collision2D>().getBody()->SetTransform(spawnLocation, 0.0f);
+					BehaviourBinding::Get<EnemyBehaviour>(enemies[0])->ResetAStar(enemySpawn, player);
+				}
+				}
+			);
+
 
 			keyToggles.emplace_back(GLFW_KEY_1, [&]() {
 				activeDef = 0;

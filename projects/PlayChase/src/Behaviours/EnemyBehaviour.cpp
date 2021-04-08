@@ -46,6 +46,13 @@ void EnemyBehaviour::Update(entt::handle entity)
 	}
 }
 
+void EnemyBehaviour::ResetAStar(glm::vec2 start, entt::handle target)
+{
+	SetTarget(target);
+	nodes = MapManager::Instance().aStar(glm::vec3(start.x, 0.0f, start.y), target.get<Transform>().GetLocalPosition());
+	nodeIndex = 0;
+}
+
 template <typename T>
 T EnemyBehaviour::LERP(T point0, T point1, float t)
 {

@@ -14,6 +14,7 @@ class EnemyBehaviour : public IBehaviour
 {
 public:
 	void Update(entt::handle entity) override;
+	void ResetAStar(glm::vec2 start, entt::handle target);
 	void SetTarget(entt::handle target) { _target = target.entity(); }
 
 	template <typename T> T LERP(T point0, T point1, float t);
