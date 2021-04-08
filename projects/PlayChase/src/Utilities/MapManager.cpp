@@ -192,6 +192,15 @@ std::vector<glm::vec3> MapManager::NodeListToVecList(std::vector<Node> nodes) {
 	return positions;
 	
 }
+void MapManager::set_data(int i, int j, bool d)
+{
+	if (d) {
+		mapdata[i][j] = 1;
+	}
+	else {
+		mapdata[i][j] = 0;
+	}
+}
 std::vector<glm::vec3> MapManager::aStar(glm::vec3 start, glm::vec3 end) {
 	Node player; 
 	Node dest;

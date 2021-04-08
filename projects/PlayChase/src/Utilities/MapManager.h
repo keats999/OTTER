@@ -57,7 +57,7 @@ public:
 	glm::vec2 TrnsToPos(glm::vec3 pos);
 	glm::vec3 PosToTrns(glm::vec2 pos);
 	std::vector<glm::vec3> NodeListToVecList(std::vector<Node> nodes);
-
+	void set_data(int i, int j, bool d);
 	std::vector<glm::vec2> saferooms;
 	std::vector<int> safeindexes;
 
