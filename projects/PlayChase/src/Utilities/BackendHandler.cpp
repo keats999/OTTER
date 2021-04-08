@@ -54,6 +54,13 @@ void BackendHandler::GlfwWindowResizedCallback(GLFWwindow* window, int width, in
 	{
 		cam.ResizeWindow(width, height);
 	});
+	if (Application::Instance().ActiveScene != Globals::Instance().scenes[1])
+	{
+		Globals::Instance().scenes[1]->Registry().view<Camera>().each([=](Camera& cam)
+			{
+				cam.ResizeWindow(width, height);
+			});
+	}
 	Globals::Instance().scenes[1]->Registry().view<Framebuffer>().each([=](Framebuffer& buf)
 	{
 		buf.Reshape(width, height);

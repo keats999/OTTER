@@ -1,5 +1,6 @@
 #include "MenuBehaviour.h"
 #include "Utilities/Globals.h"
+#include "glad/glad.h"
 
 void MenuBehaviour::Update(entt::handle entity)
 {
