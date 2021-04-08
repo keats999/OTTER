@@ -1110,6 +1110,40 @@ int main() {
 				}
 				else if (Application::Instance().ActiveScene == Globals::Instance().scenes[3] || Application::Instance().ActiveScene == Globals::Instance().scenes[4])
 				{
+					for (int i = 0; i < coins.size(); i++)
+					{
+						glm::vec2 coords;
+						bool goodPlacement = false;
+						while (!goodPlacement)
+						{
+							goodPlacement = true;
+							int tubeIndex = rand() % tubes.size();
+							for (int safeIndex : Manager.safeindexes)
+							{
+								if (tubeIndex == safeIndex)
+								{
+									goodPlacement = false;
+									break;
+								}
+							}
+							if (goodPlacement)
+								coords = glm::vec2(tubes[tubeIndex].get<Transform>().GetLocalPosition().x, tubes[tubeIndex].get<Transform>().GetLocalPosition().z);
+						}
+
+						GameObject coine = scene->CreateEntity("Coin");
+						coine.emplace<RendererComponent>().SetMesh(coinvao).SetMaterial(coinMat);
+						auto& coinCol = coine.emplace<Collision2D>(pworld->World());
+						coinCol.CreateStaticBox(coords, glm::vec2(unitsize / 2, unitsize / 2), PICKUP, PLAYER);
+						coinCol.getFixture()->SetSensor(true);
+						coinCol.getFixture()->SetEntity(coine.entity());
+						auto& coinT = coine.get<Transform>();
+						coinT.SetLocalPosition(coords.x, 0, coords.y);
+						coinT.SetLocalRotation(90, 0, 90);
+						BehaviourBinding::Bind<CoinBehaviour>(coine);
+						TriggerBinding::Bind<CoinTrigger>(coine);
+
+						coins[i] = coine;
+					}
 					Globals::Instance().coins = 0;
 					b2Vec2 spawnLocation = b2Vec2(spawn.x, spawn.y);
 					player.get<Collision2D>().getBody()->SetTransform(spawnLocation, 0.0f);
