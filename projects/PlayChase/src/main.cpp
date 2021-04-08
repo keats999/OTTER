@@ -432,6 +432,7 @@ int main() {
 		Texture2D::sptr title = Texture2D::LoadFromFile("images/title_transparent_info.png");
 		Texture2D::sptr pauseTex = Texture2D::LoadFromFile("images/pauseelement.png");
 		Texture2D::sptr endelement = Texture2D::LoadFromFile("images/endelement.png");
+		Texture2D::sptr winelement = Texture2D::LoadFromFile("images/winelement.png");
 
 		Texture2D::sptr dep = Texture2D::LoadFromFile("images/deposit.png");
 		Texture2D::sptr scrn = Texture2D::LoadFromFile("images/screens/screen9.png");
@@ -1065,6 +1066,20 @@ int main() {
 			endCard.get<Transform>().SetLocalRotation(-45, 180, 0);
 			endCard.get<Transform>().SetLocalPosition(0.0f, 0.0f, 0.25f);
 			endCard.get<Transform>().SetLocalScale(2, 2, 2);
+		}
+
+		ShaderMaterial::sptr winelmtMat = ShaderMaterial::Create();
+		winelmtMat->Shader = uiShader;
+		winelmtMat->Set("s_UiTexture", winelement);
+		winelmtMat->RenderLayer = -1;
+
+		GameObject winCard = winscene->CreateEntity("Ui");
+		{
+			VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/plane.obj");
+			winCard.emplace<RendererComponent>().SetMesh(vao).SetMaterial(winelmtMat);
+			winCard.get<Transform>().SetLocalRotation(-45, 180, 0);
+			winCard.get<Transform>().SetLocalPosition(0.0f, 0.0f, 0.25f);
+			winCard.get<Transform>().SetLocalScale(2, 2, 2);
 		}
 		
 		ShaderMaterial::sptr titleMat = ShaderMaterial::Create();
