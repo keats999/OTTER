@@ -8,7 +8,9 @@ layout(location = 3) in vec2 inUV;
 uniform sampler2D s_Diffuse;
 uniform sampler2D s_Diffuse2;
 uniform sampler2D s_Specular;
-uniform float u_textureMix;
+uniform float u_Shininess;
+uniform float u_TextureMix;
+uniform float u_Emission;
 
 layout(location = 0) out vec4 outColors;
 layout(location = 1) out vec3 outNormals;
@@ -19,7 +21,7 @@ void main()
 {
 	vec4 textureColor1 = texture(s_Diffuse, inUV);
 	vec4 textureColor2 = texture(s_Diffuse2, inUV);
-	vec4 textureColor = mix(textureColor1, textureColor2, u_textureMix);
+	vec4 textureColor = mix(textureColor1, textureColor2, u_TextureMix);
 
 	outColors = textureColor;
 

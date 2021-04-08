@@ -40,6 +40,7 @@
 #include "Behaviours/PauseBehaviour.h"
 #include "Behaviours/UIBehaviour.h"
 #include "Behaviours/ExitBehaviour.h"
+#include "Behaviours/SafeRoomBehaviour.h"
 #include "Behaviours/EndBehaviour.h"
 
 #include "Graphics/UIComponent.h"
@@ -50,6 +51,7 @@
 #include "Triggers/CoinTrigger.h"
 #include "Triggers/EnemyTrigger.h"
 #include "Triggers/ExitTrigger.h"
+#include "Triggers/SafeRoomTrigger.h"
 
 #include "Utilities/MapManager.h"
 #include "Utilities/Collision2D.h"
@@ -410,6 +412,8 @@ int main() {
 		Texture2D::sptr red = Texture2D::LoadFromFile("images/red.png");
 		Texture2D::sptr yellow = Texture2D::LoadFromFile("images/yellow.png");
 
+		Texture2D::sptr glass = Texture2D::LoadFromFile("images/glass.png");
+
 		Texture2D::sptr testUI = Texture2D::LoadFromFile("images/testUI.png");
 		Texture2D::sptr title = Texture2D::LoadFromFile("images/title_transparent_info.png");
 		Texture2D::sptr pauseTex = Texture2D::LoadFromFile("images/pauseelement.png");
@@ -473,6 +477,7 @@ int main() {
 		stoneMat->Set("s_Specular", stoneSpec);
 		stoneMat->Set("u_Shininess", 2.0f);
 		stoneMat->Set("u_TextureMix", 0.0f); 
+		stoneMat->Set("u_Emission", 0.0f);
 
 		ShaderMaterial::sptr metalMat = ShaderMaterial::Create();
 		metalMat->Shader = gBufferShader;
@@ -480,6 +485,7 @@ int main() {
 		metalMat->Set("s_Specular", noSpec);
 		metalMat->Set("u_Shininess", 10.0f);
 		metalMat->Set("u_TextureMix", 0.0f);
+		metalMat->Set("u_Emission", 0.0f);
 
 		ShaderMaterial::sptr grassMat = ShaderMaterial::Create();
 		grassMat->Shader = gBufferShader;
@@ -487,6 +493,7 @@ int main() {
 		grassMat->Set("s_Specular", noSpec);
 		grassMat->Set("u_Shininess", 2.0f);
 		grassMat->Set("u_TextureMix", 0.0f);
+		grassMat->Set("u_Emission", 0.0f);
 
 		ShaderMaterial::sptr boxMat = ShaderMaterial::Create();
 		boxMat->Shader = gBufferShader;
@@ -494,6 +501,7 @@ int main() {
 		boxMat->Set("s_Specular", boxSpec);
 		boxMat->Set("u_Shininess", 8.0f);
 		boxMat->Set("u_TextureMix", 0.0f);
+		boxMat->Set("u_Emission", 0.0f);
 
 		ShaderMaterial::sptr depositMat = ShaderMaterial::Create();
 		depositMat->Shader = gBufferShader;
@@ -501,13 +509,15 @@ int main() {
 		depositMat->Set("s_Specular", noSpec);
 		depositMat->Set("u_Shininess", 2.0f);
 		depositMat->Set("u_TextureMix", 0.0f);
-
+		depositMat->Set("u_Emission", 0.0f);
+		
 		ShaderMaterial::sptr displayMat = ShaderMaterial::Create();
 		displayMat->Shader = gBufferShader;
 		displayMat->Set("s_Diffuse", disp);
 		displayMat->Set("s_Specular", noSpec);
 		displayMat->Set("u_Shininess", 2.0f);
 		displayMat->Set("u_TextureMix", 0.0f);
+		displayMat->Set("u_Emission", 0.0f);
 
 		ShaderMaterial::sptr screenMat = ShaderMaterial::Create();
 		screenMat->Shader = gBufferShader;
@@ -515,6 +525,15 @@ int main() {
 		screenMat->Set("s_Specular", noSpec);
 		screenMat->Set("u_Shininess", 2.0f);
 		screenMat->Set("u_TextureMix", 0.0f);
+		screenMat->Set("u_Emission", 1.0f);
+
+		ShaderMaterial::sptr doorMat = ShaderMaterial::Create();
+		doorMat->Shader = gBufferShader;
+		doorMat->Set("s_Diffuse", glass);
+		doorMat->Set("s_Specular", noSpec);
+		doorMat->Set("u_Shininess", 2.0f);
+		doorMat->Set("u_TextureMix", 0.0f);
+		doorMat->Set("u_Emission", 0.0f);
 
 		ShaderMaterial::sptr simpleFloraMat = ShaderMaterial::Create();
 		simpleFloraMat->Shader = gBufferShader;
@@ -522,6 +541,7 @@ int main() {
 		simpleFloraMat->Set("s_Specular", noSpec);
 		simpleFloraMat->Set("u_Shininess", 8.0f);
 		simpleFloraMat->Set("u_TextureMix", 0.0f);
+		simpleFloraMat->Set("u_Emission", 0.0f);
 
 		ShaderMaterial::sptr ratMat = ShaderMaterial::Create();
 		ratMat->Shader = gBufferShader;
@@ -529,6 +549,7 @@ int main() {
 		ratMat->Set("s_Specular", noSpec);
 		ratMat->Set("u_Shininess", 8.0f);
 		ratMat->Set("u_TextureMix", 0.0f);
+		ratMat->Set("u_Emission", 0.0f);
 
 		ShaderMaterial::sptr testuiMat = ShaderMaterial::Create();
 		simpleFloraMat->Shader = uiShader;
@@ -536,6 +557,7 @@ int main() {
 		simpleFloraMat->Set("s_Specular", noSpec);
 		simpleFloraMat->Set("u_Shininess", 8.0f);
 		simpleFloraMat->Set("u_TextureMix", 0.0f);
+		//simpleFloraMat->Set("u_Emission", 0.0f);
 		
 		VertexArrayObject::sptr coinvao = ObjLoader::LoadFromFile("models/coin.obj");
 		std::vector<GameObject> coins;
@@ -545,6 +567,7 @@ int main() {
 		coinMat->Set("s_Specular", noSpec);
 		coinMat->Set("u_Shininess", 8.0f);
 		coinMat->Set("u_TextureMix", 0.0f);
+		coinMat->Set("u_Emission", 0.0f);
 		int coincount = 0;
 		
 
@@ -559,7 +582,9 @@ int main() {
 		VertexArrayObject::sptr tubetee = ObjLoader::LoadFromFile("models/tubetee.obj");
 		VertexArrayObject::sptr tubeqd = ObjLoader::LoadFromFile("models/tubeqd.obj");
 		VertexArrayObject::sptr tubend = ObjLoader::LoadFromFile("models/tubend.obj");
+		VertexArrayObject::sptr escdoor = ObjLoader::LoadFromFile("models/escdoor.obj");
 		std::vector<GameObject> tubes;
+		std::vector<GameObject> srooms;
 
 		VertexArrayObject::sptr wallobj = ObjLoader::LoadFromFile("models/wall.obj");
 		std::vector<GameObject> walls;
@@ -577,6 +602,7 @@ int main() {
 		int x = Manager.GetRows();
 		int y = Manager.GetColumns();
 		int unitsize = Manager.GetUnitS();
+		bool endcreated = false;
 
 		//Nested loop to cycle through the 2D array for the map
 		for (int i = 0; i < x; i++) {
@@ -594,6 +620,7 @@ int main() {
 					tMat->Shader = gBufferShader;
 					tMat->Set("u_Shininess", 20.0f);
 					tMat->Set("u_TextureMix", 0.0f);
+					tMat->Set("u_Emission", 1.0f);
 
 					//Randomly pick a color and set the material diffuse
 					int c = rand() % 5;
@@ -649,6 +676,33 @@ int main() {
 						tubee.emplace<RendererComponent>().SetMesh(tubend).SetMaterial(tMat).SetCastShadow(false);
 						Manager.saferooms.push_back(glm::vec2(coord1, coord2));
 						Manager.safeindexes.push_back(tubes.size()-1);
+						
+						GameObject sroome = scene->CreateEntity("SafeRoom");
+						srooms.push_back(sroome);
+						sroome.emplace<RendererComponent>().SetMesh(escdoor).SetMaterial(doorMat);
+						auto& srCol = sroome.emplace<Collision2D>(pworld->World());
+						srCol.CreateStaticBox(glm::vec2(coord1, coord2), glm::vec2(unitsize / 2, unitsize / 2), TRIGGER, PLAYER);
+						srCol.getFixture()->SetSensor(true);
+						srCol.getFixture()->SetEntity(sroome.entity());
+						srCol.SetAngle(glm::radians(-tubeData.y));
+						auto& srT = sroome.get<Transform>();
+						srT.SetLocalPosition(coord1, 0, coord2);
+						//srT.SetLocalRotation(glm::vec3(0.0f, tubeData.y, 0.0f));
+						BehaviourBinding::Bind<SafeRoomBehaviour>(sroome);
+						BehaviourBinding::Get<SafeRoomBehaviour>(sroome)->SetRoom(i, j);
+						TriggerBinding::Bind<SafeRoomTrigger>(sroome);
+						TriggerBinding::Get<SafeRoomTrigger>(sroome)->SetRoom(i, j);
+						if (!endcreated) {
+							auto& exitCol = tubee.emplace<Collision2D>(pworld->World());
+							exitCol.CreateStaticBox(glm::vec2(coord1, coord2), glm::vec2(1, 1), TRIGGER, PLAYER);
+							exitCol.getFixture()->SetSensor(true);
+							exitCol.getFixture()->SetEntity(tubee.entity());
+							exitCol.SetAngle(glm::radians(-tubeData.y));
+							TriggerBinding::BindDisabled<ExitTrigger>(tubee);
+							BehaviourBinding::Bind<ExitBehaviour>(tubee);
+							endcreated = true;
+						}
+
 						pspawn = true;
 						canspawn = false;
 						break;
@@ -710,17 +764,17 @@ int main() {
 		 }*/
 
 		 int endindex = Manager.safeindexes[0];
-		 GameObject exitObject = scene->CreateEntity("Exit");
+		/* GameObject exit = scene->CreateEntity("Exit");
 		 {
 			 VertexArrayObject::sptr newtube = ObjLoader::LoadFromFile("models/tubesc.obj");
 			 auto& exitCol = exitObject.emplace<Collision2D>(pworld->World());
 			 exitCol.CreateStaticBox(Manager.saferooms[0], glm::vec2(1, 1), TRIGGER, PLAYER);
 			 exitCol.getFixture()->SetSensor(true);
-			 exitCol.getFixture()->SetEntity(exitObject.entity());
-			 TriggerBinding::BindDisabled<ExitTrigger>(exitObject);
-			 BehaviourBinding::Bind <ExitBehaviour>(exitObject);
-		 }
-
+			 exitCol.getFixture()->SetEntity(exit.entity());
+			 TriggerBinding::BindDisabled<ExitTrigger>(exit);
+			 BehaviourBinding::Bind<ExitBehaviour>(exit);
+		 }*/
+		 
 		 GameObject deposit = scene->CreateEntity("Deposit");
 		 {
 			 VertexArrayObject::sptr vao = ObjLoader::LoadFromFile("models/deposit.obj");

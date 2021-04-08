@@ -15,6 +15,6 @@ class ExitBehaviour : public IBehaviour
 {
 public:
 	void Update(entt::handle entity) override;
-
 protected:
+	VertexArrayObject::sptr newtube = ObjLoader::LoadFromFile("models/tubesc.obj");
 };

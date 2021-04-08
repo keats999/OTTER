@@ -50,6 +50,7 @@ layout (binding = 3) uniform sampler2D s_positionTex;
 
 layout (binding = 4) uniform sampler2D s_lightAccumTex;
 
+uniform float u_Emission;
 uniform mat4 u_LightSpaceMatrix;
 uniform vec3 u_CamPos;
 
@@ -129,7 +130,8 @@ void main() {
 		(sun._ambientPow * sun._ambientCol.xyz) + // global ambient light
 		(1.0 - shadow) * //Shadow value
 		(diffuse + specular));
-
+	
+	result = mix(result, textureColor.rgb, u_Emission);
 	if(textureColor.a < 0.31){
 		result = vec3(0.0, 0.0, 0.0);
 	}
