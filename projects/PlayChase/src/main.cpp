@@ -560,7 +560,6 @@ int main() {
 		//simpleFloraMat->Set("u_Emission", 0.0f);
 		
 		VertexArrayObject::sptr coinvao = ObjLoader::LoadFromFile("models/coin.obj");
-		std::vector<GameObject> coins;
 		ShaderMaterial::sptr coinMat = ShaderMaterial::Create();
 		coinMat->Shader = gBufferShader;
 		coinMat->Set("s_Diffuse", coin);
@@ -722,7 +721,7 @@ int main() {
 					int r = rand() % 5;
 					if (r == 3 && canspawn) {
 						GameObject coine = scene->CreateEntity("Coin");
-						coins.push_back(coine);
+						Globals::Instance().coinArray.push_back(coine);
 						coine.emplace<RendererComponent>().SetMesh(coinvao).SetMaterial(coinMat);
 						auto& coinCol = coine.emplace<Collision2D>(pworld->World());
 						coinCol.CreateStaticBox(glm::vec2(coord1, coord2), glm::vec2(unitsize / 2, unitsize / 2), PICKUP, PLAYER);
@@ -1164,7 +1163,7 @@ int main() {
 				}
 				else if (Application::Instance().ActiveScene == Globals::Instance().scenes[3] || Application::Instance().ActiveScene == Globals::Instance().scenes[4])
 				{
-					for (int i = 0; i < coins.size(); i++)
+					for (int i = 0; i < Globals::Instance().coinArray.size(); i++)
 					{
 						glm::vec2 coords;
 						bool goodPlacement = false;
@@ -1196,8 +1195,9 @@ int main() {
 						BehaviourBinding::Bind<CoinBehaviour>(coine);
 						TriggerBinding::Bind<CoinTrigger>(coine);
 
-						coins[i] = coine;
+						Globals::Instance().coinArray[i] = coine;
 					}
+
 					Globals::Instance().coins = 0;
 					b2Vec2 spawnLocation = b2Vec2(spawn.x, spawn.y);
 					player.get<Collision2D>().getBody()->SetTransform(spawnLocation, 0.0f);

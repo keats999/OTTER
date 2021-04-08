@@ -12,5 +12,6 @@ public:
 	int coins = 0;
 	int coinmax = 0;
 	bool alive = true;
+	std::vector<GameObject> coinArray;
 	std::vector<GameScene::sptr> scenes;
 };
