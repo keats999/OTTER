@@ -1,17 +1,26 @@
 #include "ScreenBehaviour.h"
 #include "Utilities/Globals.h"
-
+#include "Utilities/AudioEngine.h"
 
 void ScreenBehaviour::Update(entt::handle entity)
 {
+	AudioEngine& engine = AudioEngine::Instance();
+	AudioEvent& deposit = engine.GetEvent("Coin Deposit");
+
 	if (Application::Instance().ActiveScene == Globals::Instance().scenes[1])
 	{
 		GLFWwindow* window = Application::Instance().Window;
 		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 			if (!pressed) {
 				if (playercontact) {
+					int oldNum = Globals::Instance().coinmax;
 					int count = Globals::Instance().coinmax - Globals::Instance().coins;
 					screenMat->Set("s_Diffuse", screens[count]);
+					if (oldNum != count)
+					{
+						deposit.SetPosition(entity.get<Transform>().GetLocalPosition());
+						deposit.Play();
+					}
 				}
 				if (Globals::Instance().coins == Globals::Instance().coinmax) {
 					Globals::Instance().unlocked = true;

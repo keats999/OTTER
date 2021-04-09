@@ -7,8 +7,11 @@
 
 void ExitBehaviour::Update(entt::handle entity)
 {
-	if (Globals::Instance().unlocked) {
-		entity.get<RendererComponent>().SetMesh(newtube);
-		TriggerBinding::Get<ExitTrigger>(entity)->Enabled = true;
+	if (Application::Instance().ActiveScene == Globals::Instance().scenes[1])
+	{
+		if (Globals::Instance().unlocked) {
+			entity.get<RendererComponent>().SetMesh(newtube);
+			TriggerBinding::Get<ExitTrigger>(entity)->Enabled = true;
+		}
 	}
 }

@@ -1150,6 +1150,9 @@ int main() {
 		AudioEvent& enemyScratching = engine.CreateSound("Enemy Scratching", "event:/Scratching");
 		enemyScratching.Play();
 		AudioEvent& enemyAmbient = engine.CreateSound("Enemy Ambient", "event:/Clown Ambient");
+		AudioEvent& coinCollect = engine.CreateSound("Coin Collect", "event:/Coin Collect");
+		AudioEvent& coinDeposit = engine.CreateSound("Coin Deposit", "event:/Coin deposit");
+		AudioEvent& doorSounds = engine.CreateSound("Door", "event:/Door");
 
 		//add modifiers to the sounds (can be done dynamically)
 		playerThumping.SetParameter("Moving", 0);
@@ -1202,7 +1205,7 @@ int main() {
 				}
 				else if (Application::Instance().ActiveScene == Globals::Instance().scenes[3] || Application::Instance().ActiveScene == Globals::Instance().scenes[4])
 				{
-					for (int i = 0; i < Globals::Instance().coinArray.size(); i++)
+					for (int i = 0; i < Globals::Instance().coinmax; i++)
 					{
 						glm::vec2 coords;
 						bool goodPlacement = false;
