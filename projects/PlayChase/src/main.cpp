@@ -728,6 +728,7 @@ int main() {
 					tubeT.SetLocalPosition(coord1, 0, coord2);
 					tubeT.SetLocalRotation(glm::vec3(0.0f, tubeData.y, 0.0f));
 					tubeT.SetLocalScale(glm::vec3(1.05f, 1.0f, 1.05f));
+					Manager.tubepositions.push_back(tubeT.GetLocalPosition());
 
 					auto& rvtT = rvte.get<Transform>();
 					rvtT.SetLocalPosition(coord1, 0, coord2);

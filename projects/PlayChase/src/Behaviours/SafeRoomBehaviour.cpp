@@ -13,6 +13,7 @@ void SafeRoomBehaviour::Update(entt::handle entity)
 					if (locked) {
 						pressed = true;
 						locktimer = 0.0f;
+						Globals::Instance().safe = false;
 						MapManager::Instance().set_data(roomi, roomj, true);
 						locked = false;
 						ready = false;
@@ -20,6 +21,7 @@ void SafeRoomBehaviour::Update(entt::handle entity)
 					else {
 						if (ready) {
 							pressed = true;
+							Globals::Instance().safe = true;
 							MapManager::Instance().set_data(roomi, roomj, false);
 							locked = true;
 						}
@@ -31,9 +33,11 @@ void SafeRoomBehaviour::Update(entt::handle entity)
 		glm::vec3 pos = entity.get<Transform>().GetLocalPosition();
 		if (locked) {
 			entity.get<Transform>().SetLocalPosition(glm::vec3(pos.x, 0.0, pos.z));
+			
 			locktimer += dt;
-			if (locktimer > 5.0f) {
+			if (locktimer > 10.0f) {
 				locktimer = 0.0f;
+				Globals::Instance().safe = false;
 				MapManager::Instance().set_data(roomi, roomj, true);
 				locked = false;
 				ready = false;

@@ -60,6 +60,7 @@ public:
 	void set_data(int i, int j, bool d);
 	std::vector<glm::vec2> saferooms;
 	std::vector<int> safeindexes;
+	std::vector<glm::vec3> tubepositions;
 
 protected:
 	int row = 0, col = 0;
