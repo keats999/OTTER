@@ -705,7 +705,6 @@ int main() {
 						BehaviourBinding::Bind<SafeRoomBehaviour>(sroome);
 						BehaviourBinding::Get<SafeRoomBehaviour>(sroome)->SetRoom(i, j);
 						TriggerBinding::Bind<SafeRoomTrigger>(sroome);
-						TriggerBinding::Get<SafeRoomTrigger>(sroome)->SetRoom(i, j);
 						if (!endcreated) {
 							auto& exitCol = tubee.emplace<Collision2D>(pworld->World());
 							exitCol.CreateStaticBox(glm::vec2(coord1, coord2), glm::vec2(0.5, 0.5), TRIGGER, PLAYER);

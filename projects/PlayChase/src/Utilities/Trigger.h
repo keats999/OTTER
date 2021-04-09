@@ -11,6 +11,7 @@ public:
 	virtual ~Trigger() = default;
 
 	virtual void OnTrigger(entt::handle handle) {}
+	virtual void EndTrigger(entt::handle handle) {}
 
 	bool Triggered = false;
 

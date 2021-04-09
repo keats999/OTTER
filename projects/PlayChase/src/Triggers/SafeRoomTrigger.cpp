@@ -6,8 +6,10 @@
 void SafeRoomTrigger::OnTrigger(entt::handle handle)
 {
 
-	if (!BehaviourBinding::Get<SafeRoomBehaviour>(handle)->locked && BehaviourBinding::Get<SafeRoomBehaviour>(handle)->ready) {
-		MapManager::Instance().set_data(roomi, roomj, false);
-		BehaviourBinding::Get<SafeRoomBehaviour>(handle)->locked = true;
-	}
+	BehaviourBinding::Get<SafeRoomBehaviour>(handle)->playercontact = true;
+}
+
+void SafeRoomTrigger::EndTrigger(entt::handle handle)
+{
+	BehaviourBinding::Get<SafeRoomBehaviour>(handle)->playercontact = false;
 }

@@ -6,6 +6,27 @@ void SafeRoomBehaviour::Update(entt::handle entity)
 {
 	if (Application::Instance().ActiveScene == Globals::Instance().scenes[1])
 	{
+		GLFWwindow* window = Application::Instance().Window;
+		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+			if (!pressed) {
+				if (playercontact) {
+					if (locked) {
+						pressed = true;
+						locktimer = 0.0f;
+						MapManager::Instance().set_data(roomi, roomj, true);
+						locked = false;
+						ready = false;
+					}
+					else {
+						if (ready) {
+							pressed = true;
+							MapManager::Instance().set_data(roomi, roomj, false);
+							locked = true;
+						}
+					}
+				}
+			}
+		}
 		float dt = Timing::Instance().DeltaTime;
 		glm::vec3 pos = entity.get<Transform>().GetLocalPosition();
 		if (locked) {
@@ -26,6 +47,13 @@ void SafeRoomBehaviour::Update(entt::handle entity)
 			if (cdtimer > 5.0f) {
 				cdtimer = 0.0f;
 				ready = true;
+			}
+		}
+		if (pressed) {
+			presstimer += dt;
+			if (presstimer > 0.5f) {
+				presstimer = 0.0f;
+				pressed = false;
 			}
 		}
 	}

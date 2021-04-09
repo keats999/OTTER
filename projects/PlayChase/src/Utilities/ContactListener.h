@@ -9,6 +9,7 @@ public:
 	void EndContact(b2Contact* contact) override;
 private:
 	void TriggerObject(b2Fixture* object);
+	void EndTriggerObject(b2Fixture* object);
 	std::shared_ptr<GameScene> _scene;
 };
 
