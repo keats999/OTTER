@@ -13,5 +13,6 @@ void EnemyTrigger::OnTrigger(entt::handle handle)
 	{
 		Collision2D::_bodiesToDelete.push_back(Globals::Instance().coinArray[i]);
 	}
+	Globals::Instance().coinArray.clear();
 	Application::Instance().ActiveScene = Globals::Instance().scenes[4];
 }

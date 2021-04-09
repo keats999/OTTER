@@ -1243,7 +1243,7 @@ int main() {
 						BehaviourBinding::Bind<CoinBehaviour>(coine);
 						TriggerBinding::Bind<CoinTrigger>(coine);
 
-						Globals::Instance().coinArray[i] = coine;
+						Globals::Instance().coinArray.push_back(coine);
 					}
 
 					Globals::Instance().coins = 0;
