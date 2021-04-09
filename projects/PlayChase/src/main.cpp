@@ -960,7 +960,7 @@ int main() {
 		}
 		effects.push_back(noColorCorrectionObj);
 
-		GameObject warmColorCorrectionObj = scene->CreateEntity("Color Correct Warm");
+		/*GameObject warmColorCorrectionObj = scene->CreateEntity("Color Correct Warm");
 		{
 			ColorCorrection* warmColorCorrectEffect = &warmColorCorrectionObj.emplace<ColorCorrection>();
 			warmColorCorrectEffect->filename = "cubes/warm_color_correction.cube";
@@ -983,7 +983,7 @@ int main() {
 			customColorCorrectEffect->Init(width, height);
 		}
 		effects.push_back(customColorCorrectionObj);
-
+		*/
 		GameObject greyscaleEffectObject = scene->CreateEntity("greyscale Effect");
 		{
 			greyscaleEffect = &greyscaleEffectObject.emplace<GreyscaleEffect>();
