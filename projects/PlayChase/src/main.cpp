@@ -41,6 +41,7 @@
 #include "Behaviours/UIBehaviour.h"
 #include "Behaviours/ExitBehaviour.h"
 #include "Behaviours/SafeRoomBehaviour.h"
+#include "Behaviours/ScreenBehaviour.h"
 #include "Behaviours/EndBehaviour.h"
 
 #include "Graphics/UIComponent.h"
@@ -52,6 +53,7 @@
 #include "Triggers/EnemyTrigger.h"
 #include "Triggers/ExitTrigger.h"
 #include "Triggers/SafeRoomTrigger.h"
+#include "Triggers/ScreenTrigger.h"
 
 #include "Utilities/MapManager.h"
 #include "Utilities/Collision2D.h"
@@ -503,7 +505,7 @@ int main() {
 		metalMat->Set("u_Emission", 0.0f);
 
 		ShaderMaterial::sptr grassMat = ShaderMaterial::Create();
-		grassMat->Shader = gBufferShader;
+		grassMat->Shader = shader;
 		grassMat->Set("s_Diffuse", grass);
 		grassMat->Set("s_Specular", noSpec);
 		grassMat->Set("u_Shininess", 2.0f);
@@ -511,7 +513,7 @@ int main() {
 		grassMat->Set("u_Emission", 0.0f);
 
 		ShaderMaterial::sptr boxMat = ShaderMaterial::Create();
-		boxMat->Shader = gBufferShader;
+		boxMat->Shader = shader;
 		boxMat->Set("s_Diffuse", box);
 		boxMat->Set("s_Specular", boxSpec);
 		boxMat->Set("u_Shininess", 8.0f);
@@ -733,7 +735,7 @@ int main() {
 					rvtT.SetLocalScale(glm::vec3(1.05f, 1.0f, 1.05f));
 
 					int r = rand() % 5;
-					if (r == 3 && canspawn) {
+					if (r == 3 && canspawn && Globals::Instance().coinmax < 9) {
 						GameObject coine = scene->CreateEntity("Coin");
 						Globals::Instance().coinArray.push_back(coine);
 						coine.emplace<RendererComponent>().SetMesh(coinvao).SetMaterial(coinMat);
@@ -816,6 +818,14 @@ int main() {
 			 displayscreen.get<Transform>().SetLocalRotation(spawntube.get<Transform>().GetLocalRotation());
 			 displayscreen.get<Transform>().SetLocalScale(1.f, 1.f, 1.f);
 			 displayscreen.emplace<RendererComponent>().SetMesh(vao).SetMaterial(screenMat).SetCastShadow(false);
+			 auto& scrnCol = displayscreen.emplace<Collision2D>(pworld->World());
+			 scrnCol.CreateStaticBox(spawn, glm::vec2(0.5, 0.5), TRIGGER, PLAYER);
+			 scrnCol.getFixture()->SetSensor(true);
+			 scrnCol.getFixture()->SetEntity(displayscreen.entity());
+			 scrnCol.SetAngle(glm::radians(-spawntube.get<Transform>().GetLocalRotation().y));
+			 TriggerBinding::Bind<ScreenTrigger>(displayscreen);
+			 BehaviourBinding::Bind<ScreenBehaviour>(displayscreen);
+			 BehaviourBinding::Get<ScreenBehaviour>(displayscreen)->SetMaterial(screenMat);
 		 }
 		 
 		GameObject player = scene->CreateEntity("Player");

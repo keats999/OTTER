@@ -12,6 +12,8 @@ public:
 	int coins = 0;
 	int coinmax = 0;
 	bool alive = true;
+	bool unlocked = false;
+	bool safe = false;
 	std::vector<GameObject> coinArray;
 	std::vector<GameScene::sptr> scenes;
 };

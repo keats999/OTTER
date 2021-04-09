@@ -7,7 +7,7 @@
 
 void ExitBehaviour::Update(entt::handle entity)
 {
-	if (Globals::Instance().coins == Globals::Instance().coinmax) {
+	if (Globals::Instance().unlocked) {
 		entity.get<RendererComponent>().SetMesh(newtube);
 		TriggerBinding::Get<ExitTrigger>(entity)->Enabled = true;
 	}
