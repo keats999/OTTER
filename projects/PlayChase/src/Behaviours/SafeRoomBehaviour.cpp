@@ -1,6 +1,7 @@
 #include "SafeRoomBehaviour.h"
 #include "Application.h"
 #include "Utilities/Globals.h"
+#include "Utilities/AudioEngine.h"
 
 void SafeRoomBehaviour::Update(entt::handle entity)
 {
@@ -15,6 +16,13 @@ void SafeRoomBehaviour::Update(entt::handle entity)
 						locktimer = 0.0f;
 						Globals::Instance().safe = false;
 						MapManager::Instance().set_data(roomi, roomj, true);
+
+						AudioEngine& engine = AudioEngine::Instance();
+						AudioEvent& door = engine.GetEvent("Door");
+						door.SetPosition(entity.get<Transform>().GetLocalPosition());
+						door.SetParameter("Opening", 0);
+						door.Play();
+
 						locked = false;
 						ready = false;
 					}
@@ -23,6 +31,13 @@ void SafeRoomBehaviour::Update(entt::handle entity)
 							pressed = true;
 							Globals::Instance().safe = true;
 							MapManager::Instance().set_data(roomi, roomj, false);
+
+							AudioEngine& engine = AudioEngine::Instance();
+							AudioEvent& door = engine.GetEvent("Door");
+							door.SetPosition(entity.get<Transform>().GetLocalPosition());
+							door.SetParameter("Opening", 1);
+							door.Play();
+
 							locked = true;
 						}
 					}

@@ -97,6 +97,10 @@ void BackendHandler::GlfwWindowResizedCallback(GLFWwindow* window, int width, in
 		{
 			buf.Reshape(width, height);
 		});
+	Globals::Instance().scenes[1]->Registry().view<VignetteEffect>().each([=](VignetteEffect& buf)
+		{
+			buf.Reshape(width, height);
+		});
 	Globals::Instance().scenes[1]->Registry().view<GBuffer>().each([=](GBuffer& buf)
 	{
 		buf.Reshape(width, height);

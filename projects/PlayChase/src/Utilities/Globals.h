@@ -14,6 +14,7 @@ public:
 	bool alive = true;
 	bool unlocked = false;
 	bool safe = false;
+	float threat_level = 0.0f;
 	std::vector<GameObject> coinArray;
 	std::vector<GameScene::sptr> scenes;
 };

@@ -13,20 +13,22 @@ void EnemyBehaviour::Update(entt::handle entity)
 	{
 		float dt = Timing::Instance().DeltaTime;
 		GLFWwindow* window = Application::Instance().Window;
-		glm::vec3 targetpos;
 		entt::registry& reg = entity.registry();
-		
+		Transform& transform = entity.get<Transform>();
+
+		glm::vec3 targetpos = reg.get<Transform>(_target).GetLocalPosition();
+		//std::vector<glm::vec3> path = MapManager::Instance().aStar(transform.GetLocalPosition(), targetpos);
+		//float distance = path.size();
+		float distance = glm::length(transform.GetLocalPosition() - targetpos);
+		Globals::Instance().threat_level = 10.0 - min(distance, 10.0);
 		if (Globals::Instance().safe) {
+			//Globals::Instance().threat_level = 0.0;
 			int max = MapManager::Instance().tubepositions.size();
 			int r = rand() % max;
 			targetpos = MapManager::Instance().tubepositions[r];
 		}
-		else {
-			targetpos = reg.get<Transform>(_target).GetLocalPosition();
-		}
-		
 
-		Transform& transform = entity.get<Transform>();
+		
 
 		if (nodeIndex >= 1 || nodes.size() <= 1)
 		{

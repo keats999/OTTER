@@ -8,6 +8,7 @@
 #include "Graphics/Post/BloomEffect.h"
 #include "Graphics/Post/PixelationEffect.h"
 #include "Graphics/Post/NightVisionEffect.h"
+#include "Graphics/Post/VignetteEffect.h"
 
 #include "Graphics/GBuffer.h"
 #include "Graphics/IlluminationBuffer.h"

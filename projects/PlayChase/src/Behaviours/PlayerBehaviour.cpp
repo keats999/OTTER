@@ -18,7 +18,12 @@ void PlayerBehaviour::Update(entt::handle entity)
 		AudioEngine& engine = AudioEngine::Instance();
 		AudioEvent& thumping = engine.GetEvent("Player Thumping");
 		bool moving = false;
+		Collision2D& collider = entity.get<Collision2D>();
 
+		collider.updateFriction();
+		if (Globals::Instance().safe) {
+			return;
+		}
 		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
 			controlState = 1;
 		}
@@ -36,10 +41,7 @@ void PlayerBehaviour::Update(entt::handle entity)
 
 		thumping.SetParameter("Moving", (int)moving);
 
-		Collision2D& collider = entity.get<Collision2D>();
-
-		collider.updateFriction();
-
+		
 		float desiredSpeed = 0;
 		float desiredTorque = 0;
 

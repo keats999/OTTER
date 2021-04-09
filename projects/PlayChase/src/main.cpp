@@ -201,6 +201,7 @@ int main() {
 		BloomEffect* bloomEffect;
 		FilmGrainEffect* filmGrainEffect;
 		PixelationEffect* pixelEffect;
+		VignetteEffect* vignetteEffect;
 
 		int activePost = 2;
 		std::vector<PostEffect*> post;
@@ -1010,6 +1011,11 @@ int main() {
 			pixelEffect->Init(width, height);
 		}
 		post.push_back(pixelEffect);
+		GameObject vignetteEffectObject = scene->CreateEntity("Vignette Effect");
+		{
+			vignetteEffect = &vignetteEffectObject.emplace<VignetteEffect>();
+			vignetteEffect->Init(width, height);
+		}
 		//////////////////////////////////////////////////////////////////////////////////////////
 
 		/////////////////////////////////// CONTROLLERS //////////////////////////////////////////
@@ -1533,6 +1539,7 @@ int main() {
 			}
 			*/
 			//testBuffer->DrawToBackbuffer();
+			vignetteEffect->SetIntensity(Globals::Instance().threat_level/12.0);
 			
 
 			post[activePost]->ApplyEffect(testBuffer);
@@ -1541,7 +1548,9 @@ int main() {
 			PostEffect* currentEffect = &effects[activeEffect].get<ColorCorrection>();
 			currentEffect->ApplyEffect(post[activePost]);
 			currentEffect->DrawToScreen();
-			currentEffect->UnbindBuffer();
+			vignetteEffect->ApplyEffect(currentEffect);
+			vignetteEffect->DrawToScreen();
+			vignetteEffect->UnbindBuffer();
 			current = nullptr;
 			currentMat = nullptr;
 			/*uiGroup.each([&](entt::entity e, UIComponent& renderer, Transform& transform) {
