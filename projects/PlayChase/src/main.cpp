@@ -212,7 +212,7 @@ int main() {
 		glfwGetWindowSize(BackendHandler::window, &width, &height);
 
 		// We'll add some ImGui controls to control our shader
-		BackendHandler::imGuiCallbacks.push_back([&]() {
+		/*BackendHandler::imGuiCallbacks.push_back([&]() {
 			if (ImGui::CollapsingHeader("basic lighting"))
 			{
 				if (ImGui::Button("No Lighting")) {
@@ -376,13 +376,13 @@ int main() {
 				}
 			}
 
-			/*auto name = controllables[selectedVao].get<GameObjectTag>().Name;
+			auto name = controllables[selectedVao].get<GameObjectTag>().Name;
 			ImGui::Text(name.c_str());
 			auto behaviour = BehaviourBinding::Get<SimpleMoveBehaviour>(controllables[selectedVao]);
 			ImGui::Checkbox("Relative Rotation", &behaviour->Relative);
 
 			ImGui::Text("Q/E -> Yaw\nLeft/Right -> Roll\nUp/Down -> Pitch\nY -> Toggle Mode");
-			*/
+			
 			minFps = FLT_MAX;
 			maxFps = 0;
 			avgFps = 0;
@@ -393,7 +393,7 @@ int main() {
 			}
 			ImGui::PlotLines("FPS", fpsBuffer, 128);
 			ImGui::Text("MIN: %f MAX: %f AVG: %f", minFps, maxFps, avgFps / 128.0f);
-			});
+			});*/
 
 		#pragma endregion 
 
@@ -1560,7 +1560,7 @@ int main() {
 				});*/
 			
 			// Draw our ImGui content
-			BackendHandler::RenderImGui();
+			//BackendHandler::RenderImGui();
 			engine.Update();
 
 			Application::Instance().ActiveScene->Poll();
@@ -1571,7 +1571,7 @@ int main() {
 		// Nullify scene so that we can release references
 		Application::Instance().ActiveScene = nullptr;
 		Globals::Instance().scenes.clear();
-		BackendHandler::ShutdownImGui();
+		//BackendHandler::ShutdownImGui();
 		engine.Shutdown();
 	}	
 
