@@ -1569,7 +1569,7 @@ int main() {
 				});*/
 			
 			// Draw our ImGui content
-			//BackendHandler::RenderImGui();
+			BackendHandler::RenderImGui();
 			engine.Update();
 
 			Application::Instance().ActiveScene->Poll();
@@ -1580,7 +1580,7 @@ int main() {
 		// Nullify scene so that we can release references
 		Application::Instance().ActiveScene = nullptr;
 		Globals::Instance().scenes.clear();
-		//BackendHandler::ShutdownImGui();
+		BackendHandler::ShutdownImGui();
 		engine.Shutdown();
 	}	
 
